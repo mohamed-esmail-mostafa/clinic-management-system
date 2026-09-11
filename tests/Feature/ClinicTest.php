@@ -4,6 +4,7 @@ use App\Models\City;
 use App\Models\Clinic;
 use App\Models\Country;
 use App\Models\Governorate;
+use App\Models\Role;
 use App\Models\Specialty;
 use App\Models\User;
 
@@ -98,5 +99,69 @@ test('authenticated user can delete a clinic', function () {
     $response->assertRedirect();
     $this->assertDatabaseMissing('clinics', [
         'id' => $clinic->id,
+    ]);
+});
+
+test('authenticated user can add existing user to clinic', function () {
+    $user = User::factory()->create();
+    $targetUser = User::factory()->create();
+    $role = Role::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('admin.clinics.users.store', $clinic->id), [
+        'mode' => 'existing',
+        'user_id' => $targetUser->id,
+        'role_id' => $role->id,
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('clinic_users', [
+        'clinic_id' => $clinic->id,
+        'user_id' => $targetUser->id,
+        'role_id' => $role->id,
+    ]);
+});
+
+test('authenticated user can create new user and attach to clinic', function () {
+    $user = User::factory()->create();
+    $role = Role::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('admin.clinics.users.store', $clinic->id), [
+        'mode' => 'new',
+        'name' => 'Dr. Jane Smith',
+        'email' => 'janesmith@example.com',
+        'password' => 'password123',
+        'phone' => '123456789',
+        'role_id' => $role->id,
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('users', [
+        'email' => 'janesmith@example.com',
+    ]);
+    $createdUser = User::where('email', 'janesmith@example.com')->first();
+    $this->assertDatabaseHas('clinic_users', [
+        'clinic_id' => $clinic->id,
+        'user_id' => $createdUser->id,
+        'role_id' => $role->id,
+    ]);
+});
+
+test('authenticated user can remove user from clinic', function () {
+    $user = User::factory()->create();
+    $targetUser = User::factory()->create();
+    $role = Role::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    // Attach first
+    $clinic->users()->attach($targetUser->id, ['role_id' => $role->id]);
+
+    $response = $this->actingAs($user)->delete(route('admin.clinics.users.destroy', [$clinic->id, $targetUser->id]));
+
+    $response->assertRedirect();
+    $this->assertDatabaseMissing('clinic_users', [
+        'clinic_id' => $clinic->id,
+        'user_id' => $targetUser->id,
     ]);
 });

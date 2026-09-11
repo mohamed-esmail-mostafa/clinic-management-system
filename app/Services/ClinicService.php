@@ -13,7 +13,7 @@ class ClinicService
 {
     public function getAllClinics(): Collection
     {
-        return Clinic::with(['country', 'governorate', 'city', 'specialties', 'users'])
+        return Clinic::with(['country', 'governorate', 'city', 'specialties', 'clinicUsers.user', 'clinicUsers.role'])
             ->orderBy('id', 'desc')
             ->get();
     }
@@ -126,5 +126,25 @@ class ClinicService
         ]);
 
         return $clinic;
+    }
+
+    public function addUserToClinic(Clinic $clinic, int $userId, int $roleId): ClinicUser
+    {
+        return ClinicUser::updateOrCreate(
+            [
+                'clinic_id' => $clinic->id,
+                'user_id' => $userId,
+            ],
+            [
+                'role_id' => $roleId,
+            ]
+        );
+    }
+
+    public function removeUserFromClinic(Clinic $clinic, int $userId): bool
+    {
+        return (bool) ClinicUser::where('clinic_id', $clinic->id)
+            ->where('user_id', $userId)
+            ->delete();
     }
 }

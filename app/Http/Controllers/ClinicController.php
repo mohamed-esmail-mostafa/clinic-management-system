@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddClinicUserRequest;
 use App\Http\Requests\StoreClinicRequest;
 use App\Http\Requests\UpdateClinicRequest;
 use App\Models\Clinic;
+use App\Models\User;
 use App\Services\CityService;
 use App\Services\ClinicService;
 use App\Services\CountryService;
 use App\Services\GovernorateService;
+use App\Services\RoleService;
 use App\Services\SpecialtyService;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,7 +25,9 @@ class ClinicController extends Controller
         protected CountryService $countryService,
         protected GovernorateService $governorateService,
         protected CityService $cityService,
-        protected SpecialtyService $specialtyService
+        protected SpecialtyService $specialtyService,
+        protected UserService $userService,
+        protected RoleService $roleService
     ) {}
 
     public function index(): Response
@@ -32,6 +38,8 @@ class ClinicController extends Controller
             'governorates' => $this->governorateService->getAllGovernorates(),
             'cities' => $this->cityService->getAllCities(),
             'specialties' => $this->specialtyService->getAllSpecialties(),
+            'all_users' => $this->userService->getAllUsers(),
+            'roles' => $this->roleService->getAllRoles(),
         ]);
     }
 
@@ -71,6 +79,36 @@ class ClinicController extends Controller
         $this->clinicService->toggleClinicStatus($clinic);
 
         return redirect()->back()->with('success', 'Clinic status updated successfully');
+    }
+
+    public function addUser(AddClinicUserRequest $request, Clinic $clinic): RedirectResponse
+    {
+        $data = $request->validated();
+        $mode = $data['mode'] ?? 'existing';
+        $roleId = (int) $data['role_id'];
+
+        if ($mode === 'new') {
+            $user = $this->userService->createUser([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'phone' => $data['phone'] ?? null,
+            ]);
+            $userId = $user->id;
+        } else {
+            $userId = (int) $data['user_id'];
+        }
+
+        $this->clinicService->addUserToClinic($clinic, $userId, $roleId);
+
+        return redirect()->back()->with('success', 'User added to clinic successfully');
+    }
+
+    public function removeUser(Clinic $clinic, User $user): RedirectResponse
+    {
+        $this->clinicService->removeUserFromClinic($clinic, $user->id);
+
+        return redirect()->back()->with('success', 'User removed from clinic successfully');
     }
 
     public function clinic_dashboard(): Response

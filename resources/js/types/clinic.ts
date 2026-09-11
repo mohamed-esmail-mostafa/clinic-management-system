@@ -2,6 +2,19 @@ import { Country } from './country';
 import { Governorate } from './governorate';
 import { City } from './city';
 import { Specialty } from './specialty';
+import { User } from './auth';
+import { Role } from './role';
+
+export interface ClinicUser {
+    id: number;
+    clinic_id: number;
+    user_id: number;
+    role_id: number;
+    user?: User;
+    role?: Role;
+    created_at?: string;
+    updated_at?: string;
+}
 
 export interface Clinic {
     id: number;
@@ -21,6 +34,8 @@ export interface Clinic {
     governorate?: Governorate;
     city?: City;
     specialties?: Specialty[];
+    clinic_users?: ClinicUser[];
+    users?: User[];
     created_at?: string;
     updated_at?: string;
 }
@@ -36,5 +51,16 @@ export interface ClinicFormValues {
     description: string;
     specialty_ids: number[];
     is_active: boolean;
+    [key: string]: any;
+}
+
+export interface AddClinicUserFormValues {
+    mode: 'existing' | 'new';
+    user_id: number | string;
+    role_id: number | string;
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
     [key: string]: any;
 }

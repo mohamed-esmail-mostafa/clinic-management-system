@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Clinic extends Model
 {
@@ -50,6 +51,11 @@ class Clinic extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function clinicUsers(): HasMany
+    {
+        return $this->hasMany(ClinicUser::class);
     }
 
     public function users(): BelongsToMany
