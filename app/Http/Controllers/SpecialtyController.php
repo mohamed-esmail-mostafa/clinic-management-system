@@ -5,62 +5,51 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSpecialtyRequest;
 use App\Http\Requests\UpdateSpecialtyRequest;
 use App\Models\Specialty;
+use App\Services\SpecialtyService;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SpecialtyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        protected SpecialtyService $specialtyService
+    ) {}
+
+    public function specialties_page(): Response
     {
-        //
+        $specialties = $this->specialtyService->getAllSpecialties();
+
+        return Inertia::render('specialties/index', [
+            'specialties' => $specialties,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreSpecialtyRequest $request): RedirectResponse
     {
-        //
+        $this->specialtyService->createSpecialty($request->validated());
+
+        return redirect()->back()->with('success', 'Specialty created successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreSpecialtyRequest $request)
+    public function update(UpdateSpecialtyRequest $request, Specialty $specialty): RedirectResponse
     {
-        //
+        $this->specialtyService->updateSpecialty($specialty, $request->validated());
+
+        return redirect()->back()->with('success', 'Specialty updated successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Specialty $specialty)
+    public function destroy(Specialty $specialty): RedirectResponse
     {
-        //
+        $this->specialtyService->deleteSpecialty($specialty);
+
+        return redirect()->back()->with('success', 'Specialty deleted successfully');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Specialty $specialty)
+    public function toggleStatus(Specialty $specialty): RedirectResponse
     {
-        //
-    }
+        $this->specialtyService->toggleSpecialtyStatus($specialty);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateSpecialtyRequest $request, Specialty $specialty)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Specialty $specialty)
-    {
-        //
+        return redirect()->back()->with('success', 'Specialty status updated successfully');
     }
 }

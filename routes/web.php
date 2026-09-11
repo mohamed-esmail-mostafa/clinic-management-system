@@ -15,6 +15,7 @@ require __DIR__.'/roles.php';
 require __DIR__.'/countries.php';
 require __DIR__.'/governorates.php';
 require __DIR__.'/cities.php';
+require __DIR__.'/specialties.php';
 
 Route::get('/admin/dashboard', function () {
     return Inertia::render('admin/index');
