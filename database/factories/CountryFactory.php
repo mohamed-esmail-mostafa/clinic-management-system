@@ -18,7 +18,10 @@ class CountryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name_ar' => fake()->country(),
+            'name_en' => fake()->country(),
+            'code' => strtoupper(fake()->unique()->lexify('??')),
+            'is_active' => true,
         ];
     }
 }

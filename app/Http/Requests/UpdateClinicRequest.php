@@ -12,7 +12,7 @@ class UpdateClinicRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,19 @@ class UpdateClinicRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['nullable', 'string', 'in:personal,medical_center'],
+            'country_id' => ['nullable', 'integer', 'exists:countries,id'],
+            'governorate_id' => ['nullable', 'integer', 'exists:governorates,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'specialty_ids' => ['nullable', 'array'],
+            'specialty_ids.*' => ['integer', 'exists:specialties,id'],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 }

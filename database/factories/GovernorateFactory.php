@@ -18,7 +18,10 @@ class GovernorateFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'country_id' => \App\Models\Country::factory(),
+            'name_ar' => fake()->city(),
+            'name_en' => fake()->city(),
+            'is_active' => true,
         ];
     }
 }

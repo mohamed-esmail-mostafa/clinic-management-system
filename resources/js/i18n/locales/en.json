@@ -1,5 +1,37 @@
 {
   "clinics": {
+    "title": "Clinics Management",
+    "subtitle": "Manage registered clinics, medical centers, locations, and specialties.",
+    "add-new": "Add New Clinic",
+    "create_title": "Create Clinic",
+    "create_subtitle": "Fill in clinic details, location, and specialties.",
+    "edit": "Edit Clinic",
+    "delete": "Delete Clinic",
+    "delete_confirm": "Are you sure you want to delete this clinic?",
+    "search_placeholder": "Search clinics...",
+    "total": "Total Clinics",
+    "active_count": "Active Clinics",
+    "inactive_count": "Inactive Clinics",
+    "name": "Clinic Name",
+    "phone": "Clinic Phone",
+    "address": "Clinic Address",
+    "type": "Clinic Type",
+    "personal": "Personal Clinic",
+    "medical_center": "Medical Center",
+    "description": "Clinic Description",
+    "country": "Country",
+    "governorate": "Governorate",
+    "city": "City",
+    "select_country": "Select Country",
+    "select_governorate": "Select Governorate",
+    "select_city": "Select City",
+    "specialties": "Specialties",
+    "select_specialties": "Select Specialties",
+    "no_clinics": "No clinics found.",
+    "created_success": "Clinic created successfully!",
+    "updated_success": "Clinic updated successfully!",
+    "deleted_success": "Clinic deleted successfully!",
+    "status_updated": "Clinic status updated!",
     "sidebar": {
       "overview": "Overview",
       "patients": "Patients",
@@ -7,13 +39,7 @@
       "medicines": "Medicines",
       "employees": "Employees",
       "settings": "Settings"
-    },
-    "addn-new": "Add New Clinic",
-    "name": "Clinic Name",
-    "phone": "Clinic Phone",
-    "address": "Clinic Address",
-    "type": "Clinic Type",
-    "description": "Clinic Description"
+    }
   },
   "admin": {
     "sidebar": {
@@ -151,6 +177,8 @@
     "actions": "Actions",
     "status": "Status",
     "required": "This field is required",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "success": "Success",
+    "error": "Error"
   }
 }

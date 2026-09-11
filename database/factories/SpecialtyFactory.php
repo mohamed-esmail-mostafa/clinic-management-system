@@ -17,8 +17,14 @@ class SpecialtyFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->unique()->jobTitle();
         return [
-            //
+            'name_ar' => $name,
+            'name_en' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
+            'description_ar' => fake()->sentence(),
+            'description_en' => fake()->sentence(),
+            'is_active' => true,
         ];
     }
 }

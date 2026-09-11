@@ -1,5 +1,37 @@
 {
   "clinics": {
+    "title": "إدارة العيادات",
+    "subtitle": "إدارة العيادات والمراكز الطبية المسجلة والمواقع والتخصصات.",
+    "add-new": "إضافة عيادة جديدة",
+    "create_title": "إنشاء عيادة جديد",
+    "create_subtitle": "أدخل بيانات العيادة والموقع والتخصصات الطبية.",
+    "edit": "تعديل العيادة",
+    "delete": "حذف العيادة",
+    "delete_confirm": "هل أنت ألكيد من رغبتك في حذف هذه العيادة؟",
+    "search_placeholder": "بحث بالاسم أو الهاتف...",
+    "total": "إجمالي العيادات",
+    "active_count": "العيادات النشطة",
+    "inactive_count": "العيادات غير النشطة",
+    "name": "اسم العيادة",
+    "phone": "هاتف العيادة",
+    "address": "عنوان العيادة",
+    "type": "نوع العيادة",
+    "personal": "عيادة خاصة",
+    "medical_center": "مركز طبي",
+    "description": "وصف العيادة",
+    "country": "الدولة",
+    "governorate": "المحافظة",
+    "city": "المدينة",
+    "select_country": "اختر الدولة",
+    "select_governorate": "اختر المحافظة",
+    "select_city": "اختر المدينة",
+    "specialties": "التخصصات الطبية",
+    "select_specialties": "اختر التخصصات",
+    "no_clinics": "لا يوجد عيادات مضافة حالياً.",
+    "created_success": "تم إضافة العيادة بنجاح!",
+    "updated_success": "تم تحديث العيادة بنجاح!",
+    "deleted_success": "تم حذف العيادة بنجاح!",
+    "status_updated": "تم تغيير حالة العيادة بنجاح!",
     "sidebar": {
       "overview": " نظرة عامه ",
       "patients": " المرضي ",
@@ -7,13 +39,7 @@
       "medicines": " الادوية ",
       "employees": " الموظفين ",
       "settings": " الاعدادات "
-    },
-    "add-new": " اضافة عيادة جديدة ",
-    "name": " اسم العيادة ",
-    "phone": " هاتف العيادة ",
-    "address": " عنوان العيادة ",
-    "type": " نوع العيادة ",
-    "description": " وصف العيادة "
+    }
   },
   "admin": {
     "sidebar": {
@@ -87,7 +113,7 @@
     "active": "مفعل",
     "inactive": "معطل",
     "no_countries": "لا يوجد دول مضافة حالياً.",
-    "governorates_count": "المحافظات",
+    "governorates_count": "المافظات",
     "created_success": "تم إضافة الدولة بنجاح!",
     "updated_success": "تم تحديث بيانات الدولة بنجاح!",
     "deleted_success": "تم حذف الدولة بنجاح!",
@@ -151,6 +177,8 @@
     "actions": "الإجراءات",
     "status": "الحالة",
     "required": "هذا الحقل مطلوب",
-    "processing": "جاري التحميل..."
+    "processing": "جاري التحميل...",
+    "success": "نجاح",
+    "error": "خطأ"
   }
 }

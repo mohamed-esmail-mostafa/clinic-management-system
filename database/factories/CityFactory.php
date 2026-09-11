@@ -18,7 +18,10 @@ class CityFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'governorate_id' => \App\Models\Governorate::factory(),
+            'name_ar' => fake()->city(),
+            'name_en' => fake()->city(),
+            'is_active' => true,
         ];
     }
 }
