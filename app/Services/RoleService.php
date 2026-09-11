@@ -2,52 +2,55 @@
 
 namespace App\Services;
 
-use App\Http\Requests\StoreRoleRequest;
-use App\Http\Requests\UpdateRoleRequest;
 use App\Models\Role;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class RoleService
 {
-
-    public function getAllRoles()
+    public function getAllRoles(): Collection
     {
-        return Role::all();
+        return Role::orderBy('id', 'desc')->get();
     }
 
-    
-    public function createNewRole(StoreRoleRequest $request)
+    public function createNewRole(array $data): Role
     {
-        $role = new Role();
-        $role->name = $request->name;
-        $role->slug = Str::slug($request->name);
-        $role->save();
+        $name = $data['name'];
+        $slug = isset($data['slug']) && ! empty($data['slug'])
+            ? Str::slug($data['slug'])
+            : Str::slug($name);
+
+        return Role::create([
+            'name' => $name,
+            'slug' => $slug,
+        ]);
+    }
+
+    public function updateRole(Role|string $roleOrSlug, array $data): Role
+    {
+        $role = $roleOrSlug instanceof Role ? $roleOrSlug : $this->getRole($roleOrSlug);
+        $name = $data['name'];
+        $slug = isset($data['slug']) && ! empty($data['slug'])
+            ? Str::slug($data['slug'])
+            : Str::slug($name);
+
+        $role->update([
+            'name' => $name,
+            'slug' => $slug,
+        ]);
+
         return $role;
     }
 
-
-    public function updateRole(UpdateRoleRequest $request, string $slug)
-    {
-        $role = $this->getRole($slug);
-        $role->name = $request->name;
-        $role->slug = Str::slug($request->name);
-        $role->save();
-        return $role;
-    }
-
-
-    public function getRole(string $slug)
+    public function getRole(string $slug): Role
     {
         return Role::where('slug', $slug)->firstOrFail();
     }
 
-
-
-
-    public function destroyRole(string $slug)
+    public function destroyRole(Role|string $roleOrSlug): bool
     {
-        $role = $this->getRole($slug);
-        $role->delete();
-        return true;
+        $role = $roleOrSlug instanceof Role ? $roleOrSlug : $this->getRole($roleOrSlug);
+
+        return (bool) $role->delete();
     }
 }

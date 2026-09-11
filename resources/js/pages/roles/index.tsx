@@ -1,82 +1,341 @@
+import React, { useState } from 'react'
+import AdminLayout from '@/layouts/admin-layout'
+import { Role, RoleFormValues } from '@/types/role'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { router } from '@inertiajs/react'
+import { toast } from 'sonner'
+import useImport from '@/hooks/use-import'
 import InputError from '@/components/input-error'
-import PageHeader from '@/components/shared/page-header'
+
+// UI Components
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import useImport from '@/hooks/use-import'
-import AdminLayout from '@/layouts/admin-layout'
-import { Role } from '@/types/role'
-import { router } from '@inertiajs/react'
-import { DialogTitle } from '@radix-ui/react-dialog'
-import { useFormik } from 'formik'
-import { Edit2, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 
+// Icons
+import {
+    Plus,
+    Pencil,
+    Trash2,
+    Search,
+    Shield,
+    ShieldCheck,
+} from 'lucide-react'
 
-export default function rolesPage({ roles }: { roles: Role[] }) {
-    const { t } = useImport()
-    const [openDialog, setOpenDialog] = useState(false)
-    const formik = useFormik({
-        initialValues:{
-            name:''
+interface Props {
+    roles?: Role[];
+}
+
+export default function RolesPage({ roles = [] }: Props) {
+    const { t, isRtl } = useImport()
+    const [searchTerm, setSearchTerm] = useState('')
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [editingRole, setEditingRole] = useState<Role | null>(null)
+    const [deletingRole, setDeletingRole] = useState<Role | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    // Validation Schema using Yup
+    const validationSchema = Yup.object({
+        name: Yup.string()
+            .trim()
+            .required(t('common.required', 'This field is required')),
+    })
+
+    // Formik for Add/Edit Role
+    const formik = useFormik<RoleFormValues>({
+        initialValues: {
+            name: editingRole?.name || '',
         },
-        onSubmit: async (values)=>{
-           router.post("/admin/roles/store",values,{
-            onSuccess:()=>{
-                toast.success(t("roles.added"))
-                formik.resetForm()
-                setOpenDialog(false)
-            },
-            onError:()=>{
-                toast.error(t("roles.failed-to-add"))
+        enableReinitialize: true,
+        validationSchema,
+        onSubmit: (values, { setSubmitting, resetForm }) => {
+            if (editingRole) {
+                // Update operation
+                router.put(`/admin/roles/${editingRole.slug}`, values, {
+                    onSuccess: () => {
+                        toast.success(t('roles.updated', 'Role updated successfully!'))
+                        handleCloseModal()
+                    },
+                    onError: (errors) => {
+                        toast.error((Object.values(errors)[0] as string) || t('roles.failed-to-add', 'Failed to update role'))
+                    },
+                    onFinish: () => setSubmitting(false),
+                })
+            } else {
+                // Create operation
+                router.post('/admin/roles/store', values, {
+                    onSuccess: () => {
+                        toast.success(t('roles.added', 'Role created successfully!'))
+                        handleCloseModal()
+                        resetForm()
+                    },
+                    onError: (errors) => {
+                        toast.error((Object.values(errors)[0] as string) || t('roles.failed-to-add', 'Failed to add role'))
+                    },
+                    onFinish: () => setSubmitting(false),
+                })
             }
-           })
-        }
+        },
+    })
+
+    const handleOpenAdd = () => {
+        setEditingRole(null)
+        formik.resetForm({ values: { name: '' } })
+        setIsAddModalOpen(true)
+    }
+
+    const handleOpenEdit = (role: Role) => {
+        setEditingRole(role)
+        formik.setValues({ name: role.name })
+        setIsAddModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsAddModalOpen(false)
+        setEditingRole(null)
+        formik.resetForm()
+    }
+
+    // Confirm Delete
+    const handleDeleteConfirm = () => {
+        if (!deletingRole) return
+        setIsDeleting(true)
+
+        router.delete(`/admin/roles/${deletingRole.slug}`, {
+            onSuccess: () => {
+                toast.success(t('roles.deleted', 'Role deleted successfully!'))
+                setDeletingRole(null)
+            },
+            onError: () => {
+                toast.error('Failed to delete role')
+            },
+            onFinish: () => setIsDeleting(false),
+        })
+    }
+
+    // Filter roles
+    const filteredRoles = roles.filter((role) => {
+        const query = searchTerm.toLowerCase().trim()
+        return (
+            role.name.toLowerCase().includes(query) ||
+            role.slug.toLowerCase().includes(query)
+        )
     })
 
     return (
-        <AdminLayout>
-            <PageHeader>
-                <Button onClick={()=>setOpenDialog(true)}>{t('roles.add-role')}</Button>
-            </PageHeader>
-            {roles.length > 0 ? (
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-                    {roles.map((role: Role) => (
-                        <div className='bg-white border p-2'>
-                            <h2>{role.name}</h2>
-                            <h2>{role.slug}</h2>
-                            <div>
-                                <Button variant="ghost"><Edit2 /></Button>
-                                <Button variant="destructive"><Trash2 /></Button>
+        <AdminLayout title={t('roles.title', 'Roles & Permissions')}>
+            <div className="space-y-6">
+                {/* Header Title & Add Button */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+                                <ShieldCheck size={22} />
                             </div>
+                            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                {t('roles.title', 'Roles & Permissions')}
+                            </h1>
                         </div>
-                    ))}
+                        <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            {t('roles.subtitle', 'Manage system user roles and permission groups.')}
+                        </p>
+                    </div>
 
+                    <Button
+                        onClick={handleOpenAdd}
+                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
+                    >
+                        <Plus size={18} />
+                        <span>{t('roles.add-role', 'Add New Role')}</span>
+                    </Button>
                 </div>
 
-            ) : (<div></div>)}
+                {/* Filter and Search Bar */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="relative w-full sm:w-80">
+                        <Search
+                            size={16}
+                            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${
+                                isRtl ? 'right-3' : 'left-3'
+                            }`}
+                        />
+                        <Input
+                            placeholder={t('roles.search_placeholder', 'Search roles...')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-orange-500`}
+                        />
+                    </div>
 
+                    <Badge variant="outline" className="h-9 px-3 rounded-xl bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-medium">
+                        {t('roles.total', 'Total Roles')}: {roles.length}
+                    </Badge>
+                </div>
 
-            <Dialog open={openDialog }>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle></DialogTitle>
-                    </DialogHeader>
-                    <div>
-                        <div>
-                            <Label>{t('roles.label')}</Label>
-                            <Input name='name' value={formik.values.name} onChange={formik.handleChange} />
-                            <InputError message={formik.errors.name} />
+                {/* Roles Cards Grid */}
+                {filteredRoles.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredRoles.map((role) => (
+                            <Card key={role.id || role.slug} className="border-gray-100 dark:border-gray-800 shadow-xs hover:border-orange-200 dark:hover:border-orange-900/50 transition-all duration-200 group">
+                                <CardContent className="p-5 flex flex-col justify-between h-full">
+                                    <div>
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
+                                                    <Shield size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base">
+                                                        {role.name}
+                                                    </h3>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="mt-1 font-mono text-[11px] bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                                                    >
+                                                        {role.slug}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-end gap-2 pt-5 border-t border-gray-100 dark:border-gray-800/80 mt-4">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleOpenEdit(role)}
+                                            className="h-8 px-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg gap-1.5 text-xs font-medium"
+                                        >
+                                            <Pencil size={14} />
+                                            <span>{t('roles.edit_role', 'Edit')}</span>
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setDeletingRole(role)}
+                                            className="h-8 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg gap-1.5 text-xs font-medium"
+                                        >
+                                            <Trash2 size={14} />
+                                            <span>{t('roles.delete_role', 'Delete')}</span>
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-12 text-center text-gray-400">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            <Shield size={36} className="text-gray-300 dark:text-gray-700" />
+                            <span className="text-sm">{t('roles.no_roles', 'No roles found.')}</span>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="destructive" onClick={()=>setOpenDialog(false)}>{t('common.close')}</Button>
-                        <Button type='submit' onClick={()=>formik.handleSubmit()}>{t('common.save')}</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                )}
+
+                {/* Create / Edit Role Modal */}
+                <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
+                    <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-gray-900">
+                        <DialogHeader>
+                            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                {editingRole
+                                    ? t('roles.edit_role', 'Edit Role')
+                                    : t('roles.add-role', 'Add New Role')}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-gray-500">
+                                Fill in role details. Form validated with Formik & Yup.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={formik.handleSubmit} className="space-y-4 py-2">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="name" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    {t('roles.label', 'Role Name')} <span className="text-rose-500">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="e.g. Doctor, Admin, Accountant"
+                                    value={formik.values.name}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                />
+                                {formik.touched.name && formik.errors.name && (
+                                    <InputError message={formik.errors.name} />
+                                )}
+                            </div>
+
+                            <DialogFooter className="pt-4 gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleCloseModal}
+                                    className="rounded-xl border-gray-200 dark:border-gray-800"
+                                >
+                                    {t('common.cancel', 'Cancel')}
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={formik.isSubmitting}
+                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium"
+                                >
+                                    {formik.isSubmitting
+                                        ? t('common.processing', 'Saving...')
+                                        : t('common.save', 'Save')}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Delete Confirmation Modal */}
+                <Dialog open={!!deletingRole} onOpenChange={() => setDeletingRole(null)}>
+                    <DialogContent className="sm:max-w-sm rounded-2xl bg-white dark:bg-gray-900">
+                        <DialogHeader>
+                            <DialogTitle className="text-base font-bold text-rose-600 dark:text-rose-400">
+                                {t('roles.delete_role', 'Delete Role')}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-gray-600 dark:text-gray-400 pt-2">
+                                {t('roles.delete_confirm', 'Are you sure you want to delete this role?')}
+                                {deletingRole && (
+                                    <span className="block font-bold text-gray-900 dark:text-gray-100 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                                        {deletingRole.name} ({deletingRole.slug})
+                                    </span>
+                                )}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="gap-2 pt-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setDeletingRole(null)}
+                                className="rounded-xl border-gray-200 dark:border-gray-800"
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                disabled={isDeleting}
+                                onClick={handleDeleteConfirm}
+                                className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl"
+                            >
+                                {isDeleting ? t('common.processing', 'Deleting...') : t('common.delete', 'Delete')}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </AdminLayout>
     )
 }
