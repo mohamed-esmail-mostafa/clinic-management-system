@@ -18,6 +18,7 @@ class Clinic extends Model
         'country_id',
         'governorate_id',
         'city_id',
+        'clinic_type_id',
         'name',
         'slug',
         'type',
@@ -36,6 +37,11 @@ class Clinic extends Model
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
         ];
+    }
+
+    public function clinicType(): BelongsTo
+    {
+        return $this->belongsTo(ClinicType::class);
     }
 
     public function country(): BelongsTo

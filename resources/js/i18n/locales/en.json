@@ -113,6 +113,7 @@
     "sidebar": {
       "overview": "Overview",
       "clinics": "Clinics",
+      "clinic_types": "Clinic Types",
       "specialties": "Specialties",
       "roles": "Roles",
       "settings": "Settings",
@@ -162,6 +163,29 @@
     "updated_success": "Specialty updated successfully!",
     "deleted_success": "Specialty deleted successfully!",
     "status_updated": "Specialty status updated!"
+  },
+  "clinic_types": {
+    "title": "Clinic Types",
+    "subtitle": "Manage clinic types, titles in Arabic and English, and active status.",
+    "add_new": "Add Clinic Type",
+    "edit": "Edit Clinic Type",
+    "delete": "Delete Clinic Type",
+    "delete_confirm": "Are you sure you want to delete this clinic type?",
+    "title_ar": "Arabic Title",
+    "title_en": "English Title",
+    "slug": "Slug",
+    "is_active": "Active Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "total": "Total Clinic Types",
+    "active_count": "Active Clinic Types",
+    "inactive_count": "Inactive Clinic Types",
+    "search_placeholder": "Search clinic types...",
+    "no_clinic_types": "No clinic types found.",
+    "created_success": "Clinic type created successfully!",
+    "updated_success": "Clinic type updated successfully!",
+    "deleted_success": "Clinic type deleted successfully!",
+    "status_updated": "Clinic type status updated!"
   },
   "countries": {
     "title": "Countries Management",

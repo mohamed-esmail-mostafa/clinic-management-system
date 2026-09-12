@@ -49,9 +49,9 @@ return new class extends Migration
                 'reception',
             ]);
 
-            $table->string('booked_by')
-                ->nullable();
-
+            $table->string('booked_by')->nullable();
+            $table->string('payment_method')->default('cash');
+            $table->decimal('amount', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
         });

@@ -1,4 +1,4 @@
-import { ExternalLink, Globe, LayoutDashboard, Map, Stethoscope, Store, Sun } from 'lucide-react';
+import { Building2, ExternalLink, Globe, LayoutDashboard, Map, Stethoscope, Store, Sun } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 import LanguageToggle from '../language-toggle';
@@ -11,6 +11,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
     const NAV_ITEMS = [
         { key: t('admin.sidebar.overview'), href: '/admin/dashboard', icon: LayoutDashboard },
         { key: t('admin.sidebar.clinics'), href: '/admin/clinics', icon: LayoutDashboard },
+        { key: t('admin.sidebar.clinic_types'), href: '/admin/clinic-types', icon: Building2 },
         { key: t('admin.sidebar.specialties'), href: '/admin/specialties/page', icon: Stethoscope },
         { key: t('admin.sidebar.roles'), href: '/admin/roles/page', icon: LayoutDashboard },
         { key: t('admin.sidebar.countries'), href: '/admin/countries/page', icon: Map },

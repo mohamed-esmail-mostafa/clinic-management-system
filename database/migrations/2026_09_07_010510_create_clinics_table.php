@@ -13,17 +13,20 @@ return new class extends Migration
     {
         Schema::create('clinics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("country_id")->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId("governorate_id")->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId("city_id")->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('country_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('governorate_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('clinic_type_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('type', ['personal', 'medical_center'])->default('personal');
+            $table->string('image')->nullable();
+            $table->string('public_id')->nullable();
+            // $table->enum('type', ['personal', 'medical_center'])->default('personal');
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->string('description')->nullable();
-            $table->decimal('latitude',10,7)->nullable();
-            $table->decimal('longitude',10,7)->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
