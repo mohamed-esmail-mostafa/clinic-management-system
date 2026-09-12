@@ -52,6 +52,7 @@ import {
     Activity,
     PlusCircle,
     X,
+    Share2,
 } from 'lucide-react';
 
 interface Props {
@@ -250,6 +251,42 @@ export default function PatientVisitsPage({
         });
     };
 
+    const handleShareWhatsApp = (visit: Visit) => {
+        const rawPhone = patient.phone || patient.secondary_phone;
+        if (!rawPhone || !rawPhone.trim()) {
+            toast.error(t('visits.no_phone_error', 'Patient phone number is not available for WhatsApp sharing.'));
+            return;
+        }
+
+        let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+            cleanPhone = '2' + cleanPhone;
+        }
+
+        const clinicName = serverClinic?.name || 'Medical Clinic';
+        const patientName = `${patient.first_name || ''} ${patient.middle_name ? patient.middle_name + ' ' : ''}${patient.last_name || ''}`.trim();
+        const visitTypeStr = visit.type === 'examination' ? 'كشف / Examination' : 'إعادة / Follow-up';
+        const visitDateStr = new Date(visit.visited_at).toLocaleString();
+
+        const medsList = (visit.visit_medications || [])
+            .map((m, i) => `${i + 1}. ${m.medication_name}`)
+            .join('\n');
+
+        const message = `🏥 *${clinicName}*
+------------------------------
+👤 *المريض / Patient:* ${patientName}
+📋 *نوع الزيارة / Visit Type:* ${visitTypeStr}
+📅 *التاريخ / Date:* ${visitDateStr}
+
+💊 *الروشتة والأدوية الموصوفة / Prescribed Medications:*
+${medsList || 'لا توجد أدوية موصوفة / No medications prescribed'}
+
+✨ *مع تمنياتنا بالشفاء العاجل! / Get well soon!*`;
+
+        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    };
+
     const patientFullName = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''}`.trim();
 
     return (
@@ -438,6 +475,16 @@ export default function PatientVisitsPage({
                                             </div>
 
                                             <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleShareWhatsApp(visit)}
+                                                    className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 gap-1.5 font-medium"
+                                                    title={t('visits.share_whatsapp', 'Share via WhatsApp')}
+                                                >
+                                                    <Share2 className="h-4 w-4" />
+                                                    {t('visits.whatsapp', 'WhatsApp')}
+                                                </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"

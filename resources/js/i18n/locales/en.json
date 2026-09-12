@@ -361,7 +361,10 @@
     "updated_success": "Visit updated successfully!",
     "deleted_success": "Visit record deleted successfully!",
     "all_types": "All Visit Types",
-    "back_to_patients": "Back to Patients"
+    "back_to_patients": "Back to Patients",
+    "share_whatsapp": "Share via WhatsApp",
+    "whatsapp": "WhatsApp",
+    "no_phone_error": "Patient phone number is not available for WhatsApp sharing."
   },
   "common": {
     "save": "Save",
