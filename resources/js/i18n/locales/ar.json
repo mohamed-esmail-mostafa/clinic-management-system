@@ -443,6 +443,32 @@
     "required": "هذا الحقل مطلوب",
     "processing": "جاري التحميل...",
     "success": "نجاح",
-    "error": "خطأ"
+    "error": "خطأ",
+    "change": "تغيير",
+    "remove": "إزالة",
+    "upload-image": "رفع صورة",
+    "file-size-limit": "PNG, JPG, WEBP حتى 5 ميجابايت",
+    "choose-file": "اختيار ملف"
+  },
+  "website_settings": {
+    "title": "إعدادات الموقع",
+    "subtitle": "إدارة هوية الموقع، بيانات محركات البحث، معلومات الاتصال، الشعار والأيقونة.",
+    "general_tab": "العام ومحركات البحث",
+    "media_tab": "الشعارات والأيقونة",
+    "contact_tab": "معلومات الاتصال",
+    "title_en": "العنوان بالإنجليزية",
+    "title_ar": "العنوان بالعربية",
+    "description_en": "الوصف بالإنجليزية (Meta Description)",
+    "description_ar": "الوصف بالعربية (Meta Description)",
+    "keywords_en": "الكلمات المفتاحية بالإنجليزية",
+    "keywords_ar": "الكلمات المفتاحية بالعربية",
+    "logo": "شعار النمط الفاتح",
+    "dark_logo": "شعار النمط الداكن",
+    "favicon": "أيقونة الموقع (Favicon)",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "address": "العنوان",
+    "save_changes": "حفظ الإعدادات",
+    "updated_success": "تم تحديث إعدادات الموقع بنجاح!"
   }
 }

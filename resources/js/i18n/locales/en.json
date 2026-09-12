@@ -443,6 +443,32 @@
     "required": "This field is required",
     "processing": "Processing...",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "change": "Change",
+    "remove": "Remove",
+    "upload-image": "Upload Image",
+    "file-size-limit": "PNG, JPG, WEBP up to 5MB",
+    "choose-file": "Choose File"
+  },
+  "website_settings": {
+    "title": "Website Settings",
+    "subtitle": "Manage site metadata, contact info, logos, and favicon.",
+    "general_tab": "General & SEO",
+    "media_tab": "Logos & Favicon",
+    "contact_tab": "Contact Info",
+    "title_en": "English Title",
+    "title_ar": "Arabic Title",
+    "description_en": "English Meta Description",
+    "description_ar": "Arabic Meta Description",
+    "keywords_en": "English Keywords",
+    "keywords_ar": "Arabic Keywords",
+    "logo": "Light Mode Logo",
+    "dark_logo": "Dark Mode Logo",
+    "favicon": "Favicon Icon",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "address": "Physical Address",
+    "save_changes": "Save Settings",
+    "updated_success": "Website settings updated successfully!"
   }
 }

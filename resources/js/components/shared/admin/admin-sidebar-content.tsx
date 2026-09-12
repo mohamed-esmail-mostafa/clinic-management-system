@@ -1,4 +1,4 @@
-import { Building2, ExternalLink, Globe, LayoutDashboard, Map, Stethoscope, Store, Sun } from 'lucide-react';
+import { Building2, ExternalLink, Globe, LayoutDashboard, Map, Settings, Stethoscope, Store, Sun } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 import LanguageToggle from '../language-toggle';
@@ -17,6 +17,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
         { key: t('admin.sidebar.countries'), href: '/admin/countries/page', icon: Map },
         { key: t('admin.sidebar.governorates'), href: '/admin/governorates/page', icon: Map },
         { key: t('admin.sidebar.cities'), href: '/admin/cities/page', icon: Map },
+        { key: t('admin.sidebar.settings'), href: '/admin/website-settings', icon: Settings },
     ];
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     return (
@@ -48,18 +49,18 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
                             onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                                 ${active
-                                    ? 'bg-white text-orange-600 shadow-sm'
-                                    : 'text-orange-100 hover:bg-white/10 hover:text-white'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : 'text-white hover:bg-white/10 hover:text-white'
                                 }
                                 ${collapsed ? 'justify-center' : ''}`}
                             title={collapsed ? t(`${key}`) : undefined}
                         >
-                            <Icon size={18} className={`shrink-0 ${active ? 'text-orange-500' : ''}`} />
+                            <Icon size={18} className={`shrink-0 ${active ? 'text-primary' : ''}`} />
                             {!collapsed && (
                                 <span className="truncate">{t(`${key}`)}</span>
                             )}
                             {!collapsed && active && (
-                                <span className="ms-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                <span className="ms-auto w-1.5 h-1.5 rounded-full bg-primary" />
                             )}
                         </Link>
                     );
@@ -71,7 +72,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
                 
                 <button
                     onClick={toggleLanguage}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-orange-100 hover:bg-white/10 text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white hover:bg-white/10 text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
                 >
                     <Globe size={16} className="shrink-0" />
                     {!collapsed && <span>{i18n.language === 'ar' ? 'English' : 'عربي'}</span>}
@@ -80,7 +81,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
 
                 <button
                     onClick={() => toggleTheme()}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-orange-100 hover:bg-white/10 text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white hover:bg-white/10 text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
                 >
                     <Sun size={16} className="shrink-0" />
                     {!collapsed && <span>{appearance === 'dark' ? 'Light' : 'Dark'}</span>}

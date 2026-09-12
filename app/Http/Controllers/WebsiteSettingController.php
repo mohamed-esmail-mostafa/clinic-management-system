@@ -2,65 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreWebsiteSettingRequest;
 use App\Http\Requests\UpdateWebsiteSettingRequest;
-use App\Models\WebsiteSetting;
+use App\Services\WebsiteSettingService;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class WebsiteSettingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        protected WebsiteSettingService $websiteSettingService
+    ) {}
+
+    public function website_settings_page(): Response
     {
-        //
+        $settings = $this->websiteSettingService->getSettings();
+
+        return Inertia::render('website-setting/index', [
+            'settings' => $settings,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function update(UpdateWebsiteSettingRequest $request): RedirectResponse
     {
-        //
-    }
+        $files = [
+            'logo' => $request->file('logo'),
+            'dark_logo' => $request->file('dark_logo'),
+            'favicon' => $request->file('favicon'),
+        ];
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreWebsiteSettingRequest $request)
-    {
-        //
-    }
+        $this->websiteSettingService->updateSettings($request->validated(), array_filter($files));
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(WebsiteSetting $websiteSetting)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WebsiteSetting $websiteSetting)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateWebsiteSettingRequest $request, WebsiteSetting $websiteSetting)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(WebsiteSetting $websiteSetting)
-    {
-        //
+        return redirect()->back()->with('success', 'Website settings updated successfully');
     }
 }

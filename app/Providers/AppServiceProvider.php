@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\WebsiteSetting;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Inertia::share('settings',fn() => Cache::rememberForever('settings', function () {
+                return WebsiteSetting::firstOrFail()->toArray();
+            })
+        );
     }
 
     /**

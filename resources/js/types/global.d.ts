@@ -1,5 +1,5 @@
 import type { Auth } from '@/types/auth';
-
+import type { WebsiteSetting } from './index';
 declare module 'react' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface InputHTMLAttributes<T> {
@@ -13,6 +13,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            settings: WebsiteSetting | null;
             [key: string]: unknown;
         };
     }

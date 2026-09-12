@@ -23,7 +23,7 @@ export default function AdminLayout({ children, title }: Props) {
             {/* Desktop sidebar */}
             <aside
                 className={`hidden lg:flex flex-col fixed top-0 bottom-0 z-30 transition-all duration-300 ease-in-out
-                    bg-linear-to-b from-orange-500 to-orange-600 shadow-xl
+                    bg-primary shadow-xl
                     ${collapsed ? 'w-16' : 'w-60'}
                     ${isRtl ? 'right-0' : 'left-0'}`}
             >
@@ -32,8 +32,8 @@ export default function AdminLayout({ children, title }: Props) {
                     onClick={() => setCollapsed(c => !c)}
                     className={`absolute top-16 -translate-y-1/2 ${isRtl ? '-left-3' : '-right-3'}
                         w-6 h-6 rounded-full bg-white shadow-md border border-gray-100
-                        flex items-center justify-center text-orange-500
-                        hover:bg-orange-50 transition-colors z-10`}
+                        flex items-center justify-center text-primary
+                        hover:bg-primary/20 transition-colors z-10`}
                 >
                     {(collapsed && !isRtl) || (!collapsed && isRtl)
                         ? <ChevronRight size={12} />
