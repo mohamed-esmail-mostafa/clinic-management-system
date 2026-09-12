@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('avatar_public_id')->nullable();
             $table->string('phone')->nullable()->unique();
+            $table->foreignId('role_id')->nullable()->constrained()->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
         });

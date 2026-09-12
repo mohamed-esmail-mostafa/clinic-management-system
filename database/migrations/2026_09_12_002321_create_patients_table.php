@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('clinic_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
 
             // Basic Information
             $table->string('patient_number')->unique();
             $table->string('first_name');
-            $table->string('middle_name')->nullable();
             $table->string('last_name');
             $table->string('gender')->nullable(); // male, female, other
             $table->date('date_of_birth')->nullable();
@@ -25,16 +26,10 @@ return new class extends Migration
             // Contact Information
             $table->string('phone')->nullable();
             $table->string('secondary_phone')->nullable();
-            $table->string('email')->nullable();
-
-            // Address
             $table->text('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('country')->nullable();
+            
 
-            // Identification
-            $table->string('national_id')->nullable()->unique();
-            $table->string('passport_number')->nullable();
+    
 
             // Emergency Contact
             $table->string('emergency_contact_name')->nullable();
@@ -43,25 +38,6 @@ return new class extends Migration
 
             // Medical Information
             $table->string('blood_type')->nullable();
-            $table->text('allergies')->nullable();
-            $table->text('chronic_diseases')->nullable();
-            $table->text('medical_history')->nullable();
-            $table->text('surgical_history')->nullable();
-            $table->text('family_medical_history')->nullable();
-
-            // Insurance
-            $table->boolean('has_insurance')->default(false);
-            $table->string('insurance_company')->nullable();
-            $table->string('insurance_number')->nullable();
-            $table->date('insurance_expiry_date')->nullable();
-
-            // Clinic Information
-            $table->foreignId('clinic_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
-
-            // Additional Information
             $table->text('notes')->nullable();
             $table->string('occupation')->nullable();
             $table->string('marital_status')->nullable();
