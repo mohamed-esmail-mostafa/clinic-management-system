@@ -147,4 +147,9 @@ class ClinicService
             ->where('user_id', $userId)
             ->delete();
     }
+
+    public function getClinic(string $slug)
+    {
+        return Clinic::where('slug', $slug)->firstOrFail();
+    }
 }

@@ -70,4 +70,9 @@ class Clinic extends Model
         return $this->belongsToMany(Specialty::class, 'clinic_specialties')
             ->withTimestamps();
     }
+
+    public function patients(): HasMany
+    {
+        return $this->hasMany(Patient::class);
+    }
 }

@@ -55,7 +55,15 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasOne(ClinicUser::class);
     }
 
-    public function clinics(): BelongsToMany
+    // public function clinics(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Clinic::class, 'clinic_users')
+    //         ->using(ClinicUser::class)
+    //         ->withPivot('role_id')
+    //         ->withTimestamps();
+    // }
+
+    public function clinics()
     {
         return $this->belongsToMany(Clinic::class, 'clinic_users')
             ->withPivot('role_id')

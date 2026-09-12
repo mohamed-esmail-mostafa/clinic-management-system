@@ -6,7 +6,7 @@ import React from 'react'
 export default function clinic_Dashboard() {
     return (
         <ClinicLayout>
-          <h2>OverView</h2>
+          <h2>OverViewfafsdaf</h2>
         </ClinicLayout>
     )
 }

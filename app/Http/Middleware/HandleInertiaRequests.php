@@ -35,11 +35,33 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        if ($user) {
+            $user->load([
+                'clinics',
+                'clinicUser.role',
+            ]);
+
+            $user->clinics->each(function ($clinic) use ($user) {
+                $clinicUser = $user->clinicUser
+                    ->firstWhere('clinic_id', $clinic->id);
+
+                $clinic->setRelation('role', $clinicUser?->role);
+            });
+
+            // Remove clinicUser from the serialized user
+            $user->unsetRelation('clinicUser');
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            // 'auth' => [
+            //     'user' => $request->user()?->load(['clinics', 'clinicUser.role']),
+            // ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

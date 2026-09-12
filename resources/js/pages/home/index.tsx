@@ -47,7 +47,7 @@ export default function HomePage() {
     const { auth } = usePage().props as unknown as Props;
     const { t, isRtl } = useImport();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+console.log("auth",auth)
     const currentUser = auth?.user;
 
     const features = [
