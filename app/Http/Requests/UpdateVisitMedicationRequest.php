@@ -5,14 +5,14 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateMedicationRequest extends FormRequest
+class UpdateVisitMedicationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -23,12 +23,7 @@ class UpdateMedicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'generic_name' => ['nullable', 'string', 'max:255'],
-            'form' => ['nullable', 'string', 'max:255'],
-            'strength' => ['nullable', 'string', 'max:255'],
-            'unit' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
+            //
         ];
     }
 }

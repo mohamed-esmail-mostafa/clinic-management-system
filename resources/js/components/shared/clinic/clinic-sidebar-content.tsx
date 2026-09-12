@@ -1,5 +1,5 @@
 import useImport from '@/hooks/use-import';
-import { BookCopyIcon, Globe, LayoutDashboard, MedalIcon, Settings2, Store, Sun, User2Icon } from 'lucide-react';
+import { BookCopyIcon, Globe, LayoutDashboard, Pill, Settings2, Store, Sun, User2Icon, Users } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 
@@ -10,12 +10,11 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
     const clinicSlug = Array.isArray(clinics) && clinics.length > 0 ? clinics[0]?.slug : '';
     const NAV_ITEMS = [
         { key: t('clinics.sidebar.overview'), href: '/clinic/overview', icon: LayoutDashboard },
-        { key: t('clinics.sidebar.patients'), href: `/clinic/${clinicSlug}/patients`, icon: LayoutDashboard },
+        { key: t('clinics.sidebar.patients'), href: `/clinic/${clinicSlug}/patients`, icon: Users },
         { key: t('clinics.sidebar.bookings'), href: '#', icon: BookCopyIcon },
-        { key: t('clinics.sidebar.medicines'), href: '#', icon: MedalIcon },
+        { key: t('clinics.sidebar.medicines'), href: `/clinic/${clinicSlug}/medications`, icon: Pill },
         { key: t('clinics.sidebar.employees'), href: '#', icon: User2Icon },
         { key: t('clinics.sidebar.settings'), href: '#', icon: Settings2 },
-       
     ];
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     return (

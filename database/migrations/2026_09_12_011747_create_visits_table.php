@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('medications', function (Blueprint $table) {
+        Schema::create('visits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('clinic_id')
-                ->nullable()
                 ->constrained()
-                ->nullOnDelete();
-            $table->string('name');
-            $table->string('generic_name')->nullable();
-            $table->string('form')->nullable();
-            $table->string('strength')->nullable();
-            $table->string('unit')->nullable();
+                ->cascadeOnDelete();
 
-            $table->boolean('is_active')->default(true);
+            $table->foreignId('patient_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->dateTime('visited_at');
+
+            $table->enum('type', ['examination', 'follow_up']);
             $table->timestamps();
         });
     }
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('medications');
+        Schema::dropIfExists('visits');
     }
 };

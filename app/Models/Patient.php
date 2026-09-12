@@ -70,4 +70,9 @@ class Patient extends Model
     {
         return $this->belongsTo(Clinic::class);
     }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
 }

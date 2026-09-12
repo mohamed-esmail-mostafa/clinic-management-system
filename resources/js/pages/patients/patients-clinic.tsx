@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Patient, PatientFormValues } from '@/types/patient';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { router } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
 import useImport from '@/hooks/use-import';
 
@@ -62,6 +62,7 @@ import {
     Activity,
     User,
     Shield,
+    Stethoscope,
 } from 'lucide-react';
 
 interface Props {
@@ -517,6 +518,16 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [] }: 
                                             </TableCell>
                                             <TableCell className="text-end">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    <Link href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                                            title={t('visits.title', 'Patient Visits')}
+                                                        >
+                                                            <Stethoscope className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
