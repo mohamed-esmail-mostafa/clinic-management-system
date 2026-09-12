@@ -22,6 +22,7 @@ require __DIR__.'/redirect.php';
 require __DIR__.'/patients.php';
 require __DIR__.'/medications.php';
 require __DIR__.'/visits.php';
+require __DIR__.'/booking.php';
 
 Route::get('/admin/dashboard', function () {
     return Inertia::render('admin/index');

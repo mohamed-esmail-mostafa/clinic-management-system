@@ -69,4 +69,9 @@ class User extends Authenticatable implements PasskeyUser
             ->withPivot('role_id')
             ->withTimestamps();
     }
+
+    public function doctorBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'doctor_id');
+    }
 }
