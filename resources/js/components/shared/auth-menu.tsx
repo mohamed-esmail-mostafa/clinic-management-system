@@ -13,9 +13,8 @@ export default function AuthMenu() {
     const { auth } = useAuth()
     const { t } = useImport();
     const cleanup = useMobileNavigation();
-
+   console.log("auth",auth)
     const handleLogout = () => {
-        // router.post('/logout');
         cleanup();
         router.flushAll();
     };
@@ -50,12 +49,30 @@ export default function AuthMenu() {
 
                     <DropdownMenuItem asChild>
 
-                        <Link href={`${auth.user.role === "admin" ? "admin/dashboard" : "/vendor/stores/page"}`}>
+                        {/* <Link href={`${auth.user.role === "admin" ? "admin/dashboard" : "/vendor/stores/page"}`}>
                             <BookDashedIcon className="mr-2 h-4 w-4" />
                             <span>
                                 {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
+
                             </span>
-                        </Link>
+                        </Link> */}
+
+                        {/* {auth?.user?.role?.slug === "admin" ?(<Link href="/admin/website-settings">
+                            <BookDashedIcon className="mr-2 h-4 w-4" />
+                            <span>
+                                {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
+
+                            </span>
+                        </Link>):null } */}
+
+
+                         {/* {auth?.user?.role?.slug === "doctor" ?(<Link href="/admin/website-settings">
+                            <BookDashedIcon className="mr-2 h-4 w-4" />
+                            <span>
+                                {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
+
+                            </span>
+                        </Link>):null } */}
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
 

@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             $user->load([
+                'role',
                 'clinics',
                 'clinicUser.role',
             ]);
