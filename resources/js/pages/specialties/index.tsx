@@ -191,7 +191,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
                     <div>
                         <div className="flex items-center gap-2">
-                            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+                            <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                                 <Stethoscope size={22} />
                             </div>
                             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -205,7 +205,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
 
                     <Button
                         onClick={handleOpenAdd}
-                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
                     >
                         <Plus size={18} />
                         <span>{t('specialties.add_new', 'Add Specialty')}</span>
@@ -224,7 +224,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                     {specialties.length}
                                 </h3>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                                 <Stethoscope size={24} />
                             </div>
                         </CardContent>
@@ -276,119 +276,208 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                             placeholder={t('specialties.search_placeholder', 'Search specialties...')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-orange-500`}
+                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-primary`}
                         />
                     </div>
                 </div>
 
-                {/* Specialties Data Table */}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-16">#</TableHead>
-                            <TableHead>{t('specialties.name_ar', 'Arabic Name')}</TableHead>
-                            <TableHead>{t('specialties.name_en', 'English Name')}</TableHead>
-                            <TableHead>{t('specialties.slug', 'Slug')}</TableHead>
-                            <TableHead>{t('common.status', 'Status')}</TableHead>
-                            <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredSpecialties.length > 0 ? (
-                            filteredSpecialties.map((specialty, idx) => (
-                                <TableRow key={specialty.id}>
-                                    <TableCell className="font-semibold text-gray-500">
-                                        {idx + 1}
-                                    </TableCell>
-
-                                    <TableCell className="font-semibold text-gray-900 dark:text-gray-100">
-                                        <div>
-                                            <span>{specialty.name_ar}</span>
-                                            {specialty.description_ar && (
-                                                <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
-                                                    {specialty.description_ar}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell className="text-gray-700 dark:text-gray-300">
-                                        <div>
-                                            <span>{specialty.name_en}</span>
-                                            {specialty.description_en && (
-                                                <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
-                                                    {specialty.description_en}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <Badge
-                                            variant="outline"
-                                            className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900/50 font-mono text-[11px]"
-                                        >
-                                            {specialty.slug}
-                                        </Badge>
-                                    </TableCell>
-
-                                    <TableCell>
+                {/* Specialties Data - Mobile Cards View (No horizontal scroll) */}
+                <div className="grid grid-cols-1 gap-3 md:hidden">
+                    {filteredSpecialties.length > 0 ? (
+                        filteredSpecialties.map((specialty, idx) => (
+                            <div
+                                key={specialty.id}
+                                className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 space-y-3 shadow-xs"
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <Switch
-                                                checked={specialty.is_active}
-                                                onCheckedChange={() => handleToggleStatus(specialty)}
-                                            />
-                                            <Badge
-                                                className={
-                                                    specialty.is_active
-                                                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
-                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                                                }
-                                            >
-                                                {specialty.is_active
-                                                    ? t('specialties.active', 'Active')
-                                                    : t('specialties.inactive', 'Inactive')}
-                                            </Badge>
+                                            <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
+                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                                {specialty.name_ar}
+                                            </h3>
                                         </div>
-                                    </TableCell>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                                            {specialty.name_en}
+                                        </p>
+                                    </div>
 
-                                    <TableCell className="text-end">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleOpenEdit(specialty)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg"
-                                                title={t('specialties.edit', 'Edit')}
-                                            >
-                                                <Pencil size={15} />
-                                            </Button>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <Switch
+                                            checked={specialty.is_active}
+                                            onCheckedChange={() => handleToggleStatus(specialty)}
+                                        />
+                                        <Badge
+                                            className={
+                                                specialty.is_active
+                                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                            }
+                                        >
+                                            {specialty.is_active
+                                                ? t('specialties.active', 'Active')
+                                                : t('specialties.inactive', 'Inactive')}
+                                        </Badge>
+                                    </div>
+                                </div>
 
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => setDeletingSpecialty(specialty)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                                title={t('specialties.delete', 'Delete')}
+                                {(specialty.description_ar || specialty.description_en) && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5 pt-1 border-t border-gray-50 dark:border-gray-800/60">
+                                        {specialty.description_ar && <p className="line-clamp-2">{specialty.description_ar}</p>}
+                                        {specialty.description_en && <p className="line-clamp-2 text-gray-400">{specialty.description_en}</p>}
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-primary/10 text-primary border-primary/20 font-mono text-[11px]"
+                                    >
+                                        {specialty.slug}
+                                    </Badge>
+
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleOpenEdit(specialty)}
+                                            className="h-8 px-2.5 text-xs text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
+                                        >
+                                            <Pencil size={14} />
+                                            <span>{t('specialties.edit', 'Edit')}</span>
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setDeletingSpecialty(specialty)}
+                                            className="h-8 px-2.5 text-xs text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg gap-1"
+                                        >
+                                            <Trash2 size={14} />
+                                            <span>{t('specialties.delete', 'Delete')}</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-center text-gray-400">
+                            <Stethoscope size={32} className="mx-auto text-gray-300 dark:text-gray-700 mb-2" />
+                            <span>{t('specialties.no_specialties', 'No specialties found.')}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Specialties Data Table - Desktop View */}
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-16 whitespace-nowrap">#</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('specialties.name_ar', 'Arabic Name')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('specialties.name_en', 'English Name')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('specialties.slug', 'Slug')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('common.status', 'Status')}</TableHead>
+                                <TableHead className="text-end whitespace-nowrap">{t('common.actions', 'Actions')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredSpecialties.length > 0 ? (
+                                filteredSpecialties.map((specialty, idx) => (
+                                    <TableRow key={specialty.id}>
+                                        <TableCell className="font-semibold text-gray-500 whitespace-nowrap">
+                                            {idx + 1}
+                                        </TableCell>
+
+                                        <TableCell className="font-semibold text-gray-900 dark:text-gray-100 min-w-[140px]">
+                                            <div>
+                                                <span>{specialty.name_ar}</span>
+                                                {specialty.description_ar && (
+                                                    <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
+                                                        {specialty.description_ar}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="text-gray-700 dark:text-gray-300 min-w-[140px]">
+                                            <div>
+                                                <span>{specialty.name_en}</span>
+                                                {specialty.description_en && (
+                                                    <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
+                                                        {specialty.description_en}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="whitespace-nowrap">
+                                            <Badge
+                                                variant="outline"
+                                                className="bg-primary/10 text-primary border-primary/20 font-mono text-[11px]"
                                             >
-                                                <Trash2 size={15} />
-                                            </Button>
+                                                {specialty.slug}
+                                            </Badge>
+                                        </TableCell>
+
+                                        <TableCell className="whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={specialty.is_active}
+                                                    onCheckedChange={() => handleToggleStatus(specialty)}
+                                                />
+                                                <Badge
+                                                    className={
+                                                        specialty.is_active
+                                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                    }
+                                                >
+                                                    {specialty.is_active
+                                                        ? t('specialties.active', 'Active')
+                                                        : t('specialties.inactive', 'Inactive')}
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="text-end whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleOpenEdit(specialty)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
+                                                    title={t('specialties.edit', 'Edit')}
+                                                >
+                                                    <Pencil size={15} />
+                                                </Button>
+
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => setDeletingSpecialty(specialty)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                                    title={t('specialties.delete', 'Delete')}
+                                                >
+                                                    <Trash2 size={15} />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-32 text-center text-gray-400">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <Stethoscope size={32} className="text-gray-300 dark:text-gray-700" />
+                                            <span>{t('specialties.no_specialties', 'No specialties found.')}</span>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-32 text-center text-gray-400">
-                                    <div className="flex flex-col items-center justify-center gap-2">
-                                        <Stethoscope size={32} className="text-gray-300 dark:text-gray-700" />
-                                        <span>{t('specialties.no_specialties', 'No specialties found.')}</span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Create / Edit Specialty Modal */}
                 <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
@@ -418,7 +507,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                     value={formik.values.name_ar}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                                 {formik.touched.name_ar && formik.errors.name_ar && (
                                     <InputError message={formik.errors.name_ar} />
@@ -438,7 +527,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                     value={formik.values.name_en}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                                 {formik.touched.name_en && formik.errors.name_en && (
                                     <InputError message={formik.errors.name_en} />
@@ -458,7 +547,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                     value={formik.values.description_ar}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                             </div>
 
@@ -475,7 +564,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                     value={formik.values.description_en}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                             </div>
 
@@ -507,7 +596,7 @@ export default function SpecialtiesPage({ specialties = [] }: Props) {
                                 <Button
                                     type="submit"
                                     disabled={formik.isSubmitting}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium"
                                 >
                                     {formik.isSubmitting
                                         ? t('common.processing', 'Saving...')

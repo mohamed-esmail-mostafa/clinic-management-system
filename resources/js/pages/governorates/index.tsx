@@ -205,7 +205,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
                     <div>
                         <div className="flex items-center gap-2">
-                            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+                            <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                                 <MapPin size={22} />
                             </div>
                             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -219,7 +219,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
 
                     <Button
                         onClick={handleOpenAdd}
-                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
                     >
                         <Plus size={18} />
                         <span>{t('governorates.add_new', 'Add Governorate')}</span>
@@ -238,7 +238,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                                     {governorates.length}
                                 </h3>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                                 <MapPin size={24} />
                             </div>
                         </CardContent>
@@ -290,7 +290,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                             placeholder={t('governorates.search_placeholder', 'Search governorates...')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-orange-500`}
+                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-primary`}
                         />
                     </div>
 
@@ -313,109 +313,198 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                     </div>
                 </div>
 
-                {/* Governorates Data Table */}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-16">#</TableHead>
-                            <TableHead>{t('governorates.name_ar', 'Arabic Name')}</TableHead>
-                            <TableHead>{t('governorates.name_en', 'English Name')}</TableHead>
-                            <TableHead>{t('governorates.country', 'Country')}</TableHead>
-                            <TableHead>{t('governorates.cities_count', 'Cities')}</TableHead>
-                            <TableHead>{t('common.status', 'Status')}</TableHead>
-                            <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredGovernorates.length > 0 ? (
-                            filteredGovernorates.map((gov, idx) => (
-                                <TableRow key={gov.id}>
-                                    <TableCell className="font-semibold text-gray-500">
-                                        {idx + 1}
-                                    </TableCell>
+                {/* Governorates Data - Mobile Cards View (No horizontal scroll) */}
+                <div className="grid grid-cols-1 gap-3 md:hidden">
+                    {filteredGovernorates.length > 0 ? (
+                        filteredGovernorates.map((gov, idx) => (
+                            <div
+                                key={gov.id}
+                                className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 space-y-3 shadow-xs"
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
+                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                                {gov.name_ar}
+                                            </h3>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                                            {gov.name_en}
+                                        </p>
+                                    </div>
 
-                                    <TableCell className="font-semibold text-gray-900 dark:text-gray-100">
-                                        {gov.name_ar}
-                                    </TableCell>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <Switch
+                                            checked={gov.is_active}
+                                            onCheckedChange={() => handleToggleStatus(gov)}
+                                        />
+                                        <Badge
+                                            className={
+                                                gov.is_active
+                                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                            }
+                                        >
+                                            {gov.is_active
+                                                ? t('governorates.active', 'Active')
+                                                : t('governorates.inactive', 'Inactive')}
+                                        </Badge>
+                                    </div>
+                                </div>
 
-                                    <TableCell className="text-gray-700 dark:text-gray-300">
-                                        {gov.name_en}
-                                    </TableCell>
-
-                                    <TableCell>
+                                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                                    <div className="flex items-center gap-2">
                                         <Badge
                                             variant="outline"
-                                            className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900/50 gap-1.5"
+                                            className="bg-primary/10 text-primary border-primary/20 gap-1"
                                         >
                                             <Globe size={12} />
                                             <span>{gov.country ? (isRtl ? gov.country.name_ar : gov.country.name_en) : '—'}</span>
                                         </Badge>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-                                            <Building2 size={14} className="text-orange-500" />
+                                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <Building2 size={13} className="text-primary" />
                                             <span>{gov.cities_count ?? 0}</span>
                                         </div>
-                                    </TableCell>
+                                    </div>
 
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Switch
-                                                checked={gov.is_active}
-                                                onCheckedChange={() => handleToggleStatus(gov)}
-                                            />
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleOpenEdit(gov)}
+                                            className="h-8 px-2 text-xs text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
+                                        >
+                                            <Pencil size={14} />
+                                            <span>{t('governorates.edit', 'Edit')}</span>
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setDeletingGovernorate(gov)}
+                                            className="h-8 px-2 text-xs text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg gap-1"
+                                        >
+                                            <Trash2 size={14} />
+                                            <span>{t('governorates.delete', 'Delete')}</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-center text-gray-400">
+                            <MapPin size={32} className="mx-auto text-gray-300 dark:text-gray-700 mb-2" />
+                            <span>{t('governorates.no_governorates', 'No governorates found.')}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Governorates Data Table - Desktop View */}
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-16">#</TableHead>
+                                <TableHead>{t('governorates.name_ar', 'Arabic Name')}</TableHead>
+                                <TableHead>{t('governorates.name_en', 'English Name')}</TableHead>
+                                <TableHead>{t('governorates.country', 'Country')}</TableHead>
+                                <TableHead>{t('governorates.cities_count', 'Cities')}</TableHead>
+                                <TableHead>{t('common.status', 'Status')}</TableHead>
+                                <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredGovernorates.length > 0 ? (
+                                filteredGovernorates.map((gov, idx) => (
+                                    <TableRow key={gov.id}>
+                                        <TableCell className="font-semibold text-gray-500">
+                                            {idx + 1}
+                                        </TableCell>
+
+                                        <TableCell className="font-semibold text-gray-900 dark:text-gray-100">
+                                            {gov.name_ar}
+                                        </TableCell>
+
+                                        <TableCell className="text-gray-700 dark:text-gray-300">
+                                            {gov.name_en}
+                                        </TableCell>
+
+                                        <TableCell>
                                             <Badge
-                                                className={
-                                                    gov.is_active
-                                                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
-                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                                                }
+                                                variant="outline"
+                                                className="bg-primary/10 text-primary border-primary/20 gap-1.5"
                                             >
-                                                {gov.is_active
-                                                    ? t('governorates.active', 'Active')
-                                                    : t('governorates.inactive', 'Inactive')}
+                                                <Globe size={12} />
+                                                <span>{gov.country ? (isRtl ? gov.country.name_ar : gov.country.name_en) : '—'}</span>
                                             </Badge>
-                                        </div>
-                                    </TableCell>
+                                        </TableCell>
 
-                                    <TableCell className="text-end">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleOpenEdit(gov)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg"
-                                                title={t('governorates.edit', 'Edit')}
-                                            >
-                                                <Pencil size={15} />
-                                            </Button>
+                                        <TableCell>
+                                            <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                <Building2 size={14} className="text-primary" />
+                                                <span>{gov.cities_count ?? 0}</span>
+                                            </div>
+                                        </TableCell>
 
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => setDeletingGovernorate(gov)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                                title={t('governorates.delete', 'Delete')}
-                                            >
-                                                <Trash2 size={15} />
-                                            </Button>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={gov.is_active}
+                                                    onCheckedChange={() => handleToggleStatus(gov)}
+                                                />
+                                                <Badge
+                                                    className={
+                                                        gov.is_active
+                                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                    }
+                                                >
+                                                    {gov.is_active
+                                                        ? t('governorates.active', 'Active')
+                                                        : t('governorates.inactive', 'Inactive')}
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="text-end">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleOpenEdit(gov)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
+                                                    title={t('governorates.edit', 'Edit')}
+                                                >
+                                                    <Pencil size={15} />
+                                                </Button>
+
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => setDeletingGovernorate(gov)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                                    title={t('governorates.delete', 'Delete')}
+                                                >
+                                                    <Trash2 size={15} />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-32 text-center text-gray-400">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <MapPin size={32} className="text-gray-300 dark:text-gray-700" />
+                                            <span>{t('governorates.no_governorates', 'No governorates found.')}</span>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-32 text-center text-gray-400">
-                                    <div className="flex flex-col items-center justify-center gap-2">
-                                        <MapPin size={32} className="text-gray-300 dark:text-gray-700" />
-                                        <span>{t('governorates.no_governorates', 'No governorates found.')}</span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Create / Edit Governorate Modal */}
                 <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
@@ -441,7 +530,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                                     value={String(formik.values.country_id)}
                                     onValueChange={(val) => formik.setFieldValue('country_id', val)}
                                 >
-                                    <SelectTrigger className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500">
+                                    <SelectTrigger className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary">
                                         <SelectValue placeholder={t('governorates.select_country', 'Select Country')} />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white dark:bg-gray-900">
@@ -470,7 +559,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                                     value={formik.values.name_ar}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                                 {formik.touched.name_ar && formik.errors.name_ar && (
                                     <InputError message={formik.errors.name_ar} />
@@ -490,7 +579,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                                     value={formik.values.name_en}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
                                 />
                                 {formik.touched.name_en && formik.errors.name_en && (
                                     <InputError message={formik.errors.name_en} />
@@ -525,7 +614,7 @@ export default function GovernoratesPage({ governorates = [], countries = [] }: 
                                 <Button
                                     type="submit"
                                     disabled={formik.isSubmitting}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium"
                                 >
                                     {formik.isSubmitting
                                         ? t('common.processing', 'Saving...')

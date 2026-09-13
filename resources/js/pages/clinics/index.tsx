@@ -346,8 +346,7 @@ export default function ClinicsPage({
 
     return (
         <AdminLayout title={t('clinics.title', 'Clinics Management')}>
-           <div className="container">
-                <div className="space-y-6">
+            <div className="space-y-6">
                     {/* Header Title & Add Button */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
                         <div>
@@ -413,156 +412,274 @@ export default function ClinicsPage({
                         </div>
                     </div>
 
-                    {/* Clinics Data Table */}
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-16 whitespace-nowrap">#</TableHead>
-                                <TableHead className="whitespace-nowrap">{t('clinics.name', 'Clinic Name')}</TableHead>
-                                {/* <TableHead className="whitespace-nowrap">{t('clinics.type', 'Type')}</TableHead> */}
-                                <TableHead className="whitespace-nowrap">{t('clinics.country', 'Location')}</TableHead>
-                                <TableHead className="whitespace-nowrap">{t('clinics.users', 'Users')}</TableHead>
-                                <TableHead className="whitespace-nowrap">{t('clinics.phone', 'Phone')}</TableHead>
-                                <TableHead className="whitespace-nowrap">{t('common.status', 'Status')}</TableHead>
-                                <TableHead className="text-end whitespace-nowrap">{t('common.actions', 'Actions')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredClinics.length > 0 ? (
-                                filteredClinics.map((clinic, idx) => (
-                                    <TableRow key={clinic.id}>
-                                        <TableCell className="font-semibold text-gray-500 whitespace-nowrap">
-                                            {idx + 1}
-                                        </TableCell>
-
-                                        <TableCell className="font-semibold text-gray-900 dark:text-gray-100 min-w-[150px]">
-                                            <div>
-                                                <span>{clinic.name}</span>
-                                                {clinic.description && (
-                                                    <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
-                                                        {clinic.description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        {/* 
-                                    <TableCell>
-                                        <Badge
-                                            variant="outline"
-                                            className={
-                                                clinic.type === 'medical_center'
-                                                    ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300'
-                                                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300'
-                                            }
-                                        >
-                                            {clinic.type === 'medical_center'
-                                                ? t('clinics.medical_center', 'Medical Center')
-                                                : t('clinics.personal', 'Personal')}
-                                        </Badge>
-                                    </TableCell> */}
-
-                                        <TableCell className="min-w-[160px]">
-                                            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                                                <MapPin size={13} className="text-primary shrink-0" />
-                                                <span>
-                                                    {[
-                                                        clinic.city ? (isRtl ? clinic.city.name_ar : clinic.city.name_en) : null,
-                                                        clinic.governorate ? (isRtl ? clinic.governorate.name_ar : clinic.governorate.name_en) : null,
-                                                        clinic.country ? (isRtl ? clinic.country.name_ar : clinic.country.name_en) : null,
-                                                    ]
-                                                        .filter(Boolean)
-                                                        .join(', ') || '—'}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-
-                                        {/* Users Column */}
-                                        <TableCell className="whitespace-nowrap">
+                    {/* Clinics Data - Mobile Cards View (No horizontal scroll) */}
+                    <div className="grid grid-cols-1 gap-3 md:hidden">
+                        {filteredClinics.length > 0 ? (
+                            filteredClinics.map((clinic, idx) => (
+                                <div
+                                    key={clinic.id}
+                                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 space-y-3 shadow-xs"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <Badge
-                                                    variant="outline"
-                                                    className="bg-primary/10 text-primary border-primary/20 font-semibold gap-1 shrink-0"
-                                                >
-                                                    <Users size={12} />
-                                                    <span>{clinic.clinic_users?.length || 0}</span>
-                                                </Badge>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setSelectedClinicForUsers(clinic)}
-                                                    className="h-7 px-2.5 text-xs font-medium gap-1 rounded-lg border-gray-200 hover:bg-primary/10 hover:text-primary dark:border-gray-800 transition-colors shrink-0 whitespace-nowrap"
-                                                    title={t('clinics.manage_users', 'Manage Users')}
-                                                >
-                                                    <UserPlus size={13} />
-                                                    <span>{t('clinics.add_user', 'Add User')}</span>
-                                                </Button>
+                                                <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
+                                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                                    {clinic.name}
+                                                </h3>
                                             </div>
-                                        </TableCell>
+                                            {clinic.description && (
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 line-clamp-2">
+                                                    {clinic.description}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                        <TableCell className="whitespace-nowrap">
-                                            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <Switch
+                                                checked={clinic.is_active}
+                                                onCheckedChange={() => handleToggleStatus(clinic)}
+                                            />
+                                            <Badge
+                                                className={
+                                                    clinic.is_active
+                                                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                }
+                                            >
+                                                {clinic.is_active
+                                                    ? t('countries.active', 'Active')
+                                                    : t('countries.inactive', 'Inactive')}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-2 pt-2 border-t border-gray-50 dark:border-gray-800/60 text-xs text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-1.5">
+                                            <MapPin size={13} className="text-primary shrink-0" />
+                                            <span className="truncate">
+                                                {[
+                                                    clinic.city ? (isRtl ? clinic.city.name_ar : clinic.city.name_en) : null,
+                                                    clinic.governorate ? (isRtl ? clinic.governorate.name_ar : clinic.governorate.name_en) : null,
+                                                    clinic.country ? (isRtl ? clinic.country.name_ar : clinic.country.name_en) : null,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ') || '—'}
+                                            </span>
+                                        </div>
+
+                                        {clinic.phone && (
+                                            <div className="flex items-center gap-1.5">
                                                 <Phone size={13} className="text-gray-400 shrink-0" />
-                                                <span>{clinic.phone || '—'}</span>
+                                                <span>{clinic.phone}</span>
                                             </div>
-                                        </TableCell>
+                                        )}
+                                    </div>
 
-                                        <TableCell className="whitespace-nowrap">
-                                            <div className="flex items-center gap-2">
-                                                <Switch
-                                                    checked={clinic.is_active}
-                                                    onCheckedChange={() => handleToggleStatus(clinic)}
-                                                />
-                                                <Badge
-                                                    className={
-                                                        clinic.is_active
-                                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
-                                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                                                    }
-                                                >
-                                                    {clinic.is_active
-                                                        ? t('countries.active', 'Active')
-                                                        : t('countries.inactive', 'Inactive')}
-                                                </Badge>
-                                            </div>
-                                        </TableCell>
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 flex-wrap gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <Badge
+                                                variant="outline"
+                                                className="bg-primary/10 text-primary border-primary/20 font-semibold gap-1 shrink-0"
+                                            >
+                                                <Users size={12} />
+                                                <span>{clinic.clinic_users?.length || 0}</span>
+                                            </Badge>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setSelectedClinicForUsers(clinic)}
+                                                className="h-7 px-2 text-xs font-medium gap-1 rounded-lg border-gray-200 hover:bg-primary/10 hover:text-primary dark:border-gray-800 transition-colors shrink-0"
+                                            >
+                                                <UserPlus size={13} />
+                                                <span>{t('clinics.add_user', 'Add User')}</span>
+                                            </Button>
+                                        </div>
 
-                                        <TableCell className="text-end whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => handleOpenEdit(clinic)}
-                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
-                                                    title={t('clinics.edit', 'Edit')}
-                                                >
-                                                    <Pencil size={15} />
-                                                </Button>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleOpenEdit(clinic)}
+                                                className="h-8 px-2 text-xs text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
+                                            >
+                                                <Pencil size={14} />
+                                                <span>{t('clinics.edit', 'Edit')}</span>
+                                            </Button>
 
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => setDeletingClinic(clinic)}
-                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                                    title={t('clinics.delete', 'Delete')}
-                                                >
-                                                    <Trash2 size={15} />
-                                                </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setDeletingClinic(clinic)}
+                                                className="h-8 px-2 text-xs text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg gap-1"
+                                            >
+                                                <Trash2 size={14} />
+                                                <span>{t('clinics.delete', 'Delete')}</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-center text-gray-400">
+                                <Building2 size={32} className="mx-auto text-gray-300 dark:text-gray-700 mb-2" />
+                                <span>{t('clinics.no_clinics', 'No clinics found.')}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Clinics Data Table - Desktop View */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-16 whitespace-nowrap">#</TableHead>
+                                    <TableHead className="whitespace-nowrap">{t('clinics.name', 'Clinic Name')}</TableHead>
+                                    {/* <TableHead className="whitespace-nowrap">{t('clinics.type', 'Type')}</TableHead> */}
+                                    <TableHead className="whitespace-nowrap">{t('clinics.country', 'Location')}</TableHead>
+                                    <TableHead className="whitespace-nowrap">{t('clinics.users', 'Users')}</TableHead>
+                                    <TableHead className="whitespace-nowrap">{t('clinics.phone', 'Phone')}</TableHead>
+                                    <TableHead className="whitespace-nowrap">{t('common.status', 'Status')}</TableHead>
+                                    <TableHead className="text-end whitespace-nowrap">{t('common.actions', 'Actions')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredClinics.length > 0 ? (
+                                    filteredClinics.map((clinic, idx) => (
+                                        <TableRow key={clinic.id}>
+                                            <TableCell className="font-semibold text-gray-500 whitespace-nowrap">
+                                                {idx + 1}
+                                            </TableCell>
+
+                                            <TableCell className="font-semibold text-gray-900 dark:text-gray-100 min-w-[150px]">
+                                                <div>
+                                                    <span>{clinic.name}</span>
+                                                    {clinic.description && (
+                                                        <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
+                                                            {clinic.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            {/* 
+                                        <TableCell>
+                                            <Badge
+                                                variant="outline"
+                                                className={
+                                                    clinic.type === 'medical_center'
+                                                        ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300'
+                                                        : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300'
+                                                }
+                                            >
+                                                {clinic.type === 'medical_center'
+                                                    ? t('clinics.medical_center', 'Medical Center')
+                                                    : t('clinics.personal', 'Personal')}
+                                            </Badge>
+                                        </TableCell> */}
+
+                                            <TableCell className="min-w-[160px]">
+                                                <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                                    <MapPin size={13} className="text-primary shrink-0" />
+                                                    <span>
+                                                        {[
+                                                            clinic.city ? (isRtl ? clinic.city.name_ar : clinic.city.name_en) : null,
+                                                            clinic.governorate ? (isRtl ? clinic.governorate.name_ar : clinic.governorate.name_en) : null,
+                                                            clinic.country ? (isRtl ? clinic.country.name_ar : clinic.country.name_en) : null,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(', ') || '—'}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Users Column */}
+                                            <TableCell className="whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="bg-primary/10 text-primary border-primary/20 font-semibold gap-1 shrink-0"
+                                                    >
+                                                        <Users size={12} />
+                                                        <span>{clinic.clinic_users?.length || 0}</span>
+                                                    </Badge>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => setSelectedClinicForUsers(clinic)}
+                                                        className="h-7 px-2.5 text-xs font-medium gap-1 rounded-lg border-gray-200 hover:bg-primary/10 hover:text-primary dark:border-gray-800 transition-colors shrink-0 whitespace-nowrap"
+                                                        title={t('clinics.manage_users', 'Manage Users')}
+                                                    >
+                                                        <UserPlus size={13} />
+                                                        <span>{t('clinics.add_user', 'Add User')}</span>
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+
+                                            <TableCell className="whitespace-nowrap">
+                                                <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                                    <Phone size={13} className="text-gray-400 shrink-0" />
+                                                    <span>{clinic.phone || '—'}</span>
+                                                </div>
+                                            </TableCell>
+
+                                            <TableCell className="whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <Switch
+                                                        checked={clinic.is_active}
+                                                        onCheckedChange={() => handleToggleStatus(clinic)}
+                                                    />
+                                                    <Badge
+                                                        className={
+                                                            clinic.is_active
+                                                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                        }
+                                                    >
+                                                        {clinic.is_active
+                                                            ? t('countries.active', 'Active')
+                                                            : t('countries.inactive', 'Inactive')}
+                                                    </Badge>
+                                                </div>
+                                            </TableCell>
+
+                                            <TableCell className="text-end whitespace-nowrap">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleOpenEdit(clinic)}
+                                                        className="h-8 w-8 p-0 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
+                                                        title={t('clinics.edit', 'Edit')}
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </Button>
+
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => setDeletingClinic(clinic)}
+                                                        className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                                        title={t('clinics.delete', 'Delete')}
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={8} className="h-32 text-center text-gray-400">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <Building2 size={32} className="text-gray-300 dark:text-gray-700" />
+                                                <span>{t('clinics.no_clinics', 'No clinics found.')}</span>
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={8} className="h-32 text-center text-gray-400">
-                                        <div className="flex flex-col items-center justify-center gap-2">
-                                            <Building2 size={32} className="text-gray-300 dark:text-gray-700" />
-                                            <span>{t('clinics.no_clinics', 'No clinics found.')}</span>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
 
                     {/* Manage Clinic Users Modal */}
                     <Dialog
@@ -1127,7 +1244,6 @@ export default function ClinicsPage({
                         </DialogContent>
                     </Dialog>
                 </div>
-            </div>
         </AdminLayout>
     );
 }
