@@ -537,6 +537,12 @@
     "field_create_error": "Failed to create patient field",
     "field_update_error": "Failed to update patient field",
     "field_delete_error": "Failed to delete patient field",
-    "status_update_error": "Failed to update field status"
+    "status_update_error": "Failed to update field status",
+    "manage_options": "Manage Options",
+    "options_modal_desc": "Add, edit, or remove options for this selection field.",
+    "add_new_option": "Add New Option",
+    "option_added_success": "Option added successfully!",
+    "option_updated_success": "Option updated successfully!",
+    "option_deleted_success": "Option deleted successfully!"
   }
 }

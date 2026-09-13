@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Clinic;
+use App\Models\PatientFieldOption;
 use App\Models\PatientFields;
 use App\Models\User;
 use App\Models\WebsiteSetting;
@@ -134,5 +135,52 @@ test('authenticated user can delete custom patient field', function () {
     $response->assertRedirect();
     $this->assertDatabaseMissing('patient_fields', [
         'id' => $field->id,
+    ]);
+});
+
+test('authenticated user can manage patient field options directly', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $field = PatientFields::create([
+        'clinic_id' => $clinic->id,
+        'name' => 'marital_status',
+        'label' => 'Marital Status',
+        'type' => 'select',
+        'is_required' => false,
+        'is_active' => true,
+        'sort_order' => 1,
+    ]);
+
+    // Store option
+    $response = $this->actingAs($user)->post(route('clinics.settings.patients.options.store', [$clinic->slug, $field->id]), [
+        'label' => 'Single',
+        'value' => 'single',
+    ]);
+    $response->assertRedirect();
+    $this->assertDatabaseHas('patient_field_options', [
+        'patient_field_id' => $field->id,
+        'label' => 'Single',
+        'value' => 'single',
+    ]);
+
+    $option = PatientFieldOption::where('patient_field_id', $field->id)->first();
+
+    // Update option
+    $response = $this->actingAs($user)->put(route('clinics.settings.patients.options.update', [$clinic->slug, $option->id]), [
+        'label' => 'Single Person',
+        'value' => 'single_person',
+    ]);
+    $response->assertRedirect();
+    $this->assertDatabaseHas('patient_field_options', [
+        'id' => $option->id,
+        'label' => 'Single Person',
+        'value' => 'single_person',
+    ]);
+
+    // Delete option
+    $response = $this->actingAs($user)->delete(route('clinics.settings.patients.options.destroy', [$clinic->slug, $option->id]));
+    $response->assertRedirect();
+    $this->assertDatabaseMissing('patient_field_options', [
+        'id' => $option->id,
     ]);
 });

@@ -104,6 +104,39 @@ class PatientFieldsService
         return $field;
     }
 
+    public function addOptionToField(PatientFields $field, array $data): PatientFieldOption
+    {
+        $label = trim($data['label']);
+        $value = ! empty($data['value']) ? trim($data['value']) : Str::slug($label, '_');
+        $sortOrder = isset($data['sort_order']) ? (int) $data['sort_order'] : ($field->options()->max('sort_order') ?? 0) + 1;
+
+        return PatientFieldOption::create([
+            'patient_field_id' => $field->id,
+            'label' => $label,
+            'value' => $value,
+            'sort_order' => $sortOrder,
+        ]);
+    }
+
+    public function updateOption(PatientFieldOption $option, array $data): PatientFieldOption
+    {
+        $label = trim($data['label']);
+        $value = ! empty($data['value']) ? trim($data['value']) : Str::slug($label, '_');
+
+        $option->update([
+            'label' => $label,
+            'value' => $value,
+            'sort_order' => isset($data['sort_order']) ? (int) $data['sort_order'] : $option->sort_order,
+        ]);
+
+        return $option;
+    }
+
+    public function deleteOption(PatientFieldOption $option): ?bool
+    {
+        return $option->delete();
+    }
+
     protected function syncFieldOptions(PatientFields $field, array $options): void
     {
         $field->options()->delete();

@@ -537,6 +537,12 @@
     "field_create_error": "فشل في إنشاء حقل المريض",
     "field_update_error": "فشل في تحديث حقل المريض",
     "field_delete_error": "فشل في حذف حقل المريض",
-    "status_update_error": "فشل في تحديث حالة الحقل"
+    "status_update_error": "فشل في تحديث حالة الحقل",
+    "manage_options": "إدارة الخيارات",
+    "options_modal_desc": "إضافة أو تعديل أو إزالة الخيارات المتاحة لهذا الحقل المخصص.",
+    "add_new_option": "إضافة خيار جديد",
+    "option_added_success": "تم إضافة الخيار بنجاح!",
+    "option_updated_success": "تم تحديث الخيار بنجاح!",
+    "option_deleted_success": "تم حذف الخيار بنجاح!"
   }
 }

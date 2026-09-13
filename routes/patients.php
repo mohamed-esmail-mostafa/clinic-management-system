@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PatientFieldOptionController;
 use App\Http\Controllers\PatientFieldsController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,5 +20,11 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/clinic/settings/{slug}/patients/fields/{field}', 'update')->name('clinics.settings.patients.fields.update');
         Route::delete('/clinic/settings/{slug}/patients/fields/{field}', 'destroy')->name('clinics.settings.patients.fields.destroy');
         Route::patch('/clinic/settings/{slug}/patients/fields/{field}/toggle-status', 'toggleStatus')->name('clinics.settings.patients.fields.toggle-status');
+    });
+
+    Route::controller(PatientFieldOptionController::class)->group(function () {
+        Route::post('/clinic/settings/{slug}/patients/fields/{field}/options', 'store')->name('clinics.settings.patients.options.store');
+        Route::put('/clinic/settings/{slug}/patients/options/{option}', 'update')->name('clinics.settings.patients.options.update');
+        Route::delete('/clinic/settings/{slug}/patients/options/{option}', 'destroy')->name('clinics.settings.patients.options.destroy');
     });
 });
