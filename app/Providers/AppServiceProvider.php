@@ -27,9 +27,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
-        Inertia::share('settings',fn() => Cache::rememberForever('settings', function () {
-                return WebsiteSetting::firstOrFail()->toArray();
-            })
+        Inertia::share('settings', fn () => Cache::rememberForever('settings', function () {
+            return WebsiteSetting::first()?->toArray() ?? [];
+        })
         );
     }
 

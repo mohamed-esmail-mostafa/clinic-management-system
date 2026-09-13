@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Patient;
+use App\Models\PatientFields;
 use App\Services\ClinicService;
 use App\Services\PatientService;
 use Illuminate\Http\RedirectResponse;
@@ -22,10 +23,16 @@ class PatientController extends Controller
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $patients = $this->patient_service->getClinicPatients($clinic);
+        $customFields = PatientFields::where('clinic_id', $clinic->id)
+            ->where('is_active', true)
+            ->with('options')
+            ->orderBy('sort_order', 'asc')
+            ->get();
 
         return Inertia::render('patients/patients-clinic', [
             'clinic' => $clinic,
             'patients' => $patients,
+            'custom_fields' => $customFields,
         ]);
     }
 

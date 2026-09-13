@@ -544,5 +544,32 @@
     "option_added_success": "Option added successfully!",
     "option_updated_success": "Option updated successfully!",
     "option_deleted_success": "Option deleted successfully!"
+  },
+  "auth": {
+    "login_title": "Sign In to Your Account",
+    "login_subtitle": "Enter your credentials below to access your account",
+    "email": "Email Address",
+    "email_placeholder": "name@example.com",
+    "password": "Password",
+    "password_placeholder": "••••••••",
+    "forgot_password": "Forgot password?",
+    "remember_me": "Remember me",
+    "login_button": "Sign In",
+    "logging_in": "Signing in...",
+    "no_account": "Don't have an account?",
+    "register_link": "Sign up",
+    "welcome_back": "Welcome Back",
+    "register_title": "Create an Account",
+    "register_subtitle": "Fill in your details below to create your account",
+    "full_name": "Full Name",
+    "full_name_placeholder": "John Doe",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "••••••••",
+    "create_account_button": "Create Account",
+    "creating_account": "Creating account...",
+    "already_have_account": "Already have an account?",
+    "login_link": "Sign In",
+    "logout":"Logout",
+    "profile":" Profile "
   }
 }

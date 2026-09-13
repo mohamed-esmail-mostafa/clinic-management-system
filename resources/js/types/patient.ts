@@ -1,74 +1,53 @@
+export interface PatientFieldValue {
+    id?: number;
+    patient_id?: number;
+    patient_field_id: number;
+    value: string | null;
+    field?: PatientField;
+}
+
 export interface Patient {
     id: number;
     patient_number: string;
     first_name: string;
-    middle_name?: string | null;
     last_name: string;
     full_name?: string;
-    gender?: 'male' | 'female' | 'other' | null;
+    gender?: 'male' | 'female' | 'other' | string | null;
     date_of_birth?: string | null;
     phone?: string | null;
     secondary_phone?: string | null;
-    email?: string | null;
     address?: string | null;
-    city?: string | null;
-    country?: string | null;
-    national_id?: string | null;
-    passport_number?: string | null;
     emergency_contact_name?: string | null;
     emergency_contact_phone?: string | null;
     emergency_contact_relation?: string | null;
     blood_type?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | string | null;
-    allergies?: string | null;
-    chronic_diseases?: string | null;
-    medical_history?: string | null;
-    surgical_history?: string | null;
-    family_medical_history?: string | null;
-    has_insurance: boolean;
-    insurance_company?: string | null;
-    insurance_number?: string | null;
-    insurance_expiry_date?: string | null;
     clinic_id?: number | null;
+    user_id?: number | null;
     notes?: string | null;
-    occupation?: string | null;
     marital_status?: 'single' | 'married' | 'divorced' | 'widowed' | string | null;
     is_active: boolean;
     created_at?: string;
     updated_at?: string;
+    field_values?: PatientFieldValue[];
 }
 
 export interface PatientFormValues {
     patient_number?: string;
     first_name: string;
-    middle_name?: string;
     last_name: string;
     gender?: string;
     date_of_birth?: string;
     phone?: string;
     secondary_phone?: string;
-    email?: string;
     address?: string;
-    city?: string;
-    country?: string;
-    national_id?: string;
-    passport_number?: string;
     emergency_contact_name?: string;
     emergency_contact_phone?: string;
     emergency_contact_relation?: string;
     blood_type?: string;
-    allergies?: string;
-    chronic_diseases?: string;
-    medical_history?: string;
-    surgical_history?: string;
-    family_medical_history?: string;
-    has_insurance: boolean;
-    insurance_company?: string;
-    insurance_number?: string;
-    insurance_expiry_date?: string;
     notes?: string;
-    occupation?: string;
     marital_status?: string;
     is_active: boolean;
+    custom_fields?: Record<number, any>;
 }
 
 export interface PatientFieldOption {
@@ -108,3 +87,4 @@ export interface PatientFieldFormValues {
     options: { label: string; value: string }[];
     [key: string]: any;
 }
+

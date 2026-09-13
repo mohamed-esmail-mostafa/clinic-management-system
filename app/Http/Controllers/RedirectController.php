@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class RedirectController extends Controller
 {
@@ -10,15 +11,15 @@ class RedirectController extends Controller
     {
         $user = Auth::user();
 
-        switch ($user->role->slug) {
+        switch ($user->role?->slug ?? '') {
             case 'admin':
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.website-settings.index');
             case 'doctor':
                 return redirect()->route('clinics.overview');
             case 'user':
                 return redirect()->route('user.dashboard');
             default:
-                return redirect()->route('login');
+                return Inertia::render('dashboard');
         }
     }
 }

@@ -33,6 +33,11 @@ class RoleSeeder extends Seeder
                 'slug' => 'receptionist',
                 'type' => 'clinic',
             ],
+            [
+                'name' => 'Patient',
+                'slug' => 'patient',
+                'type' => 'system',
+            ],
         ];
 
         foreach ($roles as $role) {

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Clinic;
 use App\Models\Patient;
+use App\Models\PatientFieldValue;
 use Illuminate\Database\Eloquent\Collection;
 
 class PatientService
@@ -11,6 +12,7 @@ class PatientService
     public function getClinicPatients(Clinic $clinic): Collection
     {
         return $clinic->patients()
+            ->with(['fieldValues.field'])
             ->orderBy('id', 'desc')
             ->get();
     }
@@ -29,37 +31,25 @@ class PatientService
         $patient->clinic_id = $clinic->id;
         $patient->patient_number = ! empty($data['patient_number']) ? $data['patient_number'] : $this->generatePatientNumber($clinic);
         $patient->first_name = $data['first_name'];
-        $patient->middle_name = $data['middle_name'] ?? null;
         $patient->last_name = $data['last_name'];
         $patient->gender = $data['gender'] ?? null;
         $patient->date_of_birth = $data['date_of_birth'] ?? null;
         $patient->phone = $data['phone'] ?? null;
         $patient->secondary_phone = $data['secondary_phone'] ?? null;
-        $patient->email = $data['email'] ?? null;
         $patient->address = $data['address'] ?? null;
-        $patient->city = $data['city'] ?? null;
-        $patient->country = $data['country'] ?? null;
-        $patient->national_id = $data['national_id'] ?? null;
-        $patient->passport_number = $data['passport_number'] ?? null;
         $patient->emergency_contact_name = $data['emergency_contact_name'] ?? null;
         $patient->emergency_contact_phone = $data['emergency_contact_phone'] ?? null;
         $patient->emergency_contact_relation = $data['emergency_contact_relation'] ?? null;
         $patient->blood_type = $data['blood_type'] ?? null;
-        $patient->allergies = $data['allergies'] ?? null;
-        $patient->chronic_diseases = $data['chronic_diseases'] ?? null;
-        $patient->medical_history = $data['medical_history'] ?? null;
-        $patient->surgical_history = $data['surgical_history'] ?? null;
-        $patient->family_medical_history = $data['family_medical_history'] ?? null;
-        $patient->has_insurance = filter_var($data['has_insurance'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $patient->insurance_company = $data['insurance_company'] ?? null;
-        $patient->insurance_number = $data['insurance_number'] ?? null;
-        $patient->insurance_expiry_date = $data['insurance_expiry_date'] ?? null;
         $patient->notes = $data['notes'] ?? null;
-        $patient->occupation = $data['occupation'] ?? null;
         $patient->marital_status = $data['marital_status'] ?? null;
         $patient->is_active = isset($data['is_active']) ? filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN) : true;
 
         $patient->save();
+
+        if (! empty($data['custom_fields']) && is_array($data['custom_fields'])) {
+            $this->saveCustomFieldValues($patient, $data['custom_fields']);
+        }
 
         return $patient;
     }
@@ -71,33 +61,17 @@ class PatientService
         }
 
         $patient->first_name = $data['first_name'];
-        $patient->middle_name = $data['middle_name'] ?? null;
         $patient->last_name = $data['last_name'];
         $patient->gender = $data['gender'] ?? null;
         $patient->date_of_birth = $data['date_of_birth'] ?? null;
         $patient->phone = $data['phone'] ?? null;
         $patient->secondary_phone = $data['secondary_phone'] ?? null;
-        $patient->email = $data['email'] ?? null;
         $patient->address = $data['address'] ?? null;
-        $patient->city = $data['city'] ?? null;
-        $patient->country = $data['country'] ?? null;
-        $patient->national_id = $data['national_id'] ?? null;
-        $patient->passport_number = $data['passport_number'] ?? null;
         $patient->emergency_contact_name = $data['emergency_contact_name'] ?? null;
         $patient->emergency_contact_phone = $data['emergency_contact_phone'] ?? null;
         $patient->emergency_contact_relation = $data['emergency_contact_relation'] ?? null;
         $patient->blood_type = $data['blood_type'] ?? null;
-        $patient->allergies = $data['allergies'] ?? null;
-        $patient->chronic_diseases = $data['chronic_diseases'] ?? null;
-        $patient->medical_history = $data['medical_history'] ?? null;
-        $patient->surgical_history = $data['surgical_history'] ?? null;
-        $patient->family_medical_history = $data['family_medical_history'] ?? null;
-        $patient->has_insurance = filter_var($data['has_insurance'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $patient->insurance_company = $data['insurance_company'] ?? null;
-        $patient->insurance_number = $data['insurance_number'] ?? null;
-        $patient->insurance_expiry_date = $data['insurance_expiry_date'] ?? null;
         $patient->notes = $data['notes'] ?? null;
-        $patient->occupation = $data['occupation'] ?? null;
         $patient->marital_status = $data['marital_status'] ?? null;
 
         if (isset($data['is_active'])) {
@@ -105,6 +79,10 @@ class PatientService
         }
 
         $patient->save();
+
+        if (isset($data['custom_fields']) && is_array($data['custom_fields'])) {
+            $this->saveCustomFieldValues($patient, $data['custom_fields']);
+        }
 
         return $patient;
     }
@@ -120,5 +98,32 @@ class PatientService
         $patient->save();
 
         return $patient;
+    }
+
+    protected function saveCustomFieldValues(Patient $patient, array $customFields): void
+    {
+        foreach ($customFields as $fieldId => $value) {
+            if (is_array($value)) {
+                $value = json_encode(array_values($value));
+            } elseif ($value !== null) {
+                $value = (string) $value;
+            }
+
+            if ($value === null || $value === '') {
+                PatientFieldValue::where('patient_id', $patient->id)
+                    ->where('patient_field_id', $fieldId)
+                    ->delete();
+            } else {
+                PatientFieldValue::updateOrCreate(
+                    [
+                        'patient_id' => $patient->id,
+                        'patient_field_id' => $fieldId,
+                    ],
+                    [
+                        'value' => $value,
+                    ]
+                );
+            }
+        }
     }
 }

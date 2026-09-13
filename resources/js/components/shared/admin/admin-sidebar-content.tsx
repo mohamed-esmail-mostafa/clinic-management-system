@@ -1,13 +1,13 @@
 import { Building2, ExternalLink, Globe, LayoutDashboard, Map, Settings, Stethoscope, Store, Sun } from 'lucide-react';
 import { Link } from '@inertiajs/react';
-
-import LanguageToggle from '../language-toggle';
-import ThemeToggle from '../theme-toggle';
 import useImport from '@/hooks/use-import';
+import useWebsiteSetting from '@/hooks/use-website-setting';
 
 export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
-    const {t,toggleLanguage,toggleTheme,appearance,i18n}=useImport()
-    
+    const { t, toggleLanguage, toggleTheme, appearance, i18n, isRtl } = useImport()
+    const { settings } = useWebsiteSetting()
+    console.log("settings", settings)
+    console.log(appearance)
     const NAV_ITEMS = [
         { key: t('admin.sidebar.overview'), href: '/admin/dashboard', icon: LayoutDashboard },
         { key: t('admin.sidebar.clinics'), href: '/admin/clinics', icon: LayoutDashboard },
@@ -24,15 +24,17 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
         <div className="flex flex-col h-full">
             {/* Logo */}
             <div className={`flex items-center gap-3 px-4 py-5 border-b border-orange-400/30 ${collapsed ? 'justify-center' : ''}`}>
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                    <Store size={18} className="text-white" />
-                </div>
+                <img className='w-9 h-9' 
+                src={
+                    appearance === "light"
+                        ? settings?.logo ?? undefined
+                        : settings?.dark_logo ?? undefined
+                } alt={settings?.title_ar || undefined} />
                 {!collapsed && (
                     <div className="min-w-0">
                         <p className="text-white font-bold text-sm truncate leading-tight">
-                            hghgh
+                            {isRtl ? settings?.title_ar : settings?.title_en}
                         </p>
-                        <p className="text-orange-200 text-xs truncate">{t('vendor.sidebar.vendor_panel')}</p>
                     </div>
                 )}
             </div>
@@ -69,7 +71,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
 
             {/* Footer */}
             <div className="border-t border-orange-400/30 p-3 space-y-1">
-                
+
                 <button
                     onClick={toggleLanguage}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white hover:bg-white/10 text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
@@ -77,7 +79,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
                     <Globe size={16} className="shrink-0" />
                     {!collapsed && <span>{i18n.language === 'ar' ? 'English' : 'عربي'}</span>}
                 </button>
-             
+
 
                 <button
                     onClick={() => toggleTheme()}
@@ -86,7 +88,7 @@ export default function AdminSidebarContent({ collapsed, setMobileOpen }: any) {
                     <Sun size={16} className="shrink-0" />
                     {!collapsed && <span>{appearance === 'dark' ? 'Light' : 'Dark'}</span>}
                 </button>
-               
+
             </div>
         </div>
     )

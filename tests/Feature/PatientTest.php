@@ -8,7 +8,7 @@ test('authenticated user can view clinic patients page', function () {
     $user = User::factory()->create();
     $clinic = Clinic::factory()->create();
 
-    $response = $this->actingAs($user)->get(route('clinics.patients', $clinic->slug));
+    $response = $this->actingAs($user)->get(route('clinics.patients', ['slug' => $clinic->slug]));
 
     $response->assertStatus(200);
 });
@@ -19,13 +19,9 @@ test('authenticated user can create a patient using service and controller', fun
 
     $response = $this->actingAs($user)->post(route('clinics.patients.store', $clinic->slug), [
         'first_name' => 'John',
-        'middle_name' => 'Michael',
         'last_name' => 'Doe',
         'gender' => 'male',
         'phone' => '1234567890',
-        'email' => 'john.doe@example.com',
-        'has_insurance' => true,
-        'insurance_company' => 'Health Care Inc',
         'blood_type' => 'O+',
         'is_active' => true,
     ]);
@@ -35,7 +31,6 @@ test('authenticated user can create a patient using service and controller', fun
         'clinic_id' => $clinic->id,
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'email' => 'john.doe@example.com',
         'blood_type' => 'O+',
     ]);
 });
