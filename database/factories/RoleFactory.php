@@ -23,6 +23,7 @@ class RoleFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'type' => fake()->randomElement(['system', 'clinic']),
         ];
     }
 }

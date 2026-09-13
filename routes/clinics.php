@@ -13,6 +13,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/admin/clinics/{clinic}/toggle-status', 'toggleStatus')->name('admin.clinics.toggle-status');
         Route::post('/admin/clinics/{clinic}/users', 'addUser')->name('admin.clinics.users.store');
         Route::delete('/admin/clinics/{clinic}/users/{user}', 'removeUser')->name('admin.clinics.users.destroy');
-        Route::get('/clinic/overview', 'clinic_dashboard')->name('admin.clinics.overview');
+        Route::get('/clinic/overview', 'clinic_dashboard')->name('clinics.overview');
     });
 });

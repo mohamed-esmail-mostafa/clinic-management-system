@@ -196,7 +196,7 @@ export default function ClinicTypesPage({ clinicTypes = [] }: Props) {
 
                     <Button
                         onClick={handleOpenAdd}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
+                      
                     >
                         <Plus size={18} />
                         <span>{t('clinic_types.add_new', 'Add Clinic Type')}</span>
@@ -376,9 +376,7 @@ export default function ClinicTypesPage({ clinicTypes = [] }: Props) {
                                     ? t('clinic_types.edit', 'Edit Clinic Type')
                                     : t('clinic_types.add_new', 'Add Clinic Type')}
                             </DialogTitle>
-                            <DialogDescription className="text-xs text-gray-500">
-                                Fill in clinic type titles in Arabic and English. Form validated with Formik & Yup.
-                            </DialogDescription>
+                           
                         </DialogHeader>
 
                         <form onSubmit={formik.handleSubmit} className="space-y-4 py-2">
@@ -395,7 +393,7 @@ export default function ClinicTypesPage({ clinicTypes = [] }: Props) {
                                     value={formik.values.title_ar}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
+                                    
                                 />
                                 {formik.touched.title_ar && formik.errors.title_ar && (
                                     <InputError message={formik.errors.title_ar} />
@@ -415,7 +413,7 @@ export default function ClinicTypesPage({ clinicTypes = [] }: Props) {
                                     value={formik.values.title_en}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-primary"
+                                    
                                 />
                                 {formik.touched.title_en && formik.errors.title_en && (
                                     <InputError message={formik.errors.title_en} />
@@ -428,9 +426,7 @@ export default function ClinicTypesPage({ clinicTypes = [] }: Props) {
                                     <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                         {t('clinic_types.is_active', 'Active Status')}
                                     </Label>
-                                    <p className="text-[11px] text-gray-400">
-                                        Active clinic types will be selectable when creating clinics.
-                                    </p>
+                                   
                                 </div>
                                 <Switch
                                     checked={formik.values.is_active}

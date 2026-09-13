@@ -9,6 +9,7 @@ use App\Models\Clinic;
 use App\Models\User;
 use App\Services\CityService;
 use App\Services\ClinicService;
+use App\Services\ClinicTypeService;
 use App\Services\CountryService;
 use App\Services\GovernorateService;
 use App\Services\RoleService;
@@ -27,7 +28,8 @@ class ClinicController extends Controller
         protected CityService $cityService,
         protected SpecialtyService $specialtyService,
         protected UserService $userService,
-        protected RoleService $roleService
+        protected RoleService $roleService,
+        protected ClinicTypeService $clinicTypeService
     ) {}
 
     public function index(): Response
@@ -38,6 +40,7 @@ class ClinicController extends Controller
             'governorates' => $this->governorateService->getAllGovernorates(),
             'cities' => $this->cityService->getAllCities(),
             'specialties' => $this->specialtyService->getAllSpecialties(),
+            'clinic_types' => $this->clinicTypeService->getAllClinicTypes(),
             'all_users' => $this->userService->getAllUsers(),
             'roles' => $this->roleService->getAllRoles(),
         ]);
@@ -50,6 +53,7 @@ class ClinicController extends Controller
             'governorates' => $this->governorateService->getAllGovernorates(),
             'cities' => $this->cityService->getAllCities(),
             'specialties' => $this->specialtyService->getAllSpecialties(),
+            'clinic_types' => $this->clinicTypeService->getAllClinicTypes(),
         ]);
     }
 
@@ -93,6 +97,7 @@ class ClinicController extends Controller
                 'email' => $data['email'],
                 'password' => $data['password'],
                 'phone' => $data['phone'] ?? null,
+                'role_id' => $roleId,
             ]);
             $userId = $user->id;
         } else {

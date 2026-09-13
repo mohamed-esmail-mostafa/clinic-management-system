@@ -70,3 +70,41 @@ export interface PatientFormValues {
     marital_status?: string;
     is_active: boolean;
 }
+
+export interface PatientFieldOption {
+    id?: number;
+    patient_field_id?: number;
+    label: string;
+    value: string;
+    sort_order?: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export type PatientFieldType = 'text' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date';
+
+export interface PatientField {
+    id: number;
+    clinic_id: number;
+    clinic_type_id?: number | null;
+    name: string;
+    label: string;
+    type: PatientFieldType;
+    is_required: boolean;
+    is_active: boolean;
+    sort_order: number;
+    options?: PatientFieldOption[];
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface PatientFieldFormValues {
+    name?: string;
+    label: string;
+    type: PatientFieldType;
+    is_required: boolean;
+    is_active: boolean;
+    sort_order: number;
+    options: { label: string; value: string }[];
+    [key: string]: any;
+}

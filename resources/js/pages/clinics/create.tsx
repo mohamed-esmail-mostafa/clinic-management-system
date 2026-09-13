@@ -4,6 +4,7 @@ import { Country } from '@/types/country';
 import { Governorate } from '@/types/governorate';
 import { City } from '@/types/city';
 import { Specialty } from '@/types/specialty';
+import { ClinicType } from '@/types/clinic-type';
 import { ClinicFormValues } from '@/types/clinic';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -11,12 +12,12 @@ import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
 import useImport from '@/hooks/use-import';
 import InputError from '@/components/input-error';
+import ImagePicker from '@/components/ui/image-picker';
 
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     Select,
@@ -30,15 +31,10 @@ import {
 import {
     Building2,
     MapPin,
-    Phone,
-    FileText,
     Stethoscope,
     ArrowLeft,
     ArrowRight,
     Check,
-    Globe,
-    UserCheck,
-    Building,
 } from 'lucide-react';
 
 interface Props {
@@ -46,6 +42,7 @@ interface Props {
     governorates?: Governorate[];
     cities?: City[];
     specialties?: Specialty[];
+    clinic_types?: ClinicType[];
 }
 
 export default function CreateClinicPage({
@@ -53,6 +50,7 @@ export default function CreateClinicPage({
     governorates = [],
     cities = [],
     specialties = [],
+    clinic_types = [],
 }: Props) {
     const { t, isRtl } = useImport();
 
@@ -75,7 +73,8 @@ export default function CreateClinicPage({
         name: Yup.string()
             .trim()
             .required(t('common.required', 'Clinic name is required')),
-        type: Yup.string().oneOf(['personal', 'medical_center']).required(),
+        clinic_type_id: Yup.mixed().nullable(),
+        image: Yup.mixed().nullable(),
         phone: Yup.string().nullable(),
         address: Yup.string().nullable(),
         description: Yup.string().nullable(),
@@ -89,7 +88,8 @@ export default function CreateClinicPage({
     const formik = useFormik<ClinicFormValues>({
         initialValues: {
             name: '',
-            type: 'personal',
+            clinic_type_id: '',
+            image: null,
             country_id: '',
             governorate_id: '',
             city_id: '',
@@ -106,9 +106,11 @@ export default function CreateClinicPage({
                 country_id: values.country_id ? Number(values.country_id) : null,
                 governorate_id: values.governorate_id ? Number(values.governorate_id) : null,
                 city_id: values.city_id ? Number(values.city_id) : null,
+                clinic_type_id: values.clinic_type_id ? Number(values.clinic_type_id) : null,
             };
 
             router.post('/store/clinic', payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     toast.success(t('clinics.created_success', 'Clinic created successfully!'));
                 },
@@ -141,7 +143,7 @@ export default function CreateClinicPage({
                         className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-orange-600 transition-colors"
                     >
                         {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                        <span>{t('clinics.title', 'Back to Clinics')}</span>
+                        <span>{t('clinics.title')}</span>
                     </Link>
                 </div>
 
@@ -167,10 +169,20 @@ export default function CreateClinicPage({
                         <CardContent className="p-6 space-y-4">
                             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
                                 <Building2 size={18} className="text-orange-500" />
-                                <span>Basic Information</span>
+                                <span>{t('clinics.basic_info')}</span>
                             </h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Clinic Image Picker */}
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <ImagePicker
+                                        id="image"
+                                        label={t('clinics.image')}
+                                        onChange={(file) => formik.setFieldValue('image', file)}
+                                        error={formik.touched.image && formik.errors.image ? (formik.errors.image as string) : undefined}
+                                    />
+                                </div>
+
                                 {/* Clinic Name */}
                                 <div className="space-y-1.5 md:col-span-2">
                                     <Label htmlFor="name" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
@@ -179,55 +191,37 @@ export default function CreateClinicPage({
                                     <Input
                                         id="name"
                                         name="name"
-                                        placeholder="e.g. Hope Dental Clinic"
+                                        placeholder={t('clinics.name_placeholder', 'e.g. Hope Dental Clinic')}
                                         value={formik.values.name}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                       
                                     />
                                     {formik.touched.name && formik.errors.name && (
                                         <InputError message={formik.errors.name} />
                                     )}
                                 </div>
 
-                                {/* Clinic Type Toggle */}
+                                {/* Clinic Type Select */}
                                 <div className="space-y-1.5 md:col-span-2">
                                     <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                         {t('clinics.type', 'Clinic Type')}
                                     </Label>
-                                    <div className="grid grid-cols-2 gap-3 pt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => formik.setFieldValue('type', 'personal')}
-                                            className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
-                                                formik.values.type === 'personal'
-                                                    ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400 font-semibold'
-                                                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <UserCheck size={20} />
-                                            <div className="text-start">
-                                                <div className="text-sm">{t('clinics.personal', 'Personal Clinic')}</div>
-                                                <div className="text-[11px] font-normal text-gray-400">Single practitioner</div>
-                                            </div>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => formik.setFieldValue('type', 'medical_center')}
-                                            className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
-                                                formik.values.type === 'medical_center'
-                                                    ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400 font-semibold'
-                                                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <Building size={20} />
-                                            <div className="text-start">
-                                                <div className="text-sm">{t('clinics.medical_center', 'Medical Center')}</div>
-                                                <div className="text-[11px] font-normal text-gray-400">Multi-specialty center</div>
-                                            </div>
-                                        </button>
-                                    </div>
+                                    <Select
+                                        value={String(formik.values.clinic_type_id || '')}
+                                        onValueChange={(val) => formik.setFieldValue('clinic_type_id', val)}
+                                    >
+                                        <SelectTrigger className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500">
+                                            <SelectValue placeholder={t('clinics.select_clinic_type', 'Select Clinic Type')} />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white dark:bg-gray-900">
+                                            {clinic_types.map((ct) => (
+                                                <SelectItem key={ct.id} value={String(ct.id)}>
+                                                    {isRtl ? ct.title_ar : ct.title_en}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 {/* Phone */}
@@ -238,11 +232,11 @@ export default function CreateClinicPage({
                                     <Input
                                         id="phone"
                                         name="phone"
-                                        placeholder="e.g. +201000000000"
+                                        placeholder={t('clinics.phone_placeholder', 'e.g. +201000000000')}
                                         value={formik.values.phone}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
+                                        
                                     />
                                 </div>
 
@@ -254,7 +248,7 @@ export default function CreateClinicPage({
                                     <Input
                                         id="address"
                                         name="address"
-                                        placeholder="e.g. Building 12, Main St."
+                                        placeholder={t('clinics.address_placeholder', 'e.g. Building 12, Main St.')}
                                         value={formik.values.address}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
@@ -270,7 +264,7 @@ export default function CreateClinicPage({
                                     <Input
                                         id="description"
                                         name="description"
-                                        placeholder="Brief description about the clinic..."
+                                        placeholder={t('clinics.description_placeholder', 'Brief description about the clinic...')}
                                         value={formik.values.description}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
@@ -286,7 +280,7 @@ export default function CreateClinicPage({
                         <CardContent className="p-6 space-y-4">
                             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
                                 <MapPin size={18} className="text-orange-500" />
-                                <span>Location Details</span>
+                                <span>{t('clinics.location_details', 'Location Details')}</span>
                             </h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -399,7 +393,7 @@ export default function CreateClinicPage({
                                     })}
                                 </div>
                             ) : (
-                                <p className="text-xs text-gray-400">No specialties available.</p>
+                                <p className="text-xs text-gray-400">{t('clinics.no_specialties', 'No specialties available.')}</p>
                             )}
                         </CardContent>
                     </Card>

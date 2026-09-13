@@ -15,6 +15,13 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
     Dialog,
     DialogContent,
     DialogDescription,
@@ -50,12 +57,16 @@ export default function RolesPage({ roles = [] }: Props) {
         name: Yup.string()
             .trim()
             .required(t('common.required', 'This field is required')),
+        type: Yup.string()
+            .oneOf(['system', 'clinic'])
+            .required(t('common.required', 'This field is required')),
     })
 
     // Formik for Add/Edit Role
     const formik = useFormik<RoleFormValues>({
         initialValues: {
             name: editingRole?.name || '',
+            type: editingRole?.type || 'system',
         },
         enableReinitialize: true,
         validationSchema,
@@ -91,13 +102,13 @@ export default function RolesPage({ roles = [] }: Props) {
 
     const handleOpenAdd = () => {
         setEditingRole(null)
-        formik.resetForm({ values: { name: '' } })
+        formik.resetForm({ values: { name: '', type: 'system' } })
         setIsAddModalOpen(true)
     }
 
     const handleOpenEdit = (role: Role) => {
         setEditingRole(role)
-        formik.setValues({ name: role.name })
+        formik.setValues({ name: role.name, type: role.type || 'system' })
         setIsAddModalOpen(true)
     }
 
@@ -129,7 +140,8 @@ export default function RolesPage({ roles = [] }: Props) {
         const query = searchTerm.toLowerCase().trim()
         return (
             role.name.toLowerCase().includes(query) ||
-            role.slug.toLowerCase().includes(query)
+            role.slug.toLowerCase().includes(query) ||
+            (role.type && role.type.toLowerCase().includes(query))
         )
     })
 
@@ -140,7 +152,7 @@ export default function RolesPage({ roles = [] }: Props) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
                     <div>
                         <div className="flex items-center gap-2">
-                            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+                            <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                                 <ShieldCheck size={22} />
                             </div>
                             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -152,10 +164,7 @@ export default function RolesPage({ roles = [] }: Props) {
                         </p>
                     </div>
 
-                    <Button
-                        onClick={handleOpenAdd}
-                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer"
-                    >
+                    <Button onClick={handleOpenAdd}>
                         <Plus size={18} />
                         <span>{t('roles.add-role', 'Add New Role')}</span>
                     </Button>
@@ -174,7 +183,6 @@ export default function RolesPage({ roles = [] }: Props) {
                             placeholder={t('roles.search_placeholder', 'Search roles...')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-orange-500`}
                         />
                     </div>
 
@@ -187,18 +195,26 @@ export default function RolesPage({ roles = [] }: Props) {
                 {filteredRoles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredRoles.map((role) => (
-                            <Card key={role.id || role.slug} className="border-gray-100 dark:border-gray-800 shadow-xs hover:border-orange-200 dark:hover:border-orange-900/50 transition-all duration-200 group">
+                            <Card key={role.id || role.slug} className="border-gray-100 dark:border-gray-800 shadow-xs hover:border-primary/40 transition-all duration-200 group">
                                 <CardContent className="p-5 flex flex-col justify-between h-full">
                                     <div>
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
+                                                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
                                                     <Shield size={20} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base">
-                                                        {role.name}
-                                                    </h3>
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base">
+                                                            {role.name}
+                                                        </h3>
+                                                        <Badge
+                                                            variant={role.type === 'system' ? 'default' : 'secondary'}
+                                                            className="capitalize text-[10px] px-2 py-0.5"
+                                                        >
+                                                            {role.type || 'system'}
+                                                        </Badge>
+                                                    </div>
                                                     <Badge
                                                         variant="outline"
                                                         className="mt-1 font-mono text-[11px] bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700"
@@ -215,7 +231,6 @@ export default function RolesPage({ roles = [] }: Props) {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => handleOpenEdit(role)}
-                                            className="h-8 px-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg gap-1.5 text-xs font-medium"
                                         >
                                             <Pencil size={14} />
                                             <span>{t('roles.edit_role', 'Edit')}</span>
@@ -225,7 +240,6 @@ export default function RolesPage({ roles = [] }: Props) {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => setDeletingRole(role)}
-                                            className="h-8 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg gap-1.5 text-xs font-medium"
                                         >
                                             <Trash2 size={14} />
                                             <span>{t('roles.delete_role', 'Delete')}</span>
@@ -270,10 +284,30 @@ export default function RolesPage({ roles = [] }: Props) {
                                     value={formik.values.name}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800 focus:ring-orange-500"
                                 />
                                 {formik.touched.name && formik.errors.name && (
                                     <InputError message={formik.errors.name} />
+                                )}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="type" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    {t('roles.type_label', 'Role Type')} <span className="text-rose-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formik.values.type}
+                                    onValueChange={(val) => formik.setFieldValue('type', val)}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder={t('roles.select_type', 'Select role type')} />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white dark:bg-gray-900">
+                                        <SelectItem value="system">{t('roles.type_system', 'System')}</SelectItem>
+                                        <SelectItem value="clinic">{t('roles.type_clinic', 'Clinic')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {formik.touched.type && formik.errors.type && (
+                                    <InputError message={formik.errors.type as string} />
                                 )}
                             </div>
 
@@ -282,14 +316,12 @@ export default function RolesPage({ roles = [] }: Props) {
                                     type="button"
                                     variant="outline"
                                     onClick={handleCloseModal}
-                                    className="rounded-xl border-gray-200 dark:border-gray-800"
                                 >
                                     {t('common.cancel', 'Cancel')}
                                 </Button>
                                 <Button
                                     type="submit"
                                     disabled={formik.isSubmitting}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium"
                                 >
                                     {formik.isSubmitting
                                         ? t('common.processing', 'Saving...')
@@ -320,7 +352,6 @@ export default function RolesPage({ roles = [] }: Props) {
                             <Button
                                 variant="outline"
                                 onClick={() => setDeletingRole(null)}
-                                className="rounded-xl border-gray-200 dark:border-gray-800"
                             >
                                 {t('common.cancel', 'Cancel')}
                             </Button>
@@ -328,7 +359,6 @@ export default function RolesPage({ roles = [] }: Props) {
                                 variant="destructive"
                                 disabled={isDeleting}
                                 onClick={handleDeleteConfirm}
-                                className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl"
                             >
                                 {isDeleting ? t('common.processing', 'Deleting...') : t('common.delete', 'Delete')}
                             </Button>

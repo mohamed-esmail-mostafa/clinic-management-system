@@ -7,11 +7,22 @@ use App\Models\Governorate;
 use App\Models\Role;
 use App\Models\Specialty;
 use App\Models\User;
+use App\Models\WebsiteSetting;
 
 test('authenticated user can view clinics page', function () {
     $user = User::factory()->create();
+    WebsiteSetting::factory()->create();
 
     $response = $this->actingAs($user)->get(route('admin.clinics.index'));
+
+    $response->assertStatus(200);
+});
+
+test('authenticated user can view create clinic page', function () {
+    $user = User::factory()->create();
+    WebsiteSetting::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('admin.clinics.create'));
 
     $response->assertStatus(200);
 });
@@ -31,7 +42,6 @@ test('authenticated user can create a clinic', function () {
         'country_id' => $country->id,
         'governorate_id' => $governorate->id,
         'city_id' => $city->id,
-        'type' => 'personal',
         'is_active' => true,
         'specialty_ids' => [$specialty->id],
     ]);
@@ -64,7 +74,6 @@ test('authenticated user can update a clinic', function () {
         'country_id' => $country->id,
         'governorate_id' => $governorate->id,
         'city_id' => $city->id,
-        'type' => 'medical_center',
         'is_active' => true,
         'specialty_ids' => [],
     ]);
@@ -73,7 +82,6 @@ test('authenticated user can update a clinic', function () {
     $this->assertDatabaseHas('clinics', [
         'id' => $clinic->id,
         'name' => 'Updated Clinic Name',
-        'type' => 'medical_center',
     ]);
 });
 
@@ -120,6 +128,10 @@ test('authenticated user can add existing user to clinic', function () {
         'user_id' => $targetUser->id,
         'role_id' => $role->id,
     ]);
+    $this->assertDatabaseHas('users', [
+        'id' => $targetUser->id,
+        'role_id' => $role->id,
+    ]);
 });
 
 test('authenticated user can create new user and attach to clinic', function () {
@@ -139,6 +151,7 @@ test('authenticated user can create new user and attach to clinic', function () 
     $response->assertRedirect();
     $this->assertDatabaseHas('users', [
         'email' => 'janesmith@example.com',
+        'role_id' => $role->id,
     ]);
     $createdUser = User::where('email', 'janesmith@example.com')->first();
     $this->assertDatabaseHas('clinic_users', [

@@ -1,3 +1,5 @@
+import { Clinic } from "./clinic";
+
 export type User = {
     id: number;
     name: string;
@@ -8,10 +10,11 @@ export type User = {
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
+    clinics: Clinic[]
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
 };
 
 export type Passkey = {

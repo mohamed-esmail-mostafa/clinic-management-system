@@ -24,7 +24,8 @@ class UpdateClinicRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['nullable', 'string', 'in:personal,medical_center'],
+            'clinic_type_id' => ['nullable', 'integer', 'exists:clinic_types,id'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
             'country_id' => ['nullable', 'integer', 'exists:countries,id'],
             'governorate_id' => ['nullable', 'integer', 'exists:governorates,id'],
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],

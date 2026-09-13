@@ -23,6 +23,7 @@ class RoleService
         return Role::create([
             'name' => $name,
             'slug' => $slug,
+            'type' => $data['type'] ?? 'system',
         ]);
     }
 
@@ -37,6 +38,7 @@ class RoleService
         $role->update([
             'name' => $name,
             'slug' => $slug,
+            'type' => $data['type'] ?? $role->type,
         ]);
 
         return $role;

@@ -21,7 +21,8 @@ class Clinic extends Model
         'clinic_type_id',
         'name',
         'slug',
-        'type',
+        'image',
+        'public_id',
         'phone',
         'address',
         'description',
@@ -95,5 +96,10 @@ class Clinic extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function patientFields(): HasMany
+    {
+        return $this->hasMany(PatientFields::class)->orderBy('sort_order', 'asc');
     }
 }

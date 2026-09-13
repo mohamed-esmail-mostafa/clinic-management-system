@@ -19,6 +19,7 @@ return new class extends Migration
             // Basic Information
             $table->string('patient_number')->unique();
             $table->string('first_name');
+            $table->string('middle_name')->nullable();
             $table->string('last_name');
             $table->string('gender')->nullable(); // male, female, other
             $table->date('date_of_birth')->nullable();
@@ -26,10 +27,12 @@ return new class extends Migration
             // Contact Information
             $table->string('phone')->nullable();
             $table->string('secondary_phone')->nullable();
+            $table->string('email')->nullable();
             $table->text('address')->nullable();
-            
-
-    
+            $table->string('city')->nullable();
+            $table->string('country')->nullable();
+            $table->string('national_id')->nullable();
+            $table->string('passport_number')->nullable();
 
             // Emergency Contact
             $table->string('emergency_contact_name')->nullable();
@@ -38,6 +41,15 @@ return new class extends Migration
 
             // Medical Information
             $table->string('blood_type')->nullable();
+            $table->text('allergies')->nullable();
+            $table->text('chronic_diseases')->nullable();
+            $table->text('medical_history')->nullable();
+            $table->text('surgical_history')->nullable();
+            $table->text('family_medical_history')->nullable();
+            $table->boolean('has_insurance')->default(false);
+            $table->string('insurance_company')->nullable();
+            $table->string('insurance_number')->nullable();
+            $table->date('insurance_expiry_date')->nullable();
             $table->text('notes')->nullable();
             $table->string('occupation')->nullable();
             $table->string('marital_status')->nullable();

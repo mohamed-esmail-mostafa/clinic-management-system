@@ -2,6 +2,7 @@ import { Country } from './country';
 import { Governorate } from './governorate';
 import { City } from './city';
 import { Specialty } from './specialty';
+import { ClinicType } from './clinic-type';
 import { User } from './auth';
 import { Role } from './role';
 
@@ -21,9 +22,11 @@ export interface Clinic {
     country_id?: number | null;
     governorate_id?: number | null;
     city_id?: number | null;
+    clinic_type_id?: number | null;
     name: string;
     slug: string;
-    type: 'personal' | 'medical_center';
+    image?: string | null;
+    public_id?: string | null;
     phone?: string | null;
     address?: string | null;
     description?: string | null;
@@ -33,6 +36,7 @@ export interface Clinic {
     country?: Country;
     governorate?: Governorate;
     city?: City;
+    clinic_type?: ClinicType;
     specialties?: Specialty[];
     clinic_users?: ClinicUser[];
     users?: User[];
@@ -42,7 +46,8 @@ export interface Clinic {
 
 export interface ClinicFormValues {
     name: string;
-    type: 'personal' | 'medical_center';
+    clinic_type_id?: number | string;
+    image?: File | string | null;
     country_id: number | string;
     governorate_id: number | string;
     city_id: number | string;

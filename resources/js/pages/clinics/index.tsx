@@ -63,6 +63,8 @@ import {
     Mail,
     Lock,
     ShieldCheck,
+    Eye,
+    EyeOff,
 } from 'lucide-react';
 
 interface Props {
@@ -90,6 +92,7 @@ export default function ClinicsPage({
     const [deletingClinic, setDeletingClinic] = useState<Clinic | null>(null);
     const [selectedClinicForUsers, setSelectedClinicForUsers] = useState<Clinic | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Filtered dropdowns for location cascade inside edit modal
     const [editCountryId, setEditCountryId] = useState<string>('');
@@ -122,7 +125,7 @@ export default function ClinicsPage({
     const formik = useFormik<ClinicFormValues>({
         initialValues: {
             name: '',
-            type: 'personal',
+        
             country_id: '',
             governorate_id: '',
             city_id: '',
@@ -243,7 +246,7 @@ export default function ClinicsPage({
 
         formik.setValues({
             name: clinic.name,
-            type: clinic.type,
+      
             country_id: clinic.country_id ? String(clinic.country_id) : '',
             governorate_id: clinic.governorate_id ? String(clinic.governorate_id) : '',
             city_id: clinic.city_id ? String(clinic.city_id) : '',
@@ -339,8 +342,7 @@ export default function ClinicsPage({
     });
 
     const activeCount = clinics.filter((c) => c.is_active).length;
-    const personalCount = clinics.filter((c) => c.type === 'personal').length;
-    const centerCount = clinics.filter((c) => c.type === 'medical_center').length;
+   
 
     return (
         <AdminLayout title={t('clinics.title', 'Clinics Management')}>
@@ -390,7 +392,7 @@ export default function ClinicsPage({
                         </CardContent>
                     </Card>
 
-                    <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
+                    {/* <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
                         <CardContent className="p-5 flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -404,9 +406,9 @@ export default function ClinicsPage({
                                 <UserCheck size={24} />
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
-                    <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
+                    {/* <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
                         <CardContent className="p-5 flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -420,7 +422,7 @@ export default function ClinicsPage({
                                 <Building size={24} />
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
 
                 {/* Filter and Search Bar */}
@@ -447,7 +449,7 @@ export default function ClinicsPage({
                         <TableRow>
                             <TableHead className="w-16">#</TableHead>
                             <TableHead>{t('clinics.name', 'Clinic Name')}</TableHead>
-                            <TableHead>{t('clinics.type', 'Type')}</TableHead>
+                            {/* <TableHead>{t('clinics.type', 'Type')}</TableHead> */}
                             <TableHead>{t('clinics.country', 'Location')}</TableHead>
                             <TableHead>{t('clinics.users', 'Users')}</TableHead>
                             <TableHead>{t('clinics.phone', 'Phone')}</TableHead>
@@ -473,7 +475,7 @@ export default function ClinicsPage({
                                             )}
                                         </div>
                                     </TableCell>
-
+{/* 
                                     <TableCell>
                                         <Badge
                                             variant="outline"
@@ -487,7 +489,7 @@ export default function ClinicsPage({
                                                 ? t('clinics.medical_center', 'Medical Center')
                                                 : t('clinics.personal', 'Personal')}
                                         </Badge>
-                                    </TableCell>
+                                    </TableCell> */}
 
                                     <TableCell>
                                         <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
@@ -810,15 +812,25 @@ export default function ClinicsPage({
                                                 <span>{t('clinics.user_password', 'Password')}</span>
                                                 <span className="text-rose-500">*</span>
                                             </Label>
-                                            <Input
-                                                name="password"
-                                                type="password"
-                                                value={userFormik.values.password}
-                                                onChange={userFormik.handleChange}
-                                                onBlur={userFormik.handleBlur}
-                                                placeholder="••••••••"
-                                                className="h-10 rounded-xl"
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    name="password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    value={userFormik.values.password}
+                                                    onChange={userFormik.handleChange}
+                                                    onBlur={userFormik.handleBlur}
+                                                    placeholder="••••••••"
+                                                    className="h-10 rounded-xl pe-10"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
+                                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                                >
+                                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                            </div>
                                             {userFormik.touched.password && userFormik.errors.password && (
                                                 <InputError message={userFormik.errors.password} />
                                             )}

@@ -22,6 +22,7 @@ class UserService
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'phone' => $data['phone'] ?? null,
+            'role_id' => $data['role_id'] ?? null,
         ]);
     }
 }

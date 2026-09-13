@@ -3,16 +3,16 @@ import { Calendar, Globe, LayoutDashboard, Pill, Settings2, Store, Sun, User2Ico
 import { Link } from '@inertiajs/react';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 
-
 export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) {
     const { t, toggleLanguage, i18n, toggleTheme, appearance } = useImport()
-    const { clinics } = useAuthClinics() as { clinics?: any };
-    const clinicSlug = Array.isArray(clinics) && clinics.length > 0 ? clinics[0]?.slug : '';
+    const {authClinic}=useAuthClinics()
+   
     const NAV_ITEMS = [
         { key: t('clinics.sidebar.overview'), href: '/clinic/overview', icon: LayoutDashboard },
-        { key: t('clinics.sidebar.patients'), href: `/clinic/${clinicSlug}/patients`, icon: Users },
-        { key: t('clinics.sidebar.bookings'), href: `/clinic/${clinicSlug}/booking`, icon: Calendar },
-        { key: t('clinics.sidebar.medicines'), href: `/clinic/${clinicSlug}/medications`, icon: Pill },
+        { key: t('clinics.sidebar.patients'), href: `/clinic/${authClinic?.slug}/patients`, icon: Users },
+        { key: t('clinics.sidebar.patients-settings'), href: `/clinic/settings/${authClinic?.slug}/patients`, icon: Users },
+        { key: t('clinics.sidebar.bookings'), href: `/clinic/${authClinic?.slug}/booking`, icon: Calendar },
+        { key: t('clinics.sidebar.medicines'), href: `/clinic/${authClinic?.slug}/medications`, icon: Pill },
         { key: t('clinics.sidebar.employees'), href: '#', icon: User2Icon },
         { key: t('clinics.sidebar.settings'), href: '#', icon: Settings2 },
     ];
@@ -22,14 +22,15 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
             {/* Logo */}
             <div className={`flex items-center gap-3 px-4 py-5 border-b border-orange-400/30 ${collapsed ? 'justify-center' : ''}`}>
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                    <Store size={18} className="text-white" />
+                   
+                    {/* {authClinic.name} */}
                 </div>
                 {!collapsed && (
                     <div className="min-w-0">
                         <p className="text-white font-bold text-sm truncate leading-tight">
-                            {'My Store'}
+                            {authClinic.name}
                         </p>
-                        <p className="text-orange-200 text-xs truncate">{t('vendor.sidebar.vendor_panel')}</p>
+                       
                     </div>
                 )}
             </div>

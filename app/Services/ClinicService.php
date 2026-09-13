@@ -7,13 +7,16 @@ use App\Models\ClinicUser;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 class ClinicService
 {
+    public function __construct(protected CloudinaryService $cloudinary_service) {}
+
     public function getAllClinics(): Collection
     {
-        return Clinic::with(['country', 'governorate', 'city', 'specialties', 'clinicUsers.user', 'clinicUsers.role'])
+        return Clinic::with(['country', 'governorate', 'city', 'clinicType', 'specialties', 'clinicUsers.user', 'clinicUsers.role'])
             ->orderBy('id', 'desc')
             ->get();
     }
@@ -30,20 +33,35 @@ class ClinicService
             $counter++;
         }
 
-        $clinic = Clinic::create([
-            'country_id' => $data['country_id'] ?? null,
-            'governorate_id' => $data['governorate_id'] ?? null,
-            'city_id' => $data['city_id'] ?? null,
-            'name' => $name,
-            'slug' => $slug,
-            'type' => $data['type'] ?? 'personal',
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
-            'description' => $data['description'] ?? null,
-            'latitude' => $data['latitude'] ?? null,
-            'longitude' => $data['longitude'] ?? null,
-            'is_active' => $data['is_active'] ?? true,
-        ]);
+        $imageUrl = null;
+        $publicId = null;
+
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            $uploadResult = $this->cloudinary_service->uploadToCloudinary($data['image'], 'clinics');
+            if ($uploadResult) {
+                $imageUrl = $uploadResult['url'];
+                $publicId = $uploadResult['public_id'];
+            }
+        } elseif (isset($data['image']) && is_string($data['image'])) {
+            $imageUrl = $data['image'];
+        }
+
+        $clinic = new Clinic;
+        $clinic->country_id = $data['country_id'] ?? null;
+        $clinic->governorate_id = $data['governorate_id'] ?? null;
+        $clinic->city_id = $data['city_id'] ?? null;
+        $clinic->clinic_type_id = $data['clinic_type_id'] ?? null;
+        $clinic->name = $name;
+        $clinic->slug = $slug;
+        $clinic->image = $imageUrl;
+        $clinic->public_id = $publicId;
+        $clinic->phone = $data['phone'] ?? null;
+        $clinic->address = $data['address'] ?? null;
+        $clinic->description = $data['description'] ?? null;
+        $clinic->latitude = $data['latitude'] ?? null;
+        $clinic->longitude = $data['longitude'] ?? null;
+        $clinic->is_active = $data['is_active'] ?? true;
+        $clinic->save();
 
         // Sync specialties if provided
         if (! empty($data['specialty_ids']) && is_array($data['specialty_ids'])) {
@@ -62,12 +80,17 @@ class ClinicService
                     $ownerRole = Role::create([
                         'name' => 'Owner',
                         'slug' => 'owner',
+                        'type' => 'clinic',
                     ]);
                 }
 
                 ClinicUser::create([
                     'clinic_id' => $clinic->id,
                     'user_id' => $user->id,
+                    'role_id' => $ownerRole->id,
+                ]);
+
+                User::where('id', $user->id)->update([
                     'role_id' => $ownerRole->id,
                 ]);
             }
@@ -92,20 +115,35 @@ class ClinicService
             }
         }
 
-        $updated = $clinic->update([
-            'country_id' => $data['country_id'] ?? $clinic->country_id,
-            'governorate_id' => $data['governorate_id'] ?? $clinic->governorate_id,
-            'city_id' => $data['city_id'] ?? $clinic->city_id,
-            'name' => $name,
-            'slug' => $slug,
-            'type' => $data['type'] ?? $clinic->type,
-            'phone' => $data['phone'] ?? $clinic->phone,
-            'address' => $data['address'] ?? $clinic->address,
-            'description' => $data['description'] ?? $clinic->description,
-            'latitude' => $data['latitude'] ?? $clinic->latitude,
-            'longitude' => $data['longitude'] ?? $clinic->longitude,
-            'is_active' => $data['is_active'] ?? $clinic->is_active,
-        ]);
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            if ($clinic->public_id) {
+                $this->cloudinary_service->deleteFromCloudinary($clinic->public_id);
+            }
+            $uploadResult = $this->cloudinary_service->uploadToCloudinary($data['image'], 'clinics');
+            if ($uploadResult) {
+                $clinic->image = $uploadResult['url'];
+                $clinic->public_id = $uploadResult['public_id'];
+            }
+        }
+
+        $clinic->country_id = $data['country_id'] ?? $clinic->country_id;
+        $clinic->governorate_id = $data['governorate_id'] ?? $clinic->governorate_id;
+        $clinic->city_id = $data['city_id'] ?? $clinic->city_id;
+        if (array_key_exists('clinic_type_id', $data)) {
+            $clinic->clinic_type_id = $data['clinic_type_id'];
+        }
+        $clinic->name = $name;
+        $clinic->slug = $slug;
+        $clinic->phone = $data['phone'] ?? $clinic->phone;
+        $clinic->address = $data['address'] ?? $clinic->address;
+        $clinic->description = $data['description'] ?? $clinic->description;
+        $clinic->latitude = $data['latitude'] ?? $clinic->latitude;
+        $clinic->longitude = $data['longitude'] ?? $clinic->longitude;
+        if (isset($data['is_active'])) {
+            $clinic->is_active = $data['is_active'];
+        }
+
+        $updated = $clinic->save();
 
         if (isset($data['specialty_ids']) && is_array($data['specialty_ids'])) {
             $clinic->specialties()->sync($data['specialty_ids']);
@@ -130,6 +168,10 @@ class ClinicService
 
     public function addUserToClinic(Clinic $clinic, int $userId, int $roleId): ClinicUser
     {
+        User::where('id', $userId)->update([
+            'role_id' => $roleId,
+        ]);
+
         return ClinicUser::updateOrCreate(
             [
                 'clinic_id' => $clinic->id,
