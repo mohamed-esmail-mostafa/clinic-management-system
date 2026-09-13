@@ -570,6 +570,7 @@
     "already_have_account": "Already have an account?",
     "login_link": "Sign In",
     "logout":"Logout",
-    "profile":" Profile "
+    "profile":" Profile ",
+    "login":"Sign In"
   }
 }

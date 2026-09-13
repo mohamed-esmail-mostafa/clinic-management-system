@@ -125,7 +125,7 @@ export default function ClinicsPage({
     const formik = useFormik<ClinicFormValues>({
         initialValues: {
             name: '',
-        
+
             country_id: '',
             governorate_id: '',
             city_id: '',
@@ -246,7 +246,7 @@ export default function ClinicsPage({
 
         formik.setValues({
             name: clinic.name,
-      
+
             country_id: clinic.country_id ? String(clinic.country_id) : '',
             governorate_id: clinic.governorate_id ? String(clinic.governorate_id) : '',
             city_id: clinic.city_id ? String(clinic.city_id) : '',
@@ -342,140 +342,110 @@ export default function ClinicsPage({
     });
 
     const activeCount = clinics.filter((c) => c.is_active).length;
-   
+
 
     return (
         <AdminLayout title={t('clinics.title', 'Clinics Management')}>
-            <div className="space-y-6">
-                {/* Header Title & Add Button */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-                                <Building2 size={22} />
+           <div className="container">
+                <div className="space-y-6">
+                    {/* Header Title & Add Button */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                                    <Building2 size={22} />
+                                </div>
+                                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                    {t('clinics.title', 'Clinics Management')}
+                                </h1>
                             </div>
-                            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                {t('clinics.title', 'Clinics Management')}
-                            </h1>
+                            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                {t(
+                                    'clinics.subtitle',
+                                    'Manage registered clinics, medical centers, locations, and assigned users.'
+                                )}
+                            </p>
                         </div>
-                        <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                            {t(
-                                'clinics.subtitle',
-                                'Manage registered clinics, medical centers, locations, and assigned users.'
-                            )}
-                        </p>
+
+                        <Link href="/create/clinic/page">
+                            <Button >
+                                <Plus size={18} />
+                                <span>{t('clinics.add-new', 'Add New Clinic')}</span>
+                            </Button>
+                        </Link>
                     </div>
 
-                    <Link href="/create/clinic/page">
-                        <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm font-medium rounded-xl h-10 px-4 transition-transform active:scale-95 cursor-pointer">
-                            <Plus size={18} />
-                            <span>{t('clinics.add-new', 'Add New Clinic')}</span>
-                        </Button>
-                    </Link>
-                </div>
+                    {/* Stats Overview */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
+                            <CardContent className="p-5 flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                        {t('clinics.total', 'Total Clinics')}
+                                    </p>
+                                    <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mt-1">
+                                        {clinics.length}
+                                    </h3>
+                                </div>
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                    <Building2 size={24} />
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                {/* Stats Overview */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('clinics.total', 'Total Clinics')}
-                                </p>
-                                <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mt-1">
-                                    {clinics.length}
-                                </h3>
-                            </div>
-                            <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 flex items-center justify-center">
-                                <Building2 size={24} />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('clinics.personal', 'Personal Clinics')}
-                                </p>
-                                <h3 className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-                                    {personalCount}
-                                </h3>
-                            </div>
-                            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center">
-                                <UserCheck size={24} />
-                            </div>
-                        </CardContent>
-                    </Card> */}
-
-                    {/* <Card className="border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('clinics.medical_center', 'Medical Centers')}
-                                </p>
-                                <h3 className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                                    {centerCount}
-                                </h3>
-                            </div>
-                            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center">
-                                <Building size={24} />
-                            </div>
-                        </CardContent>
-                    </Card> */}
-                </div>
-
-                {/* Filter and Search Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="relative w-full sm:w-80">
-                        <Search
-                            size={16}
-                            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${
-                                isRtl ? 'right-3' : 'left-3'
-                            }`}
-                        />
-                        <Input
-                            placeholder={t('clinics.search_placeholder', 'Search clinics...')}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-orange-500`}
-                        />
+                      
                     </div>
-                </div>
 
-                {/* Clinics Data Table */}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-16">#</TableHead>
-                            <TableHead>{t('clinics.name', 'Clinic Name')}</TableHead>
-                            {/* <TableHead>{t('clinics.type', 'Type')}</TableHead> */}
-                            <TableHead>{t('clinics.country', 'Location')}</TableHead>
-                            <TableHead>{t('clinics.users', 'Users')}</TableHead>
-                            <TableHead>{t('clinics.phone', 'Phone')}</TableHead>
-                            <TableHead>{t('common.status', 'Status')}</TableHead>
-                            <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredClinics.length > 0 ? (
-                            filteredClinics.map((clinic, idx) => (
-                                <TableRow key={clinic.id}>
-                                    <TableCell className="font-semibold text-gray-500">
-                                        {idx + 1}
-                                    </TableCell>
+                    {/* Filter and Search Bar */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="relative w-full sm:w-80">
+                            <Search
+                                size={16}
+                                className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${isRtl ? 'right-3' : 'left-3'
+                                    }`}
+                            />
+                            <Input
+                                placeholder={t('clinics.search_placeholder', 'Search clinics...')}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className={`${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:ring-primary`}
+                            />
+                        </div>
+                    </div>
 
-                                    <TableCell className="font-semibold text-gray-900 dark:text-gray-100">
-                                        <div>
-                                            <span>{clinic.name}</span>
-                                            {clinic.description && (
-                                                <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
-                                                    {clinic.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </TableCell>
-{/* 
+                    {/* Clinics Data Table */}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-16 whitespace-nowrap">#</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('clinics.name', 'Clinic Name')}</TableHead>
+                                {/* <TableHead className="whitespace-nowrap">{t('clinics.type', 'Type')}</TableHead> */}
+                                <TableHead className="whitespace-nowrap">{t('clinics.country', 'Location')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('clinics.users', 'Users')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('clinics.phone', 'Phone')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('common.status', 'Status')}</TableHead>
+                                <TableHead className="text-end whitespace-nowrap">{t('common.actions', 'Actions')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredClinics.length > 0 ? (
+                                filteredClinics.map((clinic, idx) => (
+                                    <TableRow key={clinic.id}>
+                                        <TableCell className="font-semibold text-gray-500 whitespace-nowrap">
+                                            {idx + 1}
+                                        </TableCell>
+
+                                        <TableCell className="font-semibold text-gray-900 dark:text-gray-100 min-w-[150px]">
+                                            <div>
+                                                <span>{clinic.name}</span>
+                                                {clinic.description && (
+                                                    <p className="text-xs font-normal text-gray-400 line-clamp-1 mt-0.5">
+                                                        {clinic.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        {/* 
                                     <TableCell>
                                         <Badge
                                             variant="outline"
@@ -491,674 +461,672 @@ export default function ClinicsPage({
                                         </Badge>
                                     </TableCell> */}
 
-                                    <TableCell>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                                            <MapPin size={13} className="text-orange-500 shrink-0" />
-                                            <span>
-                                                {[
-                                                    clinic.city ? (isRtl ? clinic.city.name_ar : clinic.city.name_en) : null,
-                                                    clinic.governorate ? (isRtl ? clinic.governorate.name_ar : clinic.governorate.name_en) : null,
-                                                    clinic.country ? (isRtl ? clinic.country.name_ar : clinic.country.name_en) : null,
-                                                ]
-                                                    .filter(Boolean)
-                                                    .join(', ') || '—'}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-
-                                    {/* Users Column */}
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 font-semibold gap-1"
-                                            >
-                                                <Users size={12} />
-                                                <span>{clinic.clinic_users?.length || 0}</span>
-                                            </Badge>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => setSelectedClinicForUsers(clinic)}
-                                                className="h-7 px-2.5 text-xs font-medium gap-1 rounded-lg border-gray-200 hover:bg-orange-50 hover:text-orange-600 dark:border-gray-800 transition-colors"
-                                                title={t('clinics.manage_users', 'Manage Users')}
-                                            >
-                                                <UserPlus size={13} />
-                                                <span>{t('clinics.add_user', 'Add User')}</span>
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                                            <Phone size={13} className="text-gray-400 shrink-0" />
-                                            <span>{clinic.phone || '—'}</span>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Switch
-                                                checked={clinic.is_active}
-                                                onCheckedChange={() => handleToggleStatus(clinic)}
-                                            />
-                                            <Badge
-                                                className={
-                                                    clinic.is_active
-                                                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
-                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                                                }
-                                            >
-                                                {clinic.is_active
-                                                    ? t('countries.active', 'Active')
-                                                    : t('countries.inactive', 'Inactive')}
-                                            </Badge>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell className="text-end">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleOpenEdit(clinic)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg"
-                                                title={t('clinics.edit', 'Edit')}
-                                            >
-                                                <Pencil size={15} />
-                                            </Button>
-
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => setDeletingClinic(clinic)}
-                                                className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                                title={t('clinics.delete', 'Delete')}
-                                            >
-                                                <Trash2 size={15} />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={8} className="h-32 text-center text-gray-400">
-                                    <div className="flex flex-col items-center justify-center gap-2">
-                                        <Building2 size={32} className="text-gray-300 dark:text-gray-700" />
-                                        <span>{t('clinics.no_clinics', 'No clinics found.')}</span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-
-                {/* Manage Clinic Users Modal */}
-                <Dialog
-                    open={!!selectedClinicForUsers}
-                    onOpenChange={(open) => {
-                        if (!open) {
-                            setSelectedClinicForUsers(null);
-                            userFormik.resetForm();
-                        }
-                    }}
-                >
-                    <DialogContent className="sm:max-w-xl rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                                <Users size={20} className="text-orange-500" />
-                                <span>{t('clinics.manage_users', 'Manage Users')}</span>
-                                <span className="text-gray-400 font-normal">
-                                    ({selectedClinicForUsers?.name})
-                                </span>
-                            </DialogTitle>
-                            <DialogDescription className="text-xs text-gray-500">
-                                {t('clinics.manage_users_desc', 'Add new or existing users to this clinic with specific roles.')}
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {/* Assigned Users Section */}
-                        <div className="space-y-3 mt-2">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                {t('clinics.assigned_users', 'Assigned Users')}
-                            </h4>
-
-                            {selectedClinicForUsers?.clinic_users &&
-                            selectedClinicForUsers.clinic_users.length > 0 ? (
-                                <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
-                                    {selectedClinicForUsers.clinic_users.map((cu) => (
-                                        <div
-                                            key={cu.id}
-                                            className="p-3 flex items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-600 font-bold flex items-center justify-center text-xs shrink-0">
-                                                    {cu.user?.name?.charAt(0).toUpperCase() || 'U'}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                                        {cu.user?.name || 'User #' + cu.user_id}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 truncate">
-                                                        {cu.user?.email || '—'}
-                                                    </p>
-                                                </div>
+                                        <TableCell className="min-w-[160px]">
+                                            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                                <MapPin size={13} className="text-primary shrink-0" />
+                                                <span>
+                                                    {[
+                                                        clinic.city ? (isRtl ? clinic.city.name_ar : clinic.city.name_en) : null,
+                                                        clinic.governorate ? (isRtl ? clinic.governorate.name_ar : clinic.governorate.name_en) : null,
+                                                        clinic.country ? (isRtl ? clinic.country.name_ar : clinic.country.name_en) : null,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(', ') || '—'}
+                                                </span>
                                             </div>
+                                        </TableCell>
 
+                                        {/* Users Column */}
+                                        <TableCell className="whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <Badge
                                                     variant="outline"
-                                                    className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 capitalize text-xs"
+                                                    className="bg-primary/10 text-primary border-primary/20 font-semibold gap-1 shrink-0"
                                                 >
-                                                    {cu.role?.name || 'Staff'}
+                                                    <Users size={12} />
+                                                    <span>{clinic.clinic_users?.length || 0}</span>
                                                 </Badge>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setSelectedClinicForUsers(clinic)}
+                                                    className="h-7 px-2.5 text-xs font-medium gap-1 rounded-lg border-gray-200 hover:bg-primary/10 hover:text-primary dark:border-gray-800 transition-colors shrink-0 whitespace-nowrap"
+                                                    title={t('clinics.manage_users', 'Manage Users')}
+                                                >
+                                                    <UserPlus size={13} />
+                                                    <span>{t('clinics.add_user', 'Add User')}</span>
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="whitespace-nowrap">
+                                            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                                <Phone size={13} className="text-gray-400 shrink-0" />
+                                                <span>{clinic.phone || '—'}</span>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={clinic.is_active}
+                                                    onCheckedChange={() => handleToggleStatus(clinic)}
+                                                />
+                                                <Badge
+                                                    className={
+                                                        clinic.is_active
+                                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                    }
+                                                >
+                                                    {clinic.is_active
+                                                        ? t('countries.active', 'Active')
+                                                        : t('countries.inactive', 'Inactive')}
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="text-end whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleOpenEdit(clinic)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
+                                                    title={t('clinics.edit', 'Edit')}
+                                                >
+                                                    <Pencil size={15} />
+                                                </Button>
 
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() => handleRemoveUserFromClinic(cu.user_id)}
-                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-                                                    title={t('common.delete', 'Remove')}
+                                                    onClick={() => setDeletingClinic(clinic)}
+                                                    className="h-8 w-8 p-0 text-gray-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                                    title={t('clinics.delete', 'Delete')}
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <Trash2 size={15} />
                                                 </Button>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
                             ) : (
-                                <p className="text-xs text-gray-400 italic p-3 bg-gray-50 dark:bg-gray-800/40 rounded-xl text-center">
-                                    {t('clinics.no_assigned_users', 'No users assigned to this clinic.')}
-                                </p>
+                                <TableRow>
+                                    <TableCell colSpan={8} className="h-32 text-center text-gray-400">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <Building2 size={32} className="text-gray-300 dark:text-gray-700" />
+                                            <span>{t('clinics.no_clinics', 'No clinics found.')}</span>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
                             )}
-                        </div>
+                        </TableBody>
+                    </Table>
 
-                        {/* Add User Form Section */}
-                        <form onSubmit={userFormik.handleSubmit} className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                                <UserPlus size={14} className="text-orange-500" />
-                                <span>{t('clinics.add_user', 'Add User to Clinic')}</span>
-                            </h4>
+                    {/* Manage Clinic Users Modal */}
+                    <Dialog
+                        open={!!selectedClinicForUsers}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setSelectedClinicForUsers(null);
+                                userFormik.resetForm();
+                            }
+                        }}
+                    >
+                        <DialogContent className="sm:max-w-xl rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                    <Users size={20} className="text-primary" />
+                                    <span>{t('clinics.manage_users', 'Manage Users')}</span>
+                                    <span className="text-gray-400 font-normal">
+                                        ({selectedClinicForUsers?.name})
+                                    </span>
+                                </DialogTitle>
+                                <DialogDescription className="text-xs text-gray-500">
+                                    {t('clinics.manage_users_desc', 'Add new or existing users to this clinic with specific roles.')}
+                                </DialogDescription>
+                            </DialogHeader>
 
-                            {/* Mode Selector (Existing vs New) */}
-                            <div className="grid grid-cols-2 gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-                                <button
-                                    type="button"
-                                    onClick={() => userFormik.setFieldValue('mode', 'existing')}
-                                    className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                                        userFormik.values.mode === 'existing'
-                                            ? 'bg-white dark:bg-gray-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }`}
-                                >
-                                    {t('clinics.existing_user', 'Existing User')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => userFormik.setFieldValue('mode', 'new')}
-                                    className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                                        userFormik.values.mode === 'new'
-                                            ? 'bg-white dark:bg-gray-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }`}
-                                >
-                                    {t('clinics.new_user', 'New User')}
-                                </button>
-                            </div>
+                            {/* Assigned Users Section */}
+                            <div className="space-y-3 mt-2">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                    {t('clinics.assigned_users', 'Assigned Users')}
+                                </h4>
 
-                            {/* Role Select (Common for both modes) */}
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-medium flex items-center gap-1">
-                                    <ShieldCheck size={14} className="text-gray-400" />
-                                    <span>{t('clinics.select_role', 'Select Role')}</span>
-                                    <span className="text-rose-500">*</span>
-                                </Label>
-                                <Select
-                                    value={String(userFormik.values.role_id)}
-                                    onValueChange={(val) => userFormik.setFieldValue('role_id', val)}
-                                >
-                                    <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                        <SelectValue placeholder={t('clinics.select_role', 'Select Role')} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {roles.map((r) => (
-                                            <SelectItem key={r.id} value={String(r.id)}>
-                                                {r.name}
-                                            </SelectItem>
+                                {selectedClinicForUsers?.clinic_users &&
+                                    selectedClinicForUsers.clinic_users.length > 0 ? (
+                                    <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
+                                        {selectedClinicForUsers.clinic_users.map((cu) => (
+                                            <div
+                                                key={cu.id}
+                                                className="p-3 flex items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs shrink-0">
+                                                        {cu.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                                            {cu.user?.name || 'User #' + cu.user_id}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {cu.user?.email || '—'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 capitalize text-xs"
+                                                    >
+                                                        {cu.role?.name || 'Staff'}
+                                                    </Badge>
+
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleRemoveUserFromClinic(cu.user_id)}
+                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
+                                                        title={t('common.delete', 'Remove')}
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                                {userFormik.touched.role_id && userFormik.errors.role_id && (
-                                    <InputError message={String(userFormik.errors.role_id)} />
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 italic p-3 bg-gray-50 dark:bg-gray-800/40 rounded-xl text-center">
+                                        {t('clinics.no_assigned_users', 'No users assigned to this clinic.')}
+                                    </p>
                                 )}
                             </div>
 
-                            {/* Existing User Selection */}
-                            {userFormik.values.mode === 'existing' && (
+                            {/* Add User Form Section */}
+                            <form onSubmit={userFormik.handleSubmit} className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+                                    <UserPlus size={14} className="text-primary" />
+                                    <span>{t('clinics.add_user', 'Add User to Clinic')}</span>
+                                </h4>
+
+                                {/* Mode Selector (Existing vs New) */}
+                                <div className="grid grid-cols-2 gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => userFormik.setFieldValue('mode', 'existing')}
+                                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${userFormik.values.mode === 'existing'
+                                                ? 'bg-white dark:bg-gray-900 text-primary shadow-xs'
+                                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                                            }`}
+                                    >
+                                        {t('clinics.existing_user', 'Existing User')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => userFormik.setFieldValue('mode', 'new')}
+                                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${userFormik.values.mode === 'new'
+                                                ? 'bg-white dark:bg-gray-900 text-primary shadow-xs'
+                                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                                            }`}
+                                    >
+                                        {t('clinics.new_user', 'New User')}
+                                    </button>
+                                </div>
+
+                                {/* Role Select (Common for both modes) */}
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-medium flex items-center gap-1">
-                                        <UserIcon size={14} className="text-gray-400" />
-                                        <span>{t('clinics.select_user', 'Select User')}</span>
+                                        <ShieldCheck size={14} className="text-gray-400" />
+                                        <span>{t('clinics.select_role', 'Select Role')}</span>
                                         <span className="text-rose-500">*</span>
                                     </Label>
                                     <Select
-                                        value={String(userFormik.values.user_id)}
-                                        onValueChange={(val) => userFormik.setFieldValue('user_id', val)}
+                                        value={String(userFormik.values.role_id)}
+                                        onValueChange={(val) => userFormik.setFieldValue('role_id', val)}
                                     >
                                         <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                            <SelectValue placeholder={t('clinics.select_user', 'Select User')} />
+                                            <SelectValue placeholder={t('clinics.select_role', 'Select Role')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {all_users.map((u) => (
-                                                <SelectItem key={u.id} value={String(u.id)}>
-                                                    {u.name} ({u.email})
+                                            {roles.map((r) => (
+                                                <SelectItem key={r.id} value={String(r.id)}>
+                                                    {r.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {userFormik.touched.user_id && userFormik.errors.user_id && (
-                                        <InputError message={String(userFormik.errors.user_id)} />
+                                    {userFormik.touched.role_id && userFormik.errors.role_id && (
+                                        <InputError message={String(userFormik.errors.role_id)} />
                                     )}
                                 </div>
-                            )}
 
-                            {/* New User Fields */}
-                            {userFormik.values.mode === 'new' && (
-                                <div className="space-y-3">
+                                {/* Existing User Selection */}
+                                {userFormik.values.mode === 'existing' && (
                                     <div className="space-y-1.5">
                                         <Label className="text-xs font-medium flex items-center gap-1">
                                             <UserIcon size={14} className="text-gray-400" />
-                                            <span>{t('clinics.user_name', 'Full Name')}</span>
+                                            <span>{t('clinics.select_user', 'Select User')}</span>
                                             <span className="text-rose-500">*</span>
                                         </Label>
-                                        <Input
-                                            name="name"
-                                            value={userFormik.values.name}
-                                            onChange={userFormik.handleChange}
-                                            onBlur={userFormik.handleBlur}
-                                            placeholder="John Doe"
-                                            className="h-10 rounded-xl"
-                                        />
-                                        {userFormik.touched.name && userFormik.errors.name && (
-                                            <InputError message={userFormik.errors.name} />
+                                        <Select
+                                            value={String(userFormik.values.user_id)}
+                                            onValueChange={(val) => userFormik.setFieldValue('user_id', val)}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                                <SelectValue placeholder={t('clinics.select_user', 'Select User')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {all_users.map((u) => (
+                                                    <SelectItem key={u.id} value={String(u.id)}>
+                                                        {u.name} ({u.email})
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {userFormik.touched.user_id && userFormik.errors.user_id && (
+                                            <InputError message={String(userFormik.errors.user_id)} />
                                         )}
                                     </div>
+                                )}
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {/* New User Fields */}
+                                {userFormik.values.mode === 'new' && (
+                                    <div className="space-y-3">
                                         <div className="space-y-1.5">
                                             <Label className="text-xs font-medium flex items-center gap-1">
-                                                <Mail size={14} className="text-gray-400" />
-                                                <span>{t('clinics.user_email', 'Email Address')}</span>
+                                                <UserIcon size={14} className="text-gray-400" />
+                                                <span>{t('clinics.user_name', 'Full Name')}</span>
                                                 <span className="text-rose-500">*</span>
                                             </Label>
                                             <Input
-                                                name="email"
-                                                type="email"
-                                                value={userFormik.values.email}
+                                                name="name"
+                                                value={userFormik.values.name}
                                                 onChange={userFormik.handleChange}
                                                 onBlur={userFormik.handleBlur}
-                                                placeholder="john@example.com"
+                                                placeholder="John Doe"
                                                 className="h-10 rounded-xl"
                                             />
-                                            {userFormik.touched.email && userFormik.errors.email && (
-                                                <InputError message={userFormik.errors.email} />
+                                            {userFormik.touched.name && userFormik.errors.name && (
+                                                <InputError message={userFormik.errors.name} />
                                             )}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs font-medium flex items-center gap-1">
+                                                    <Mail size={14} className="text-gray-400" />
+                                                    <span>{t('clinics.user_email', 'Email Address')}</span>
+                                                    <span className="text-rose-500">*</span>
+                                                </Label>
+                                                <Input
+                                                    name="email"
+                                                    type="email"
+                                                    value={userFormik.values.email}
+                                                    onChange={userFormik.handleChange}
+                                                    onBlur={userFormik.handleBlur}
+                                                    placeholder="john@example.com"
+                                                    className="h-10 rounded-xl"
+                                                />
+                                                {userFormik.touched.email && userFormik.errors.email && (
+                                                    <InputError message={userFormik.errors.email} />
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs font-medium flex items-center gap-1">
+                                                    <Lock size={14} className="text-gray-400" />
+                                                    <span>{t('clinics.user_password', 'Password')}</span>
+                                                    <span className="text-rose-500">*</span>
+                                                </Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        name="password"
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        value={userFormik.values.password}
+                                                        onChange={userFormik.handleChange}
+                                                        onBlur={userFormik.handleBlur}
+                                                        placeholder="••••••••"
+                                                        className="h-10 rounded-xl pe-10"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
+                                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                                    >
+                                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                    </button>
+                                                </div>
+                                                {userFormik.touched.password && userFormik.errors.password && (
+                                                    <InputError message={userFormik.errors.password} />
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="space-y-1.5">
                                             <Label className="text-xs font-medium flex items-center gap-1">
-                                                <Lock size={14} className="text-gray-400" />
-                                                <span>{t('clinics.user_password', 'Password')}</span>
-                                                <span className="text-rose-500">*</span>
+                                                <Phone size={14} className="text-gray-400" />
+                                                <span>{t('clinics.user_phone', 'Phone Number')}</span>
                                             </Label>
-                                            <div className="relative">
-                                                <Input
-                                                    name="password"
-                                                    type={showPassword ? 'text' : 'password'}
-                                                    value={userFormik.values.password}
-                                                    onChange={userFormik.handleChange}
-                                                    onBlur={userFormik.handleBlur}
-                                                    placeholder="••••••••"
-                                                    className="h-10 rounded-xl pe-10"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    className="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
-                                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                                >
-                                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                                </button>
-                                            </div>
-                                            {userFormik.touched.password && userFormik.errors.password && (
-                                                <InputError message={userFormik.errors.password} />
-                                            )}
+                                            <Input
+                                                name="phone"
+                                                value={userFormik.values.phone}
+                                                onChange={userFormik.handleChange}
+                                                onBlur={userFormik.handleBlur}
+                                                placeholder="+123456789"
+                                                className="h-10 rounded-xl"
+                                            />
                                         </div>
+                                    </div>
+                                )}
+
+                                <DialogFooter className="pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setSelectedClinicForUsers(null)}
+                                        className="rounded-xl h-10 px-4 cursor-pointer"
+                                    >
+                                        {t('common.cancel', 'Cancel')}
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={userFormik.isSubmitting}
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 px-5 font-medium cursor-pointer"
+                                    >
+                                        {userFormik.isSubmitting
+                                            ? t('common.saving', 'Saving...')
+                                            : t('clinics.add_user', 'Add User')}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Edit Clinic Modal */}
+                    <Dialog open={!!editingClinic} onOpenChange={handleCloseModal}>
+                        <DialogContent className="sm:max-w-xl rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                    {t('clinics.edit', 'Edit Clinic')}
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            <form onSubmit={formik.handleSubmit} className="space-y-4 mt-2">
+                                {/* Clinic Name */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="name" className="text-xs font-medium">
+                                        {t('clinics.name', 'Clinic Name')}{' '}
+                                        <span className="text-rose-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        value={formik.values.name}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        className="h-10 rounded-xl"
+                                    />
+                                    {formik.touched.name && formik.errors.name && (
+                                        <InputError message={formik.errors.name} />
+                                    )}
+                                </div>
+
+                                {/* Type Select */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="type" className="text-xs font-medium">
+                                        {t('clinics.type', 'Clinic Type')}{' '}
+                                        <span className="text-rose-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={formik.values.type}
+                                        onValueChange={(val) => formik.setFieldValue('type', val)}
+                                    >
+                                        <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                            <SelectValue placeholder={t('clinics.type', 'Select Type')} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="personal">
+                                                {t('clinics.personal', 'Personal Clinic')}
+                                            </SelectItem>
+                                            <SelectItem value="medical_center">
+                                                {t('clinics.medical_center', 'Medical Center')}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Location Cascade */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-medium">
+                                            {t('clinics.country', 'Country')}
+                                        </Label>
+                                        <Select
+                                            value={String(formik.values.country_id)}
+                                            onValueChange={(val) => {
+                                                formik.setFieldValue('country_id', val);
+                                                formik.setFieldValue('governorate_id', '');
+                                                formik.setFieldValue('city_id', '');
+                                                setEditCountryId(val);
+                                                setEditGovId('');
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                                <SelectValue
+                                                    placeholder={t('clinics.select_country', 'Select Country')}
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {countries.map((c) => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>
+                                                        {isRtl ? c.name_ar : c.name_en}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-medium flex items-center gap-1">
-                                            <Phone size={14} className="text-gray-400" />
-                                            <span>{t('clinics.user_phone', 'Phone Number')}</span>
+                                        <Label className="text-xs font-medium">
+                                            {t('clinics.governorate', 'Governorate')}
+                                        </Label>
+                                        <Select
+                                            value={String(formik.values.governorate_id)}
+                                            onValueChange={(val) => {
+                                                formik.setFieldValue('governorate_id', val);
+                                                formik.setFieldValue('city_id', '');
+                                                setEditGovId(val);
+                                            }}
+                                            disabled={!formik.values.country_id}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                                <SelectValue
+                                                    placeholder={t(
+                                                        'clinics.select_governorate',
+                                                        'Select Governorate'
+                                                    )}
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {filteredGovs.map((g) => (
+                                                    <SelectItem key={g.id} value={String(g.id)}>
+                                                        {isRtl ? g.name_ar : g.name_en}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-medium">
+                                            {t('clinics.city', 'City')}
+                                        </Label>
+                                        <Select
+                                            value={String(formik.values.city_id)}
+                                            onValueChange={(val) => formik.setFieldValue('city_id', val)}
+                                            disabled={!formik.values.governorate_id}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                                <SelectValue
+                                                    placeholder={t('clinics.select_city', 'Select City')}
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {filteredCities.map((ct) => (
+                                                    <SelectItem key={ct.id} value={String(ct.id)}>
+                                                        {isRtl ? ct.name_ar : ct.name_en}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Phone & Address */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="phone" className="text-xs font-medium">
+                                            {t('clinics.phone', 'Phone')}
                                         </Label>
                                         <Input
+                                            id="phone"
                                             name="phone"
-                                            value={userFormik.values.phone}
-                                            onChange={userFormik.handleChange}
-                                            onBlur={userFormik.handleBlur}
-                                            placeholder="+123456789"
+                                            value={formik.values.phone}
+                                            onChange={formik.handleChange}
+                                            className="h-10 rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="address" className="text-xs font-medium">
+                                            {t('clinics.address', 'Address')}
+                                        </Label>
+                                        <Input
+                                            id="address"
+                                            name="address"
+                                            value={formik.values.address}
+                                            onChange={formik.handleChange}
                                             className="h-10 rounded-xl"
                                         />
                                     </div>
                                 </div>
-                            )}
 
-                            <DialogFooter className="pt-2">
+                                {/* Description */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="description" className="text-xs font-medium">
+                                        {t('clinics.description', 'Description')}
+                                    </Label>
+                                    <Input
+                                        id="description"
+                                        name="description"
+                                        value={formik.values.description}
+                                        onChange={formik.handleChange}
+                                        className="h-10 rounded-xl"
+                                    />
+                                </div>
+
+                                {/* Specialties checkboxes */}
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-medium">
+                                        {t('clinics.specialties', 'Specialties')}
+                                    </Label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-gray-100 dark:border-gray-800 p-3 rounded-xl max-h-36 overflow-y-auto">
+                                        {specialties.map((s) => {
+                                            const selected = formik.values.specialty_ids.includes(s.id);
+                                            return (
+                                                <div
+                                                    key={s.id}
+                                                    onClick={() => handleToggleSpecialty(s.id)}
+                                                    className={`p-2 rounded-lg border text-xs font-medium flex items-center justify-between cursor-pointer transition-all ${selected
+                                                            ? 'border-primary bg-primary/10 text-primary'
+                                                            : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                >
+                                                    <span>{isRtl ? s.name_ar : s.name_en}</span>
+                                                    {selected && <Check size={14} className="text-primary" />}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Active Switch */}
+                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {t('countries.active', 'Active')}
+                                    </span>
+                                    <Switch
+                                        checked={formik.values.is_active}
+                                        onCheckedChange={(val) => formik.setFieldValue('is_active', val)}
+                                    />
+                                </div>
+
+                                <DialogFooter className="pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleCloseModal}
+                                        className="rounded-xl h-10 px-4 cursor-pointer"
+                                    >
+                                        {t('common.cancel', 'Cancel')}
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={formik.isSubmitting}
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 px-5 font-medium cursor-pointer"
+                                    >
+                                        {formik.isSubmitting
+                                            ? t('common.saving', 'Saving...')
+                                            : t('common.save', 'Save Changes')}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Delete Confirmation Modal */}
+                    <Dialog open={!!deletingClinic} onOpenChange={() => setDeletingClinic(null)}>
+                        <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-gray-900">
+                            <DialogHeader>
+                                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                    {t('clinics.delete', 'Delete Clinic')}
+                                </DialogTitle>
+                                <DialogDescription className="text-sm text-gray-500 mt-2">
+                                    {t(
+                                        'clinics.delete_confirm',
+                                        'Are you sure you want to delete this clinic?'
+                                    )}{' '}
+                                    <strong className="text-gray-900 dark:text-gray-100">
+                                        {deletingClinic?.name}
+                                    </strong>
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <DialogFooter className="gap-2 sm:gap-0 mt-4">
                                 <Button
-                                    type="button"
                                     variant="outline"
-                                    onClick={() => setSelectedClinicForUsers(null)}
+                                    onClick={() => setDeletingClinic(null)}
+                                    disabled={isDeleting}
                                     className="rounded-xl h-10 px-4 cursor-pointer"
                                 >
                                     {t('common.cancel', 'Cancel')}
                                 </Button>
                                 <Button
-                                    type="submit"
-                                    disabled={userFormik.isSubmitting}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-medium cursor-pointer"
+                                    variant="destructive"
+                                    onClick={handleDeleteClinic}
+                                    disabled={isDeleting}
+                                    className="rounded-xl h-10 px-4 font-medium cursor-pointer"
                                 >
-                                    {userFormik.isSubmitting
-                                        ? t('common.saving', 'Saving...')
-                                        : t('clinics.add_user', 'Add User')}
+                                    {isDeleting
+                                        ? t('common.deleting', 'Deleting...')
+                                        : t('common.delete', 'Delete')}
                                 </Button>
                             </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Edit Clinic Modal */}
-                <Dialog open={!!editingClinic} onOpenChange={handleCloseModal}>
-                    <DialogContent className="sm:max-w-xl rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                {t('clinics.edit', 'Edit Clinic')}
-                            </DialogTitle>
-                        </DialogHeader>
-
-                        <form onSubmit={formik.handleSubmit} className="space-y-4 mt-2">
-                            {/* Clinic Name */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="name" className="text-xs font-medium">
-                                    {t('clinics.name', 'Clinic Name')}{' '}
-                                    <span className="text-rose-500">*</span>
-                                </Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    value={formik.values.name}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    className="h-10 rounded-xl"
-                                />
-                                {formik.touched.name && formik.errors.name && (
-                                    <InputError message={formik.errors.name} />
-                                )}
-                            </div>
-
-                            {/* Type Select */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="type" className="text-xs font-medium">
-                                    {t('clinics.type', 'Clinic Type')}{' '}
-                                    <span className="text-rose-500">*</span>
-                                </Label>
-                                <Select
-                                    value={formik.values.type}
-                                    onValueChange={(val) => formik.setFieldValue('type', val)}
-                                >
-                                    <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                        <SelectValue placeholder={t('clinics.type', 'Select Type')} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="personal">
-                                            {t('clinics.personal', 'Personal Clinic')}
-                                        </SelectItem>
-                                        <SelectItem value="medical_center">
-                                            {t('clinics.medical_center', 'Medical Center')}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Location Cascade */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-medium">
-                                        {t('clinics.country', 'Country')}
-                                    </Label>
-                                    <Select
-                                        value={String(formik.values.country_id)}
-                                        onValueChange={(val) => {
-                                            formik.setFieldValue('country_id', val);
-                                            formik.setFieldValue('governorate_id', '');
-                                            formik.setFieldValue('city_id', '');
-                                            setEditCountryId(val);
-                                            setEditGovId('');
-                                        }}
-                                    >
-                                        <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                            <SelectValue
-                                                placeholder={t('clinics.select_country', 'Select Country')}
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {countries.map((c) => (
-                                                <SelectItem key={c.id} value={String(c.id)}>
-                                                    {isRtl ? c.name_ar : c.name_en}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-medium">
-                                        {t('clinics.governorate', 'Governorate')}
-                                    </Label>
-                                    <Select
-                                        value={String(formik.values.governorate_id)}
-                                        onValueChange={(val) => {
-                                            formik.setFieldValue('governorate_id', val);
-                                            formik.setFieldValue('city_id', '');
-                                            setEditGovId(val);
-                                        }}
-                                        disabled={!formik.values.country_id}
-                                    >
-                                        <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                            <SelectValue
-                                                placeholder={t(
-                                                    'clinics.select_governorate',
-                                                    'Select Governorate'
-                                                )}
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {filteredGovs.map((g) => (
-                                                <SelectItem key={g.id} value={String(g.id)}>
-                                                    {isRtl ? g.name_ar : g.name_en}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-medium">
-                                        {t('clinics.city', 'City')}
-                                    </Label>
-                                    <Select
-                                        value={String(formik.values.city_id)}
-                                        onValueChange={(val) => formik.setFieldValue('city_id', val)}
-                                        disabled={!formik.values.governorate_id}
-                                    >
-                                        <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                                            <SelectValue
-                                                placeholder={t('clinics.select_city', 'Select City')}
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {filteredCities.map((ct) => (
-                                                <SelectItem key={ct.id} value={String(ct.id)}>
-                                                    {isRtl ? ct.name_ar : ct.name_en}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            {/* Phone & Address */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="phone" className="text-xs font-medium">
-                                        {t('clinics.phone', 'Phone')}
-                                    </Label>
-                                    <Input
-                                        id="phone"
-                                        name="phone"
-                                        value={formik.values.phone}
-                                        onChange={formik.handleChange}
-                                        className="h-10 rounded-xl"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="address" className="text-xs font-medium">
-                                        {t('clinics.address', 'Address')}
-                                    </Label>
-                                    <Input
-                                        id="address"
-                                        name="address"
-                                        value={formik.values.address}
-                                        onChange={formik.handleChange}
-                                        className="h-10 rounded-xl"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="description" className="text-xs font-medium">
-                                    {t('clinics.description', 'Description')}
-                                </Label>
-                                <Input
-                                    id="description"
-                                    name="description"
-                                    value={formik.values.description}
-                                    onChange={formik.handleChange}
-                                    className="h-10 rounded-xl"
-                                />
-                            </div>
-
-                            {/* Specialties checkboxes */}
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium">
-                                    {t('clinics.specialties', 'Specialties')}
-                                </Label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-gray-100 dark:border-gray-800 p-3 rounded-xl max-h-36 overflow-y-auto">
-                                    {specialties.map((s) => {
-                                        const selected = formik.values.specialty_ids.includes(s.id);
-                                        return (
-                                            <div
-                                                key={s.id}
-                                                onClick={() => handleToggleSpecialty(s.id)}
-                                                className={`p-2 rounded-lg border text-xs font-medium flex items-center justify-between cursor-pointer transition-all ${
-                                                    selected
-                                                        ? 'border-orange-500 bg-orange-50/50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300'
-                                                        : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'
-                                                }`}
-                                            >
-                                                <span>{isRtl ? s.name_ar : s.name_en}</span>
-                                                {selected && <Check size={14} className="text-orange-600" />}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Active Switch */}
-                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {t('countries.active', 'Active')}
-                                </span>
-                                <Switch
-                                    checked={formik.values.is_active}
-                                    onCheckedChange={(val) => formik.setFieldValue('is_active', val)}
-                                />
-                            </div>
-
-                            <DialogFooter className="pt-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleCloseModal}
-                                    className="rounded-xl h-10 px-4 cursor-pointer"
-                                >
-                                    {t('common.cancel', 'Cancel')}
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={formik.isSubmitting}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-medium cursor-pointer"
-                                >
-                                    {formik.isSubmitting
-                                        ? t('common.saving', 'Saving...')
-                                        : t('common.save', 'Save Changes')}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Delete Confirmation Modal */}
-                <Dialog open={!!deletingClinic} onOpenChange={() => setDeletingClinic(null)}>
-                    <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-gray-900">
-                        <DialogHeader>
-                            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                {t('clinics.delete', 'Delete Clinic')}
-                            </DialogTitle>
-                            <DialogDescription className="text-sm text-gray-500 mt-2">
-                                {t(
-                                    'clinics.delete_confirm',
-                                    'Are you sure you want to delete this clinic?'
-                                )}{' '}
-                                <strong className="text-gray-900 dark:text-gray-100">
-                                    {deletingClinic?.name}
-                                </strong>
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => setDeletingClinic(null)}
-                                disabled={isDeleting}
-                                className="rounded-xl h-10 px-4 cursor-pointer"
-                            >
-                                {t('common.cancel', 'Cancel')}
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={handleDeleteClinic}
-                                disabled={isDeleting}
-                                className="rounded-xl h-10 px-4 font-medium cursor-pointer"
-                            >
-                                {isDeleting
-                                    ? t('common.deleting', 'Deleting...')
-                                    : t('common.delete', 'Delete')}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
         </AdminLayout>
     );
