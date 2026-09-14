@@ -110,7 +110,8 @@
       "bookings": "Bookings",
       "medicines": "Medicines",
       "employees": "Employees",
-      "settings": "Settings"
+      "settings": "Settings",
+      "profile": "Profile"
     }
   },
   "admin": {
@@ -590,5 +591,23 @@
     "logout":"Logout",
     "profile":" Profile ",
     "login":"Sign In"
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "subtitle": "Manage your personal information, profile photo, and password.",
+    "basic_info": "Basic Information",
+    "basic_info_desc": "Update your name, email address, and phone number.",
+    "avatar": "Profile Photo",
+    "avatar_desc": "This will be displayed on your profile and navigation bar.",
+    "remove_avatar": "Remove current photo",
+    "security": "Security & Password",
+    "security_desc": "Ensure your account is using a secure password.",
+    "password_help": "Leave blank if you do not want to change your password.",
+    "new_password": "New Password",
+    "confirm_password": "Confirm New Password",
+    "password_placeholder": "Leave blank to keep current password",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "updated_success": "Profile updated successfully!"
   }
 }
