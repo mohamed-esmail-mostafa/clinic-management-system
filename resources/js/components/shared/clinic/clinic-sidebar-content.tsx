@@ -47,18 +47,18 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
                             onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                                 ${active
-                                    ? 'bg-white text-orange-600 shadow-sm'
+                                    ? 'bg-white text-primary shadow-sm'
                                     : 'text-orange-100 hover:bg-white/10 hover:text-white'
                                 }
                                 ${collapsed ? 'justify-center' : ''}`}
                             title={collapsed ? t(`${key}`) : undefined}
                         >
-                            <Icon size={18} className={`shrink-0 ${active ? 'text-orange-500' : ''}`} />
+                            <Icon size={18} className={`shrink-0 ${active ? 'text-primary' : ''}`} />
                             {!collapsed && (
                                 <span className="truncate">{t(`${key}`)}</span>
                             )}
                             {!collapsed && active && (
-                                <span className="ms-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                <span className="ms-auto w-1.5 h-1.5 rounded-full bg-primary" />
                             )}
                         </Link>
                     );

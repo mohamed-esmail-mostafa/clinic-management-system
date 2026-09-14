@@ -59,6 +59,8 @@ import {
     Stethoscope,
     Sliders,
 } from 'lucide-react';
+import PageHeader from '@/components/shared/page-header';
+import PatientStats from './components/patient-stats';
 
 interface Props {
     clinic?: any;
@@ -478,17 +480,9 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
     return (
         <ClinicLayout title={t('patients.title', 'Patients Management')}>
             <div className="space-y-6">
-                {/* Header & Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                            <Users className="h-7 w-7 text-primary" />
-                            {t('patients.title', 'Patients Management')}
-                        </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {t('patients.subtitle', 'View and manage clinic patients, contact info, and custom clinic details.')}
-                        </p>
-                    </div>
+
+
+                <PageHeader icon={<Users className="h-7 w-7 text-primary" />} title={t('patients.title', 'Patients Management')} subtitle={t('patients.subtitle', 'View and manage clinic patients, contact info, and custom clinic details.')}>
                     <Button
                         onClick={() => {
                             setEditingPatient(null);
@@ -500,74 +494,10 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                         <Plus className="h-4 w-4" />
                         {t('patients.add_new', 'Add New Patient')}
                     </Button>
-                </div>
+                </PageHeader>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('patients.total', 'Total Patients')}
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                                    {stats.total}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                <Users className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('patients.active_count', 'Active Patients')}
-                                </p>
-                                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                                    {stats.active}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600">
-                                <CheckCircle2 className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('patients.inactive_count', 'Inactive Patients')}
-                                </p>
-                                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 mt-1">
-                                    {stats.inactive}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500">
-                                <XCircle className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('patients.custom_fields_count', 'Clinic Custom Fields')}
-                                </p>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                                    {stats.customFieldsCount}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600">
-                                <Sliders className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+               <PatientStats stats={stats} />
 
                 {/* Filters & Search */}
                 <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
@@ -782,22 +712,20 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                         <button
                             type="button"
                             onClick={() => setActiveTab('basic')}
-                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                activeTab === 'basic'
+                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'basic'
                                     ? 'border-primary text-primary'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                            }`}
+                                }`}
                         >
                             {t('patients.tab_basic', 'Basic & Contact Info')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('emergency')}
-                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                activeTab === 'emergency'
+                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'emergency'
                                     ? 'border-primary text-primary'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                            }`}
+                                }`}
                         >
                             {t('patients.tab_emergency', 'Emergency & Notes')}
                         </button>
@@ -805,11 +733,10 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('custom')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${
-                                    activeTab === 'custom'
+                                className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'custom'
                                         ? 'border-primary text-primary'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                }`}
+                                    }`}
                             >
                                 <Sliders className="h-3.5 w-3.5" />
                                 {t('patients.tab_custom_fields', 'Clinic Custom Fields')}
@@ -1048,8 +975,8 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                 {formik.isSubmitting
                                     ? t('common.processing', 'Processing...')
                                     : editingPatient
-                                    ? t('common.save', 'Save Changes')
-                                    : t('common.save', 'Create Patient')}
+                                        ? t('common.save', 'Save Changes')
+                                        : t('common.save', 'Create Patient')}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -1082,22 +1009,20 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                             <button
                                 type="button"
                                 onClick={() => setViewTab('info')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                    viewTab === 'info'
+                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'info'
                                         ? 'border-primary text-primary'
                                         : 'border-transparent text-gray-500'
-                                }`}
+                                    }`}
                             >
                                 {t('patients.tab_basic', 'Personal Info')}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setViewTab('emergency')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                    viewTab === 'emergency'
+                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'emergency'
                                         ? 'border-primary text-primary'
                                         : 'border-transparent text-gray-500'
-                                }`}
+                                    }`}
                             >
                                 {t('patients.tab_emergency', 'Emergency & Notes')}
                             </button>
@@ -1105,11 +1030,10 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                 <button
                                     type="button"
                                     onClick={() => setViewTab('custom')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                        viewTab === 'custom'
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'custom'
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500'
-                                    }`}
+                                        }`}
                                 >
                                     {t('patients.tab_custom_fields', 'Custom Fields')}
                                 </button>

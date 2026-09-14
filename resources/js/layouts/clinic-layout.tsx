@@ -32,7 +32,7 @@ export default function ClinicLayout({ children, title }: Props) {
             {/* Desktop sidebar */}
             <aside
                 className={`hidden lg:flex flex-col fixed top-0 bottom-0 z-30 transition-all duration-300 ease-in-out
-                    bg-linear-to-b from-orange-500 to-orange-600 shadow-xl
+                    bg-primary shadow-xl
                     ${collapsed ? 'w-16' : 'w-60'}
                     ${isRtl ? 'right-0' : 'left-0'}`}
             >
@@ -41,7 +41,7 @@ export default function ClinicLayout({ children, title }: Props) {
                     onClick={() => setCollapsed(c => !c)}
                     className={`absolute top-16 -translate-y-1/2 ${isRtl ? '-left-3' : '-right-3'}
                         w-6 h-6 rounded-full bg-white shadow-md border border-gray-100
-                        flex items-center justify-center text-orange-500
+                        flex items-center justify-center text-primary
                         hover:bg-orange-50 transition-colors z-10`}
                 >
                     {(collapsed && !isRtl) || (!collapsed && isRtl)
@@ -61,7 +61,7 @@ export default function ClinicLayout({ children, title }: Props) {
             {/* Mobile sidebar */}
             <aside
                 className={`fixed top-0 bottom-0 z-50 w-64 lg:hidden transition-transform duration-300
-                    bg-linear-to-b from-orange-500 to-orange-600 shadow-xl
+                    bg-primary shadow-xl
                     ${isRtl ? 'right-0' : 'left-0'}
                     ${mobileOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}
             >

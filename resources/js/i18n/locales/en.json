@@ -452,7 +452,9 @@
     "remove": "Remove",
     "upload-image": "Upload Image",
     "file-size-limit": "PNG, JPG, WEBP up to 5MB",
-    "choose-file": "Choose File"
+    "choose-file": "Choose File",
+    "admin-dashboard":"Admin Dashboard",
+    "clinic-dashboard":"Clinic Dashboard"
   },
   "website_settings": {
     "title": "Website Settings",

@@ -452,7 +452,9 @@
     "remove": "إزالة",
     "upload-image": "رفع صورة",
     "file-size-limit": "PNG, JPG, WEBP حتى 5 ميجابايت",
-    "choose-file": "اختيار ملف"
+    "choose-file": "اختيار ملف",
+    "admin-dashboard":" لوحة تحكم الادمن ",
+    "clinic-dashboard":" لوحة تحكم العيادة "
   },
   "website_settings": {
     "title": "إعدادات الموقع",

@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BookDashedIcon, LogOut, Store as StoreIcon, User } from 'lucide-react';
+import { BookDashedIcon, DatabaseIcon, LogOut, Store as StoreIcon, User } from 'lucide-react';
 import { Button } from '../ui/button';
 import useImport from '@/hooks/use-import';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
@@ -13,12 +13,11 @@ export default function AuthMenu() {
     const { auth } = useAuth()
     const { t } = useImport();
     const cleanup = useMobileNavigation();
-   console.log("auth",auth)
     const handleLogout = () => {
         cleanup();
         router.flushAll();
     };
-
+const role = auth?.user?.role?.slug
     return (
         <div>
             {auth?.user ? (<DropdownMenu>
@@ -47,33 +46,32 @@ export default function AuthMenu() {
 
 
 
-                    <DropdownMenuItem asChild>
-
-                        {/* <Link href={`${auth.user.role === "admin" ? "admin/dashboard" : "/vendor/stores/page"}`}>
-                            <BookDashedIcon className="mr-2 h-4 w-4" />
-                            <span>
-                                {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
-
-                            </span>
-                        </Link> */}
-
-                        {/* {auth?.user?.role?.slug === "admin" ?(<Link href="/admin/website-settings">
-                            <BookDashedIcon className="mr-2 h-4 w-4" />
-                            <span>
-                                {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
-
-                            </span>
-                        </Link>):null } */}
 
 
-                         {/* {auth?.user?.role?.slug === "doctor" ?(<Link href="/admin/website-settings">
-                            <BookDashedIcon className="mr-2 h-4 w-4" />
-                            <span>
-                                {`${auth.user.role === "admin" ? t("auth.admin-dashboard") : t("auth.store-dashboard")}`}
 
-                            </span>
-                        </Link>):null } */}
-                    </DropdownMenuItem>
+                    {auth?.user?.role?.slug === "admin" ? (
+                        <DropdownMenuItem >
+
+                            <Link href={"/admin/website-settings"} className='flex items-center'>
+                                <DatabaseIcon className="mr-2 h-4 w-4" />
+                                <span>{t('common.admin-dashboard')}</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    ) : null}
+
+
+                    {auth?.user?.role?.slug === "doctor" || auth?.user?.role?.slug === "nurse" || auth?.user?.role?.slug === "receptionist" ? (
+                        <DropdownMenuItem >
+
+                            <Link href={"/clinic/overview"} className='flex items-center'>
+                                <DatabaseIcon className="mr-2 h-4 w-4" />
+                                <span>{t('common.clinic-dashboard')}</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    ) : null}
+
+
+
                     <DropdownMenuItem asChild>
 
                         <Link href={""}>
@@ -81,8 +79,9 @@ export default function AuthMenu() {
                             <span>{t('auth.profile')}</span>
                         </Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem  className="text-red-600 focus:text-red-600">
+                    <DropdownMenuItem className="text-red-600 focus:text-red-600">
                         {/* <LogOut className="mr-2 h-4 w-4" />
                         <span>{t('auth.logout')}</span> */}
                         <Link
@@ -93,7 +92,7 @@ export default function AuthMenu() {
                             data-test="logout-button"
                         >
                             <LogOut className="mr-2" />
-                            <span>{t('auth.logout')}</span> 
+                            <span>{t('auth.logout')}</span>
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
