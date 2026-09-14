@@ -16,6 +16,8 @@ class Booking extends Model
         'clinic_id',
         'patient_id',
         'doctor_id',
+        'name',
+        'phone',
         'appointment_date',
         'appointment_time',
         'type',

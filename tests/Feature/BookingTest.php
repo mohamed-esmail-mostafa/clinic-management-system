@@ -42,6 +42,33 @@ test('authenticated user can create a booking', function () {
     ]);
 });
 
+test('authenticated user can create a booking for an unregistered patient', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('clinics.booking.store', $clinic->slug), [
+        'name' => 'John Doe Walk-in',
+        'phone' => '0123456789',
+        'appointment_date' => '2026-09-16',
+        'appointment_time' => '11:00',
+        'type' => 'new',
+        'status' => 'pending',
+        'booking_source' => 'reception',
+        'notes' => 'Walk-in without prior file',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('bookings', [
+        'clinic_id' => $clinic->id,
+        'patient_id' => null,
+        'name' => 'John Doe Walk-in',
+        'phone' => '0123456789',
+        'doctor_id' => null,
+        'appointment_date' => '2026-09-16',
+        'appointment_time' => '11:00',
+    ]);
+});
+
 test('authenticated user can update a booking', function () {
     $user = User::factory()->create();
     $clinic = Clinic::factory()->create();

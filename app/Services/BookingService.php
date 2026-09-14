@@ -23,6 +23,8 @@ class BookingService
 
         $booking->clinic_id = $clinic->id;
         $booking->patient_id = ! empty($data['patient_id']) ? $data['patient_id'] : null;
+        $booking->name = ! empty($data['name']) ? $data['name'] : null;
+        $booking->phone = ! empty($data['phone']) ? $data['phone'] : null;
         $booking->doctor_id = ! empty($data['doctor_id']) ? $data['doctor_id'] : null;
         $booking->appointment_date = $data['appointment_date'];
         $booking->appointment_time = $data['appointment_time'];
@@ -40,6 +42,8 @@ class BookingService
     public function updateBooking(Booking $booking, array $data): Booking
     {
         $booking->patient_id = ! empty($data['patient_id']) ? $data['patient_id'] : null;
+        $booking->name = ! empty($data['name']) ? $data['name'] : null;
+        $booking->phone = ! empty($data['phone']) ? $data['phone'] : null;
         $booking->doctor_id = ! empty($data['doctor_id']) ? $data['doctor_id'] : null;
         $booking->appointment_date = $data['appointment_date'];
         $booking->appointment_time = $data['appointment_time'];

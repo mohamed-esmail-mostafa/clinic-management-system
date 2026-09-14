@@ -25,6 +25,8 @@ class BookingFactory extends Factory
         return [
             'clinic_id' => Clinic::factory(),
             'patient_id' => Patient::factory(),
+            'name' => null,
+            'phone' => null,
             'doctor_id' => User::factory(),
             'appointment_date' => fake()->date(),
             'appointment_time' => fake()->time('H:i'),

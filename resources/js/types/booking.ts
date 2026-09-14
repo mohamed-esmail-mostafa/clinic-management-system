@@ -10,6 +10,8 @@ export interface Booking {
     clinic_id: number;
     patient_id?: number | null;
     doctor_id?: number | null;
+    name?: string | null;
+    phone?: string | null;
     appointment_date: string;
     appointment_time: string;
     type: BookingType;
@@ -26,6 +28,8 @@ export interface Booking {
 export interface BookingFormValues {
     patient_id?: string | number;
     doctor_id?: string | number;
+    name?: string;
+    phone?: string;
     appointment_date: string;
     appointment_time: string;
     type: BookingType;

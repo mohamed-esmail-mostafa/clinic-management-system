@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use Cloudinary\Cloudinary;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Format;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\Format;
+use Intervention\Image\ImageManager;
 
 class CloudinaryService
 {
@@ -14,7 +14,7 @@ class CloudinaryService
         return new Cloudinary([
             'cloud' => [
                 'cloud_name' => config('services.cloudinary.cloud_name'),
-                'api_key'    => config('services.cloudinary.api_key'),
+                'api_key' => config('services.cloudinary.api_key'),
                 'api_secret' => config('services.cloudinary.api_secret'),
             ],
         ]);
@@ -41,7 +41,7 @@ class CloudinaryService
             );
 
             $tempPath = storage_path(
-                'app/temp_' . uniqid() . '.webp'
+                'app/temp_'.uniqid().'.webp'
             );
 
             $encoded->save($tempPath);
@@ -56,8 +56,8 @@ class CloudinaryService
             }
 
             return [
-                "url" => $result['secure_url'],
-                "public_id" => $result['public_id']
+                'url' => $result['secure_url'],
+                'public_id' => $result['public_id'],
             ];
         } catch (\Exception $e) {
             return null;
@@ -66,12 +66,13 @@ class CloudinaryService
 
     public function deleteFromCloudinary(?string $publicId): bool
     {
-        if (!$publicId) {
+        if (! $publicId) {
             return false;
         }
-        
+
         try {
             $this->cloudinary()->uploadApi()->destroy($publicId);
+
             return true;
         } catch (\Exception $e) {
             return false;

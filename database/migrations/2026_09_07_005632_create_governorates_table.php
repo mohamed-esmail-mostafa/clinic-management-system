@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('governorates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("country_id")->constrained()->cascadeOnDelete();
+            $table->foreignId('country_id')->constrained()->cascadeOnDelete();
             $table->string('name_ar');
             $table->string('name_en');
             $table->boolean('is_active')->default(true);

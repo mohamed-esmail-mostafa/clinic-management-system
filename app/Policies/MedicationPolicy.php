@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Medication;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class MedicationPolicy
 {

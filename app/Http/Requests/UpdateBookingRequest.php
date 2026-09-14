@@ -24,6 +24,8 @@ class UpdateBookingRequest extends FormRequest
     {
         return [
             'patient_id' => ['nullable', 'exists:patients,id'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
             'doctor_id' => ['nullable', 'exists:users,id'],
             'appointment_date' => ['required', 'date'],
             'appointment_time' => ['required', 'string'],
