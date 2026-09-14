@@ -27,9 +27,8 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
                 {!collapsed && (
                     <div className="min-w-0">
                         <p className="text-white font-bold text-sm truncate leading-tight">
-                            {authClinic.name}
+                            {authClinic?.name || 'Clinic'}
                         </p>
-                       
                     </div>
                 )}
             </div>

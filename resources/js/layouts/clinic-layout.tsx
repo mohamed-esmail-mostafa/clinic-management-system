@@ -23,11 +23,9 @@ export default function ClinicLayout({ children, title }: Props) {
    
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
-  
-   
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col lg:flex-row w-full max-w-full overflow-x-clip" dir={isRtl ? 'rtl' : 'ltr'}>
 
             {/* Desktop sidebar */}
             <aside
@@ -53,33 +51,35 @@ export default function ClinicLayout({ children, title }: Props) {
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
                     onClick={() => setMobileOpen(false)}
                 />
             )}
 
             {/* Mobile sidebar */}
             <aside
-                className={`fixed top-0 bottom-0 z-50 w-64 lg:hidden transition-transform duration-300
-                    bg-primary shadow-xl
+                className={`fixed top-0 bottom-0 z-50 w-64 lg:hidden transition-all duration-300 ease-in-out
+                    bg-primary shadow-2xl
                     ${isRtl ? 'right-0' : 'left-0'}
-                    ${mobileOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}
+                    ${mobileOpen 
+                        ? 'translate-x-0 visible opacity-100 pointer-events-auto' 
+                        : (isRtl ? 'translate-x-full invisible opacity-0 pointer-events-none' : '-translate-x-full invisible opacity-0 pointer-events-none')}`}
             >
                 <button
                     onClick={() => setMobileOpen(false)}
-                    className={`absolute top-4 ${isRtl ? 'left-3' : 'right-3'} text-white`}
+                    className={`absolute top-4 ${isRtl ? 'left-3' : 'right-3'} text-white p-1 rounded-md hover:bg-white/10`}
                 >
                     <X size={20} />
                 </button>
-               <ClinicSidebarContent collapsed={collapsed} setMobileOpen={setMobileOpen} />
+               <ClinicSidebarContent collapsed={false} setMobileOpen={setMobileOpen} />
             </aside>
 
             {/* Main area */}
-            <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${collapsed ? 'lg:ms-16' : 'lg:ms-60'}`}>
+            <div className={`flex-1 flex flex-col min-h-screen w-full min-w-0 max-w-full transition-all duration-300 ${collapsed ? 'lg:ms-16' : 'lg:ms-60'}`}>
                 {/* Top bar */}
-               <ClinicHeaderLayout setMobileOpen={setMobileOpen} />
+               <ClinicHeaderLayout setMobileOpen={setMobileOpen} title={title} />
 
-                <main className="flex-1 p-5 md:p-6">
+                <main className="flex-1 p-3.5 sm:p-5 md:p-6 w-full min-w-0 max-w-full">
                     {children}
                 </main>
             </div>
