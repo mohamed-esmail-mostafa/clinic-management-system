@@ -100,8 +100,8 @@
     "user_added_success": "تم إضافة المستخدم إلى العيادة بنجاح!",
     "user_removed_success": "تم إزالة المستخدم من العيادة بنجاح!",
     "confirm_remove_user": "هل أنت تأكد من إزالة هذا المستخدم من العيادة؟",
-    "basic_info": "البيانات الأساسية", 
-    "image": "صورة العيادة", 
+    "basic_info": "البيانات الأساسية",
+    "image": "صورة العيادة",
     "location_details": "تفاصيل الموقع",
     "sidebar": {
       "overview": " نظرة عامه ",
@@ -331,7 +331,11 @@
     "all_insurance": "جميع حالات التأمين",
     "all_statuses": "جميع الحالات",
     "with_insurance": "مؤمن عليه",
-    "without_insurance": "بدون تأمين"
+    "without_insurance": "بدون تأمين",
+    "tab_custom_fields": "معلومات إضافية",
+    "emergency_name": "اسم جهة الاتصال في حالات الطوارئ",
+    "emergency_phone": "هاتف جهة الاتصال في حالات الطوارئ",
+    "emergency_relation": "صلة القرابة"
   },
   "medications": {
     "title": "إدارة الأدوية",
@@ -453,8 +457,13 @@
     "upload-image": "رفع صورة",
     "file-size-limit": "PNG, JPG, WEBP حتى 5 ميجابايت",
     "choose-file": "اختيار ملف",
-    "admin-dashboard":" لوحة تحكم الادمن ",
-    "clinic-dashboard":" لوحة تحكم العيادة "
+    "admin-dashboard": " لوحة تحكم الادمن ",
+    "clinic-dashboard": " لوحة تحكم العيادة ",
+    "go_back": " العودة للخلف ",
+     "previous":" السابق ",
+    "next":" التالي ",
+    "create":" اضافة ",
+     "save_changes":"حفظ التغييرات"
   },
   "website_settings": {
     "title": "إعدادات الموقع",
@@ -571,8 +580,8 @@
     "creating_account": "جاري إنشاء الحساب...",
     "already_have_account": "لديك حساب بالفعل؟",
     "login_link": "تسجيل الدخول",
-    "logout":" تسجيل الخروج ",
-    "profile":" الملف الشخصي ",
-    "login":"تسجيل الدخول"
+    "logout": " تسجيل الخروج ",
+    "profile": " الملف الشخصي ",
+    "login": "تسجيل الدخول"
   }
 }

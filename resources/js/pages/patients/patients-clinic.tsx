@@ -1,9 +1,7 @@
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import ClinicLayout from '@/layouts/clinic-layout';
 import React, { useState, useMemo } from 'react';
-import { Patient, PatientField, PatientFormValues } from '@/types/patient';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { Patient, PatientField } from '@/types/patient';
 import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
 import useImport from '@/hooks/use-import';
@@ -40,6 +38,23 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
+import { flexRender, SortingState } from '@tanstack/react-table';
+import {
+    useLegacyTable as useReactTable,
+    getCoreRowModel,
+    getSortedRowModel,
+    getPaginationRowModel,
+    LegacyColumnDef as ColumnDef,
+} from '@tanstack/react-table/legacy';
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 // Icons
 import {
     Plus,
@@ -47,8 +62,6 @@ import {
     Trash2,
     Search,
     Users,
-    CheckCircle2,
-    XCircle,
     Eye,
     Phone,
     MapPin,
@@ -58,6 +71,13 @@ import {
     User,
     Stethoscope,
     Sliders,
+    ArrowUpDown,
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    MoreHorizontal,
+    Heart,
 } from 'lucide-react';
 import PageHeader from '@/components/shared/page-header';
 import PatientStats from './components/patient-stats';
@@ -80,13 +100,10 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
     const [genderFilter, setGenderFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Modals state
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+    // Modals state (Viewing details & Deleting)
     const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
     const [deletingPatient, setDeletingPatient] = useState<Patient | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [activeTab, setActiveTab] = useState<'basic' | 'emergency' | 'custom'>('basic');
     const [viewTab, setViewTab] = useState<'info' | 'emergency' | 'custom'>('info');
 
     // Filter patients
@@ -123,129 +140,6 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
         };
     }, [patients, custom_fields]);
 
-    // Build initial custom field values for Formik
-    const initialCustomFields = useMemo(() => {
-        const fieldValuesObj: Record<number, any> = {};
-        const patientValues = editingPatient?.field_values || (editingPatient as any)?.fieldValues || [];
-
-        custom_fields.forEach((field) => {
-            const matchedValue = patientValues.find((fv: any) => fv.patient_field_id === field.id);
-            if (matchedValue && matchedValue.value !== null && matchedValue.value !== undefined) {
-                if (field.type === 'checkbox') {
-                    try {
-                        fieldValuesObj[field.id] = JSON.parse(matchedValue.value);
-                    } catch {
-                        fieldValuesObj[field.id] = matchedValue.value ? [matchedValue.value] : [];
-                    }
-                } else {
-                    fieldValuesObj[field.id] = matchedValue.value;
-                }
-            } else {
-                fieldValuesObj[field.id] = field.type === 'checkbox' ? [] : '';
-            }
-        });
-
-        return fieldValuesObj;
-    }, [editingPatient, custom_fields]);
-
-    // Formik Validation Schema
-    const validationSchema = useMemo(() => {
-        const customFieldSchema: Record<string, any> = {};
-        custom_fields.forEach((field) => {
-            if (field.is_required) {
-                if (field.type === 'checkbox') {
-                    customFieldSchema[field.id] = Yup.array().min(1, t('common.required', 'This field is required'));
-                } else {
-                    customFieldSchema[field.id] = Yup.string().required(t('common.required', 'This field is required'));
-                }
-            }
-        });
-
-        return Yup.object({
-            first_name: Yup.string().trim().required(t('common.required', 'This field is required')),
-            last_name: Yup.string().trim().required(t('common.required', 'This field is required')),
-            phone: Yup.string().nullable(),
-            date_of_birth: Yup.string().nullable(),
-            gender: Yup.string().nullable(),
-            is_active: Yup.boolean().default(true),
-            custom_fields: Yup.object(customFieldSchema),
-        });
-    }, [custom_fields, t]);
-
-    const initialValues: PatientFormValues = useMemo(() => {
-        return {
-            patient_number: editingPatient?.patient_number || '',
-            first_name: editingPatient?.first_name || '',
-            last_name: editingPatient?.last_name || '',
-            gender: editingPatient?.gender || '',
-            date_of_birth: editingPatient?.date_of_birth || '',
-            phone: editingPatient?.phone || '',
-            secondary_phone: editingPatient?.secondary_phone || '',
-            address: editingPatient?.address || '',
-            emergency_contact_name: editingPatient?.emergency_contact_name || '',
-            emergency_contact_phone: editingPatient?.emergency_contact_phone || '',
-            emergency_contact_relation: editingPatient?.emergency_contact_relation || '',
-            blood_type: editingPatient?.blood_type || '',
-            notes: editingPatient?.notes || '',
-            marital_status: editingPatient?.marital_status || '',
-            is_active: editingPatient ? Boolean(editingPatient.is_active) : true,
-            custom_fields: initialCustomFields,
-        };
-    }, [editingPatient, initialCustomFields]);
-
-    const formik = useFormik<PatientFormValues>({
-        initialValues,
-        enableReinitialize: true,
-        validationSchema,
-        onSubmit: (values, { setSubmitting, resetForm }) => {
-            if (!clinicSlug) {
-                toast.error('Clinic slug is missing.');
-                setSubmitting(false);
-                return;
-            }
-
-            if (editingPatient) {
-                // Update Patient
-                router.put(`/clinic/${clinicSlug}/patients/${editingPatient.id}`, values as any, {
-                    onSuccess: () => {
-                        toast.success(t('patients.updated_success', 'Patient updated successfully!'));
-                        handleCloseModal();
-                    },
-                    onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error updating patient');
-                    },
-                    onFinish: () => setSubmitting(false),
-                });
-            } else {
-                // Create Patient
-                router.post(`/clinic/${clinicSlug}/patients`, values as any, {
-                    onSuccess: () => {
-                        toast.success(t('patients.created_success', 'Patient created successfully!'));
-                        handleCloseModal();
-                        resetForm();
-                    },
-                    onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error creating patient');
-                    },
-                    onFinish: () => setSubmitting(false),
-                });
-            }
-        },
-    });
-
-    const handleCloseModal = () => {
-        setIsAddModalOpen(false);
-        setEditingPatient(null);
-        setActiveTab('basic');
-        formik.resetForm();
-    };
-
-    const handleOpenEdit = (patient: Patient) => {
-        setEditingPatient(patient);
-        setIsAddModalOpen(true);
-        setActiveTab('basic');
-    };
-
     const handleToggleStatus = (patient: Patient) => {
         if (!clinicSlug) return;
         router.patch(`/clinic/${clinicSlug}/patients/${patient.id}/toggle-status`, {}, {
@@ -280,183 +174,228 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
         return `${f}${l}` || 'P';
     };
 
-    const renderCustomFieldInput = (field: PatientField) => {
-        const fieldName = `custom_fields.${field.id}`;
-        const value = formik.values.custom_fields?.[field.id] ?? (field.type === 'checkbox' ? [] : '');
-        const touched = (formik.touched.custom_fields as any)?.[field.id];
-        const error = (formik.errors.custom_fields as any)?.[field.id];
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
 
-        switch (field.type) {
-            case 'textarea':
-                return (
-                    <div key={field.id} className="space-y-1 md:col-span-2">
-                        <Label htmlFor={`custom_field_${field.id}`}>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <textarea
-                            id={`custom_field_${field.id}`}
-                            name={fieldName}
-                            rows={3}
-                            value={value}
-                            onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
-                            className="w-full p-2 text-sm border rounded-md bg-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
-                            placeholder={field.label}
-                        />
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'select':
-                return (
-                    <div key={field.id} className="space-y-1">
-                        <Label htmlFor={`custom_field_${field.id}`}>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Select
-                            value={value || ''}
-                            onValueChange={(val) => formik.setFieldValue(fieldName, val)}
-                        >
-                            <SelectTrigger id={`custom_field_${field.id}`} className="mt-1">
-                                <SelectValue placeholder={t('common.select', 'Select option')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {field.options?.map((opt) => (
-                                    <SelectItem key={opt.id || opt.value} value={opt.value}>
-                                        {opt.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'radio':
-                return (
-                    <div key={field.id} className="space-y-2 md:col-span-2">
-                        <Label>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <div className="flex flex-wrap gap-4 pt-1">
-                            {field.options?.map((opt) => (
-                                <label key={opt.id || opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name={fieldName}
-                                        value={opt.value}
-                                        checked={value === opt.value}
-                                        onChange={() => formik.setFieldValue(fieldName, opt.value)}
-                                        className="accent-primary"
-                                    />
-                                    <span>{opt.label}</span>
-                                </label>
-                            ))}
+    const columns = useMemo<ColumnDef<Patient>[]>(
+        () => [
+            {
+                accessorKey: 'patient_number',
+                header: ({ column }) => (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                        className="-ml-3 h-8 text-xs font-semibold data-[state=open]:bg-accent"
+                    >
+                        <span>{t('patients.patient_number', 'Patient')}</span>
+                        {column.getIsSorted() === 'asc' ? (
+                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+                        ) : (
+                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
+                        )}
+                    </Button>
+                ),
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
+                    return (
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9 bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0">
+                                <AvatarFallback>{getInitials(patient.first_name, patient.last_name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                    {fullName}
+                                </p>
+                                <p className="text-xs text-primary font-mono">
+                                    {patient.patient_number}
+                                </p>
+                            </div>
                         </div>
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'checkbox':
-                const selectedArr = Array.isArray(value) ? value : [];
-                return (
-                    <div key={field.id} className="space-y-2 md:col-span-2">
-                        <Label>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <div className="flex flex-wrap gap-4 pt-1">
-                            {field.options && field.options.length > 0 ? (
-                                field.options.map((opt) => {
-                                    const isChecked = selectedArr.includes(opt.value);
-                                    return (
-                                        <label key={opt.id || opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                value={opt.value}
-                                                checked={isChecked}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        formik.setFieldValue(fieldName, [...selectedArr, opt.value]);
-                                                    } else {
-                                                        formik.setFieldValue(
-                                                            fieldName,
-                                                            selectedArr.filter((val: string) => val !== opt.value)
-                                                        );
-                                                    }
-                                                }}
-                                                className="accent-primary rounded-xs"
-                                            />
-                                            <span>{opt.label}</span>
-                                        </label>
-                                    );
-                                })
-                            ) : (
-                                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={Boolean(value)}
-                                        onChange={(e) => formik.setFieldValue(fieldName, e.target.checked ? '1' : '')}
-                                        className="accent-primary rounded-xs"
-                                    />
-                                    <span>{field.label}</span>
-                                </label>
+                    );
+                },
+            },
+            {
+                accessorKey: 'phone',
+                header: () => <span className="text-xs font-semibold">{t('patients.phone', 'Contact Info')}</span>,
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    return (
+                        <div className="space-y-0.5 text-xs text-gray-600 dark:text-gray-300">
+                            {patient.phone && (
+                                <p className="flex items-center gap-1.5">
+                                    <Phone className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                    {patient.phone}
+                                </p>
+                            )}
+                            {patient.address && (
+                                <p className="flex items-center gap-1.5 text-gray-500">
+                                    <MapPin className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                    {patient.address}
+                                </p>
                             )}
                         </div>
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'number':
-                return (
-                    <div key={field.id} className="space-y-1">
-                        <Label htmlFor={`custom_field_${field.id}`}>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                            id={`custom_field_${field.id}`}
-                            name={fieldName}
-                            type="number"
-                            value={value}
-                            onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
-                            className="mt-1"
-                            placeholder={field.label}
-                        />
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'date':
-                return (
-                    <div key={field.id} className="space-y-1">
-                        <Label htmlFor={`custom_field_${field.id}`}>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                            id={`custom_field_${field.id}`}
-                            name={fieldName}
-                            type="date"
-                            value={value}
-                            onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
-                            className="mt-1"
-                        />
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-            case 'text':
-            default:
-                return (
-                    <div key={field.id} className="space-y-1">
-                        <Label htmlFor={`custom_field_${field.id}`}>
-                            {field.label} {field.is_required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                            id={`custom_field_${field.id}`}
-                            name={fieldName}
-                            type="text"
-                            value={value}
-                            onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
-                            className="mt-1"
-                            placeholder={field.label}
-                        />
-                        {touched && error && <p className="text-xs text-red-500">{String(error)}</p>}
-                    </div>
-                );
-        }
-    };
+                    );
+                },
+            },
+            {
+                id: 'gender_dob',
+                header: () => <span className="text-xs font-semibold">{t('patients.gender', 'Gender / DOB')}</span>,
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    return (
+                        <div className="text-xs space-y-1">
+                            {patient.gender && (
+                                <Badge variant="outline" className="capitalize text-[11px] font-normal">
+                                    {t(`patients.${patient.gender}`, patient.gender)}
+                                </Badge>
+                            )}
+                            {patient.date_of_birth && (
+                                <p className="text-gray-500 text-[11px] flex items-center gap-1">
+                                    <Calendar className="h-3 w-3 text-gray-400" />
+                                    {patient.date_of_birth}
+                                </p>
+                            )}
+                        </div>
+                    );
+                },
+            },
+            {
+                id: 'blood_marital',
+                header: () => <span className="text-xs font-semibold">{t('patients.blood_type', 'Blood & Marital')}</span>,
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    return (
+                        <div className="flex items-center gap-2">
+                            {patient.blood_type && (
+                                <Badge className="bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 font-bold text-[11px]">
+                                    {patient.blood_type}
+                                </Badge>
+                            )}
+                            {patient.marital_status && (
+                                <Badge variant="secondary" className="capitalize text-[11px]">
+                                    {t(`patients.${patient.marital_status}`, patient.marital_status)}
+                                </Badge>
+                            )}
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'is_active',
+                header: ({ column }) => (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                        className="-ml-3 h-8 text-xs font-semibold data-[state=open]:bg-accent"
+                    >
+                        <span>{t('patients.is_active', 'Status')}</span>
+                        {column.getIsSorted() === 'asc' ? (
+                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+                        ) : (
+                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
+                        )}
+                    </Button>
+                ),
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    return (
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                checked={patient.is_active}
+                                onCheckedChange={() => handleToggleStatus(patient)}
+                            />
+                            <Badge
+                                className={
+                                    patient.is_active
+                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
+                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
+                                }
+                            >
+                                {patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
+                            </Badge>
+                        </div>
+                    );
+                },
+            },
+            {
+                id: 'actions',
+                header: () => <div className="text-end text-xs font-semibold">{t('common.actions', 'Actions')}</div>,
+                cell: ({ row }) => {
+                    const patient = row.original;
+                    return (
+                        <div className="flex justify-end">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">Open menu</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}
+                                            className="flex items-center gap-2 cursor-pointer text-emerald-600 dark:text-emerald-400 font-medium"
+                                        >
+                                            <Stethoscope className="h-4 w-4" />
+                                            {t('visits.title', 'Patient Visits')}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setViewingPatient(patient)}
+                                        className="flex items-center gap-2 cursor-pointer"
+                                    >
+                                        <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                        {t('patients.view', 'View Details')}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}
+                                            className="flex items-center gap-2 cursor-pointer text-amber-600 dark:text-amber-400"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            {t('patients.edit', 'Edit Patient')}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => setDeletingPatient(patient)}
+                                        className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 font-medium"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        {t('patients.delete', 'Delete Patient')}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    );
+                },
+            },
+        ],
+        [clinicSlug, t]
+    );
+
+    const table = useReactTable({
+        data: filteredPatients,
+        columns,
+        state: {
+            sorting,
+            pagination,
+        },
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     const renderFieldValueDisplay = (field: PatientField, patient: Patient) => {
         const fieldValues = patient.field_values || (patient as any).fieldValues || [];
@@ -480,24 +419,21 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
     return (
         <ClinicLayout title={t('patients.title', 'Patients Management')}>
             <div className="space-y-6">
-
-
-                <PageHeader icon={<Users className="h-7 w-7 text-primary" />} title={t('patients.title', 'Patients Management')} subtitle={t('patients.subtitle', 'View and manage clinic patients, contact info, and custom clinic details.')}>
-                    <Button
-                        onClick={() => {
-                            setEditingPatient(null);
-                            setIsAddModalOpen(true);
-                            setActiveTab('basic');
-                        }}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm shrink-0"
-                    >
-                        <Plus className="h-4 w-4" />
-                        {t('patients.add_new', 'Add New Patient')}
-                    </Button>
+                <PageHeader
+                    icon={<Users className="h-7 w-7 text-primary" />}
+                    title={t('patients.title', 'Patients Management')}
+                    subtitle={t('patients.subtitle', 'View and manage clinic patients, contact info, and custom clinic details.')}
+                >
+                    <Link href={`/clinic/${clinicSlug}/patients/create`}>
+                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-xs shrink-0">
+                            <Plus className="h-4 w-4" />
+                            {t('patients.add_new', 'Add New Patient')}
+                        </Button>
+                    </Link>
                 </PageHeader>
 
                 {/* Stats Cards */}
-               <PatientStats stats={stats} />
+                <PatientStats stats={stats} />
 
                 {/* Filters & Search */}
                 <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
@@ -539,609 +475,409 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                     </CardContent>
                 </Card>
 
-                {/* Table */}
+                {/* Responsive View (Cards on mobile, TanStack Table on desktop) */}
                 <Card className="border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
-                            <TableRow>
-                                <TableHead>{t('patients.patient_number', 'Patient')}</TableHead>
-                                <TableHead>{t('patients.phone', 'Contact Info')}</TableHead>
-                                <TableHead>{t('patients.gender', 'Gender / DOB')}</TableHead>
-                                <TableHead>{t('patients.blood_type', 'Blood & Marital')}</TableHead>
-                                <TableHead>{t('patients.is_active', 'Status')}</TableHead>
-                                <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredPatients.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-10 text-gray-500 dark:text-gray-400">
-                                        <Users className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                        {t('patients.no_patients', 'No patients found.')}
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredPatients.map((patient) => {
-                                    const fullName = `${patient.first_name} ${patient.last_name}`;
-                                    return (
-                                        <TableRow key={patient.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-9 w-9 bg-primary/10 text-primary border border-primary/20 font-semibold">
-                                                        <AvatarFallback>{getInitials(patient.first_name, patient.last_name)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                                                            {fullName}
-                                                        </p>
-                                                        <p className="text-xs text-primary font-mono">
-                                                            {patient.patient_number}
-                                                        </p>
-                                                    </div>
+                    {/* Mobile View: Cards */}
+                    <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                        {table.getRowModel().rows.length === 0 ? (
+                            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                                <Users className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                {t('patients.no_patients', 'No patients found.')}
+                            </div>
+                        ) : (
+                            table.getRowModel().rows.map((row) => {
+                                const patient = row.original;
+                                const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
+                                return (
+                                    <div key={patient.id} className="p-4 space-y-3 bg-white dark:bg-gray-900">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10 bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0">
+                                                    <AvatarFallback>{getInitials(patient.first_name, patient.last_name)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900 dark:text-white text-base">
+                                                        {fullName}
+                                                    </p>
+                                                    <p className="text-xs text-primary font-mono font-medium">
+                                                        {patient.patient_number}
+                                                    </p>
                                                 </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="space-y-0.5 text-xs text-gray-600 dark:text-gray-300">
-                                                    {patient.phone && (
-                                                        <p className="flex items-center gap-1.5">
-                                                            <Phone className="h-3 w-3 text-gray-400" />
-                                                            {patient.phone}
-                                                        </p>
-                                                    )}
-                                                    {patient.address && (
-                                                        <p className="flex items-center gap-1.5 text-gray-500">
-                                                            <MapPin className="h-3 w-3 text-gray-400" />
-                                                            {patient.address}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="text-xs space-y-1">
-                                                    {patient.gender && (
-                                                        <Badge variant="outline" className="capitalize text-[11px] font-normal">
-                                                            {t(`patients.${patient.gender}`, patient.gender)}
-                                                        </Badge>
-                                                    )}
-                                                    {patient.date_of_birth && (
-                                                        <p className="text-gray-500 text-[11px] flex items-center gap-1">
-                                                            <Calendar className="h-3 w-3 text-gray-400" />
-                                                            {patient.date_of_birth}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    {patient.blood_type && (
-                                                        <Badge className="bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 font-bold text-[11px]">
-                                                            {patient.blood_type}
-                                                        </Badge>
-                                                    )}
-                                                    {patient.marital_status && (
-                                                        <Badge variant="secondary" className="capitalize text-[11px]">
-                                                            {t(`patients.${patient.marital_status}`, patient.marital_status)}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <Switch
-                                                        checked={patient.is_active}
-                                                        onCheckedChange={() => handleToggleStatus(patient)}
-                                                    />
-                                                    <Badge
-                                                        className={
-                                                            patient.is_active
-                                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
-                                                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
-                                                        }
-                                                    >
-                                                        {patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
-                                                    </Badge>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-end">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    <Link href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                                                            title={t('visits.title', 'Patient Visits')}
-                                                        >
-                                                            <Stethoscope className="h-4 w-4" />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={patient.is_active}
+                                                    onCheckedChange={() => handleToggleStatus(patient)}
+                                                />
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                            <span className="sr-only">Open menu</span>
                                                         </Button>
-                                                    </Link>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => setViewingPatient(patient)}
-                                                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40"
-                                                        title={t('patients.view', 'Patient Details')}
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleOpenEdit(patient)}
-                                                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                                                        title={t('patients.edit', 'Edit Patient')}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => setDeletingPatient(patient)}
-                                                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
-                                                        title={t('patients.delete', 'Delete Patient')}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })
-                            )}
-                        </TableBody>
-                    </Table>
-                </Card>
-            </div>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-48">
+                                                        <DropdownMenuItem asChild>
+                                                            <Link
+                                                                href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}
+                                                                className="flex items-center gap-2 cursor-pointer text-emerald-600 dark:text-emerald-400 font-medium"
+                                                            >
+                                                                <Stethoscope className="h-4 w-4" />
+                                                                {t('visits.title', 'Patient Visits')}
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => setViewingPatient(patient)}
+                                                            className="flex items-center gap-2 cursor-pointer"
+                                                        >
+                                                            <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                                            {t('patients.view', 'View Details')}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem asChild>
+                                                            <Link
+                                                                href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}
+                                                                className="flex items-center gap-2 cursor-pointer text-amber-600 dark:text-amber-400"
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                                {t('patients.edit', 'Edit Patient')}
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            onClick={() => setDeletingPatient(patient)}
+                                                            className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 font-medium"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                            {t('patients.delete', 'Delete Patient')}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </div>
 
-            {/* Create / Edit Dialog */}
-            <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            <User className="h-5 w-5 text-primary" />
-                            {editingPatient ? t('patients.edit', 'Edit Patient') : t('patients.add_new', 'Add New Patient')}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {editingPatient
-                                ? t('patients.edit_desc', 'Update patient profile, emergency details, and custom fields.')
-                                : t('patients.add_desc', 'Fill in patient personal details, contact info, and clinic specific fields.')}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {/* Modal Tabs */}
-                    <div className="flex border-b border-gray-200 dark:border-gray-800 gap-4 mb-4">
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('basic')}
-                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'basic'
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                }`}
-                        >
-                            {t('patients.tab_basic', 'Basic & Contact Info')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('emergency')}
-                            className={`pb-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'emergency'
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                }`}
-                        >
-                            {t('patients.tab_emergency', 'Emergency & Notes')}
-                        </button>
-                        {custom_fields.length > 0 && (
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab('custom')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'custom'
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                    }`}
-                            >
-                                <Sliders className="h-3.5 w-3.5" />
-                                {t('patients.tab_custom_fields', 'Clinic Custom Fields')}
-                                <Badge variant="secondary" className="ml-1 text-[10px] py-0 px-1.5">
-                                    {custom_fields.length}
-                                </Badge>
-                            </button>
+                                        <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 dark:bg-gray-800/40 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800">
+                                            <div>
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.phone', 'Phone')}</span>
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-1 mt-0.5">
+                                                    <Phone className="h-3 w-3 text-gray-400 shrink-0" />
+                                                    {patient.phone || '-'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.gender', 'Gender / DOB')}</span>
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 mt-0.5">
+                                                    {patient.gender ? t(`patients.${patient.gender}`, patient.gender) : '-'}
+                                                    {patient.date_of_birth ? ` (${patient.date_of_birth})` : ''}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.blood_type', 'Blood / Marital')}</span>
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 mt-0.5">
+                                                    {patient.blood_type || '-'} {patient.marital_status ? `/ ${patient.marital_status}` : ''}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.address', 'Address')}</span>
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 truncate mt-0.5 flex items-center gap-1">
+                                                    {patient.address ? (
+                                                        <>
+                                                            <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
+                                                            {patient.address}
+                                                        </>
+                                                    ) : '-'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
 
-                    <form onSubmit={formik.handleSubmit} className="space-y-4">
-                        {/* Tab 1: Basic & Contact */}
-                        {activeTab === 'basic' && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <Label htmlFor="first_name" className="required">
-                                        {t('patients.first_name', 'First Name')} *
-                                    </Label>
-                                    <Input
-                                        id="first_name"
-                                        name="first_name"
-                                        value={formik.values.first_name}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="mt-1"
-                                    />
-                                    {formik.touched.first_name && formik.errors.first_name && (
-                                        <p className="text-xs text-red-500 mt-1">{formik.errors.first_name}</p>
-                                    )}
-                                </div>
+                    {/* Desktop View: TanStack Table */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(header.column.columnDef.header, header.getContext())}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={columns.length} className="text-center py-10 text-gray-500 dark:text-gray-400">
+                                            <Users className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                            {t('patients.no_patients', 'No patients found.')}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    table.getRowModel().rows.map((row) => (
+                                        <TableRow key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
 
-                                <div>
-                                    <Label htmlFor="last_name" className="required">
-                                        {t('patients.last_name', 'Last Name')} *
-                                    </Label>
-                                    <Input
-                                        id="last_name"
-                                        name="last_name"
-                                        value={formik.values.last_name}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="mt-1"
-                                    />
-                                    {formik.touched.last_name && formik.errors.last_name && (
-                                        <p className="text-xs text-red-500 mt-1">{formik.errors.last_name}</p>
-                                    )}
-                                </div>
+                    {/* Pagination Controls */}
+                    {table.getPageCount() > 0 && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <span>
+                                    {t('common.showing', 'Page')} <strong className="text-gray-900 dark:text-white">{table.getState().pagination.pageIndex + 1}</strong> {t('common.of', 'of')} <strong className="text-gray-900 dark:text-white">{table.getPageCount()}</strong>
+                                </span>
+                                <span>•</span>
+                                <span>
+                                    <strong className="text-gray-900 dark:text-white">{filteredPatients.length}</strong> {t('patients.total', 'total patients')}
+                                </span>
+                            </div>
 
-                                <div>
-                                    <Label htmlFor="patient_number">{t('patients.patient_number', 'Patient ID')}</Label>
-                                    <Input
-                                        id="patient_number"
-                                        name="patient_number"
-                                        placeholder="Auto-generated if empty"
-                                        value={formik.values.patient_number || ''}
-                                        onChange={formik.handleChange}
-                                        className="mt-1 font-mono"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="gender">{t('patients.gender', 'Gender')}</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">{t('common.rows_per_page', 'Rows per page')}</span>
                                     <Select
-                                        value={formik.values.gender || ''}
-                                        onValueChange={(val) => formik.setFieldValue('gender', val)}
+                                        value={String(table.getState().pagination.pageSize)}
+                                        onValueChange={(val) => table.setPageSize(Number(val))}
                                     >
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder={t('patients.gender', 'Select Gender')} />
+                                        <SelectTrigger className="h-8 w-[70px] text-xs">
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="male">{t('patients.male', 'Male')}</SelectItem>
-                                            <SelectItem value="female">{t('patients.female', 'Female')}</SelectItem>
-                                            <SelectItem value="other">{t('patients.other', 'Other')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="date_of_birth">{t('patients.date_of_birth', 'Date of Birth')}</Label>
-                                    <Input
-                                        id="date_of_birth"
-                                        name="date_of_birth"
-                                        type="date"
-                                        value={formik.values.date_of_birth || ''}
-                                        onChange={formik.handleChange}
-                                        className="mt-1"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="blood_type">{t('patients.blood_type', 'Blood Type')}</Label>
-                                    <Select
-                                        value={formik.values.blood_type || ''}
-                                        onValueChange={(val) => formik.setFieldValue('blood_type', val)}
-                                    >
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder="Select Blood Type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((type) => (
-                                                <SelectItem key={type} value={type}>
-                                                    {type}
+                                            {[10, 20, 30, 50].map((size) => (
+                                                <SelectItem key={size} value={String(size)} className="text-xs">
+                                                    {size}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
 
-                                <div>
-                                    <Label htmlFor="phone">{t('patients.phone', 'Phone Number')}</Label>
-                                    <Input
-                                        id="phone"
-                                        name="phone"
-                                        value={formik.values.phone || ''}
-                                        onChange={formik.handleChange}
-                                        className="mt-1"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="secondary_phone">{t('patients.secondary_phone', 'Secondary Phone')}</Label>
-                                    <Input
-                                        id="secondary_phone"
-                                        name="secondary_phone"
-                                        value={formik.values.secondary_phone || ''}
-                                        onChange={formik.handleChange}
-                                        className="mt-1"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="marital_status">{t('patients.marital_status', 'Marital Status')}</Label>
-                                    <Select
-                                        value={formik.values.marital_status || ''}
-                                        onValueChange={(val) => formik.setFieldValue('marital_status', val)}
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => table.previousPage()}
+                                        disabled={!table.getCanPreviousPage()}
                                     >
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="single">{t('patients.single', 'Single')}</SelectItem>
-                                            <SelectItem value="married">{t('patients.married', 'Married')}</SelectItem>
-                                            <SelectItem value="divorced">{t('patients.divorced', 'Divorced')}</SelectItem>
-                                            <SelectItem value="widowed">{t('patients.widowed', 'Widowed')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="md:col-span-3">
-                                    <Label htmlFor="address">{t('patients.address', 'Address')}</Label>
-                                    <Input
-                                        id="address"
-                                        name="address"
-                                        value={formik.values.address || ''}
-                                        onChange={formik.handleChange}
-                                        className="mt-1"
-                                    />
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => table.nextPage()}
+                                        disabled={!table.getCanNextPage()}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
+                </Card>
+            </div>
 
-                        {/* Tab 2: Emergency & Notes */}
-                        {activeTab === 'emergency' && (
-                            <div className="space-y-4">
-                                <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 space-y-3">
-                                    <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                                        <AlertCircle className="h-4 w-4" />
-                                        {t('patients.emergency_contact_name', 'Emergency Contact')}
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* View Details Dialog */}
+            <Dialog open={!!viewingPatient} onOpenChange={(open) => !open && setViewingPatient(null)}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                            <Avatar className="h-10 w-10 bg-primary/10 text-primary border border-primary/20 font-semibold">
+                                <AvatarFallback>{viewingPatient ? getInitials(viewingPatient.first_name, viewingPatient.last_name) : 'P'}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <span>{viewingPatient ? `${viewingPatient.first_name} ${viewingPatient.last_name}` : ''}</span>
+                                <p className="text-xs text-primary font-mono font-normal">
+                                    {viewingPatient?.patient_number}
+                                </p>
+                            </div>
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {viewingPatient && (
+                        <div className="space-y-4">
+                            {/* View Modal Tabs */}
+                            <div className="flex border-b border-gray-200 dark:border-gray-800 gap-4 mb-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setViewTab('info')}
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
+                                        viewTab === 'info'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                    }`}
+                                >
+                                    {t('patients.tab_basic', 'Basic & Contact Info')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setViewTab('emergency')}
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
+                                        viewTab === 'emergency'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                    }`}
+                                >
+                                    {t('patients.tab_emergency', 'Emergency & Notes')}
+                                </button>
+                                {custom_fields.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewTab('custom')}
+                                        className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${
+                                            viewTab === 'custom'
+                                                ? 'border-primary text-primary'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        <Sliders className="h-3.5 w-3.5" />
+                                        {t('patients.tab_custom_fields', 'Clinic Custom Fields')}
+                                    </button>
+                                )}
+                            </div>
+
+                            {viewTab === 'info' && (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                                    <div className="space-y-1">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.gender', 'Gender')}</span>
+                                        <p className="font-medium capitalize">{viewingPatient.gender ? t(`patients.${viewingPatient.gender}`, viewingPatient.gender) : '-'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.date_of_birth', 'Date of Birth')}</span>
+                                        <p className="font-medium">{viewingPatient.date_of_birth || '-'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.phone', 'Phone')}</span>
+                                        <p className="font-medium">{viewingPatient.phone || '-'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.secondary_phone', 'Secondary Phone')}</span>
+                                        <p className="font-medium">{viewingPatient.secondary_phone || '-'}</p>
+                                    </div>
+                                    <div className="space-y-1 col-span-2">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.address', 'Address')}</span>
+                                        <p className="font-medium">{viewingPatient.address || '-'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.is_active', 'Status')}</span>
                                         <div>
-                                            <Label htmlFor="emergency_contact_name">{t('patients.emergency_contact_name', 'Contact Name')}</Label>
-                                            <Input
-                                                id="emergency_contact_name"
-                                                name="emergency_contact_name"
-                                                value={formik.values.emergency_contact_name || ''}
-                                                onChange={formik.handleChange}
-                                                className="mt-1 bg-white dark:bg-gray-900"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="emergency_contact_phone">{t('patients.emergency_contact_phone', 'Contact Phone')}</Label>
-                                            <Input
-                                                id="emergency_contact_phone"
-                                                name="emergency_contact_phone"
-                                                value={formik.values.emergency_contact_phone || ''}
-                                                onChange={formik.handleChange}
-                                                className="mt-1 bg-white dark:bg-gray-900"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="emergency_contact_relation">{t('patients.emergency_contact_relation', 'Relation')}</Label>
-                                            <Input
-                                                id="emergency_contact_relation"
-                                                name="emergency_contact_relation"
-                                                placeholder="e.g. Spouse, Parent"
-                                                value={formik.values.emergency_contact_relation || ''}
-                                                onChange={formik.handleChange}
-                                                className="mt-1 bg-white dark:bg-gray-900"
-                                            />
+                                            <Badge className={viewingPatient.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'}>
+                                                {viewingPatient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
+                                            </Badge>
                                         </div>
                                     </div>
                                 </div>
+                            )}
 
-                                <div>
-                                    <Label htmlFor="notes">{t('patients.notes', 'General Notes')}</Label>
-                                    <textarea
-                                        id="notes"
-                                        name="notes"
-                                        rows={3}
-                                        value={formik.values.notes || ''}
-                                        onChange={formik.handleChange}
-                                        className="w-full mt-1 p-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
-                                        placeholder="Additional patient notes..."
-                                    />
+                            {viewTab === 'emergency' && (
+                                <div className="space-y-4 text-sm">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.emergency_name', 'Emergency Contact')}</span>
+                                            <p className="font-medium">{viewingPatient.emergency_contact_name || '-'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.emergency_phone', 'Emergency Phone')}</span>
+                                            <p className="font-medium">{viewingPatient.emergency_contact_phone || '-'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.emergency_relation', 'Relation')}</span>
+                                            <p className="font-medium">{viewingPatient.emergency_contact_relation || '-'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.blood_type', 'Blood Type')}</span>
+                                            <p className="font-medium">{viewingPatient.blood_type || '-'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.marital_status', 'Marital Status')}</span>
+                                            <p className="font-medium capitalize">{viewingPatient.marital_status ? t(`patients.${viewingPatient.marital_status}`, viewingPatient.marital_status) : '-'}</p>
+                                        </div>
+                                    </div>
+
+                                    {viewingPatient.notes && (
+                                        <div className="space-y-1 pt-2 border-t border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{t('patients.notes', 'Medical Notes')}</span>
+                                            <p className="text-sm bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md whitespace-pre-wrap">{viewingPatient.notes}</p>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Tab 3: Custom Clinic Fields */}
-                        {activeTab === 'custom' && custom_fields.length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {custom_fields.map((field) => renderCustomFieldInput(field))}
-                            </div>
-                        )}
+                            {viewTab === 'custom' && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                    {custom_fields.map((field) => (
+                                        <div key={field.id} className="space-y-1 p-2.5 rounded-md bg-gray-50 dark:bg-gray-800/50">
+                                            <span className="text-gray-400 text-xs uppercase font-semibold">{field.label}</span>
+                                            <p className="font-medium">{renderFieldValueDisplay(field, viewingPatient)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                        <DialogFooter className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <Button type="button" variant="outline" onClick={handleCloseModal}>
-                                {t('common.cancel', 'Cancel')}
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Link href={`/clinic/${clinicSlug}/patients/${viewingPatient?.id}/edit`}>
+                            <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
+                                <Pencil className="h-4 w-4" />
+                                {t('patients.edit', 'Edit Patient')}
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={formik.isSubmitting}
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]"
-                            >
-                                {formik.isSubmitting
-                                    ? t('common.processing', 'Processing...')
-                                    : editingPatient
-                                        ? t('common.save', 'Save Changes')
-                                        : t('common.save', 'Create Patient')}
-                            </Button>
-                        </DialogFooter>
-                    </form>
+                        </Link>
+                        <Button variant="outline" onClick={() => setViewingPatient(null)}>
+                            {t('common.close', 'Close')}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Patient View Details Dialog */}
-            {viewingPatient && (
-                <Dialog open={Boolean(viewingPatient)} onOpenChange={() => setViewingPatient(null)}>
-                    <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12 bg-primary/10 text-primary border border-primary/20 font-bold text-lg">
-                                    <AvatarFallback>
-                                        {getInitials(viewingPatient.first_name, viewingPatient.last_name)}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <DialogTitle className="text-xl font-bold">
-                                        {viewingPatient.first_name} {viewingPatient.last_name}
-                                    </DialogTitle>
-                                    <p className="text-xs text-primary font-mono">
-                                        {viewingPatient.patient_number}
-                                    </p>
-                                </div>
-                            </div>
-                        </DialogHeader>
-
-                        <div className="flex border-b border-gray-200 dark:border-gray-800 gap-4 my-3">
-                            <button
-                                type="button"
-                                onClick={() => setViewTab('info')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'info'
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-gray-500'
-                                    }`}
-                            >
-                                {t('patients.tab_basic', 'Personal Info')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setViewTab('emergency')}
-                                className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'emergency'
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-gray-500'
-                                    }`}
-                            >
-                                {t('patients.tab_emergency', 'Emergency & Notes')}
-                            </button>
-                            {custom_fields.length > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={() => setViewTab('custom')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'custom'
-                                            ? 'border-primary text-primary'
-                                            : 'border-transparent text-gray-500'
-                                        }`}
-                                >
-                                    {t('patients.tab_custom_fields', 'Custom Fields')}
-                                </button>
-                            )}
-                        </div>
-
-                        {viewTab === 'info' && (
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.gender', 'Gender')}</p>
-                                    <p className="font-medium capitalize">{viewingPatient.gender || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.date_of_birth', 'Date of Birth')}</p>
-                                    <p className="font-medium">{viewingPatient.date_of_birth || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.phone', 'Phone Number')}</p>
-                                    <p className="font-medium">{viewingPatient.phone || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.secondary_phone', 'Secondary Phone')}</p>
-                                    <p className="font-medium">{viewingPatient.secondary_phone || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.blood_type', 'Blood Type')}</p>
-                                    <p className="font-medium">{viewingPatient.blood_type || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">{t('patients.marital_status', 'Marital Status')}</p>
-                                    <p className="font-medium capitalize">{viewingPatient.marital_status || '-'}</p>
-                                </div>
-                                <div className="col-span-2">
-                                    <p className="text-xs text-gray-500">{t('patients.address', 'Address')}</p>
-                                    <p className="font-medium">{viewingPatient.address || '-'}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {viewTab === 'emergency' && (
-                            <div className="space-y-4 text-sm">
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <h4 className="font-semibold text-xs text-gray-500 mb-2">EMERGENCY CONTACT</h4>
-                                    <p className="font-medium">{viewingPatient.emergency_contact_name || 'No contact provided'}</p>
-                                    {viewingPatient.emergency_contact_phone && (
-                                        <p className="text-xs text-gray-600">Phone: {viewingPatient.emergency_contact_phone}</p>
-                                    )}
-                                    {viewingPatient.emergency_contact_relation && (
-                                        <p className="text-xs text-gray-600">Relation: {viewingPatient.emergency_contact_relation}</p>
-                                    )}
-                                </div>
-
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <h4 className="font-semibold text-xs text-gray-500 mb-2">NOTES</h4>
-                                    <p className="font-medium">{viewingPatient.notes || 'No notes'}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {viewTab === 'custom' && custom_fields.length > 0 && (
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                {custom_fields.map((field) => (
-                                    <div key={field.id} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                        <p className="text-xs text-gray-500 font-medium">{field.label}</p>
-                                        <p className="font-semibold mt-1">
-                                            {renderFieldValueDisplay(field, viewingPatient)}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <DialogFooter className="pt-4 border-t">
-                            <Button variant="outline" onClick={() => setViewingPatient(null)}>
-                                {t('common.close', 'Close')}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={Boolean(deletingPatient)} onOpenChange={() => setDeletingPatient(null)}>
+            {/* Delete Dialog */}
+            <Dialog open={!!deletingPatient} onOpenChange={(open) => !open && setDeletingPatient(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className="text-red-600 flex items-center gap-2">
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            {t('patients.delete', 'Delete Patient')}
+                            {t('patients.delete_confirm_title', 'Delete Patient')}
                         </DialogTitle>
                         <DialogDescription>
-                            {t('patients.delete_confirm', 'Are you sure you want to delete this patient record?')}
-                            {deletingPatient && (
-                                <span className="block mt-2 font-bold text-gray-900 dark:text-white">
-                                    {deletingPatient.first_name} {deletingPatient.last_name} ({deletingPatient.patient_number})
-                                </span>
+                            {t(
+                                'patients.delete_confirm_desc',
+                                'Are you sure you want to delete this patient record? This action cannot be undone.'
                             )}
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2">
-                        <Button variant="outline" onClick={() => setDeletingPatient(null)}>
+
+                    {deletingPatient && (
+                        <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-100 dark:border-red-900 text-sm space-y-1">
+                            <p className="font-semibold text-red-900 dark:text-red-300">
+                                {deletingPatient.first_name} {deletingPatient.last_name}
+                            </p>
+                            <p className="text-xs text-red-700 dark:text-red-400 font-mono">
+                                {deletingPatient.patient_number}
+                            </p>
+                        </div>
+                    )}
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setDeletingPatient(null)} disabled={isDeleting}>
                             {t('common.cancel', 'Cancel')}
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? t('common.processing', 'Deleting...') : t('common.delete', 'Delete')}
+                        <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

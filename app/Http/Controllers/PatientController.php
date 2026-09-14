@@ -36,19 +36,51 @@ class PatientController extends Controller
         ]);
     }
 
+    public function create($slug): Response
+    {
+        $clinic = $this->clinic_service->getClinic($slug);
+        $customFields = PatientFields::where('clinic_id', $clinic->id)
+            ->where('is_active', true)
+            ->with('options')
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        return Inertia::render('patients/create', [
+            'clinic' => $clinic,
+            'custom_fields' => $customFields,
+        ]);
+    }
+
+    public function edit($slug, Patient $patient): Response
+    {
+        $clinic = $this->clinic_service->getClinic($slug);
+        $patient->load(['fieldValues']);
+        $customFields = PatientFields::where('clinic_id', $clinic->id)
+            ->where('is_active', true)
+            ->with('options')
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        return Inertia::render('patients/update', [
+            'clinic' => $clinic,
+            'patient' => $patient,
+            'custom_fields' => $customFields,
+        ]);
+    }
+
     public function store(StorePatientRequest $request, $slug): RedirectResponse
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $this->patient_service->createPatient($clinic, $request->validated());
 
-        return redirect()->back()->with('success', 'Patient created successfully');
+        return redirect()->route('clinics.patients', ['slug' => $slug])->with('success', 'Patient created successfully');
     }
 
     public function update(UpdatePatientRequest $request, $slug, Patient $patient): RedirectResponse
     {
         $this->patient_service->updatePatient($patient, $request->validated());
 
-        return redirect()->back()->with('success', 'Patient updated successfully');
+        return redirect()->route('clinics.patients', ['slug' => $slug])->with('success', 'Patient updated successfully');
     }
 
     public function destroy($slug, Patient $patient): RedirectResponse

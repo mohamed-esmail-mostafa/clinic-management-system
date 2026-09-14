@@ -331,7 +331,11 @@
     "all_insurance": "All Insurance Status",
     "all_statuses": "All Statuses",
     "with_insurance": "With Insurance",
-    "without_insurance": "Without Insurance"
+    "without_insurance": "Without Insurance",
+    "tab_custom_fields":"Extra Info",
+    "emergency_name":"Emergency Name",
+    "emergency_phone":"Emergency Phone",
+    "emergency_relation":"Emergency Relation"
   },
   "medications": {
     "title": "Medications Management",
@@ -454,7 +458,12 @@
     "file-size-limit": "PNG, JPG, WEBP up to 5MB",
     "choose-file": "Choose File",
     "admin-dashboard":"Admin Dashboard",
-    "clinic-dashboard":"Clinic Dashboard"
+    "clinic-dashboard":"Clinic Dashboard",
+    "go_back":"Go Back",
+    "previous":"Previous",
+    "next":"Next",
+    "create":"Create",
+    "save_changes":"Save Changes"
   },
   "website_settings": {
     "title": "Website Settings",
