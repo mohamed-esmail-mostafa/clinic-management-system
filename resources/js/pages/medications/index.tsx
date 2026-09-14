@@ -8,6 +8,16 @@ import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import useImport from '@/hooks/use-import';
 
+// TanStack Table
+import { flexRender, SortingState } from '@tanstack/react-table';
+import {
+    useLegacyTable as useReactTable,
+    getCoreRowModel,
+    getSortedRowModel,
+    getPaginationRowModel,
+    LegacyColumnDef as ColumnDef,
+} from '@tanstack/react-table/legacy';
+
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +49,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+import PageHeader from '@/components/shared/page-header';
+
 // Icons
 import {
     Plus,
@@ -50,7 +62,11 @@ import {
     XCircle,
     Layers,
     AlertCircle,
-    Activity,
+    ArrowUpDown,
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-react';
 
 interface Props {
@@ -80,7 +96,6 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
     const { t, isRtl } = useImport();
     const { clinics } = useAuthClinics() as { clinics?: any[] };
 
-    // Determine clinic slug
     const clinicSlug = serverClinic?.slug || (Array.isArray(clinics) && clinics.length > 0 ? clinics[0].slug : '');
 
     // Search and filter states
@@ -93,6 +108,10 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
     const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
     const [deletingMedication, setDeletingMedication] = useState<Medication | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Sorting & Pagination
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     // Filter medications
     const filteredMedications = useMemo(() => {
@@ -221,31 +240,180 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
         });
     };
 
+
+    // TanStack Table Columns
+    const columns = useMemo<ColumnDef<Medication>[]>(
+        () => [
+            {
+                accessorKey: 'name',
+                header: ({ column }) => (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                        className="-ml-3 h-8 text-xs font-semibold"
+                    >
+                        <span>{t('medications.name', 'Medication Name')}</span>
+                        {column.getIsSorted() === 'asc' ? (
+                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+                        ) : (
+                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
+                        )}
+                    </Button>
+                ),
+                cell: ({ row }) => {
+                    const medication = row.original;
+                    return (
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <Pill className="h-4 w-4" />
+                            </div>
+                            <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                {medication.name}
+                            </p>
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'generic_name',
+                header: () => <span className="text-xs font-semibold">{t('medications.generic_name', 'Generic Name')}</span>,
+                cell: ({ row }) => (
+                    <p className="text-xs text-gray-600 dark:text-gray-300 italic">
+                        {row.original.generic_name || '-'}
+                    </p>
+                ),
+            },
+            {
+                accessorKey: 'form',
+                header: () => <span className="text-xs font-semibold">{t('medications.form', 'Form')}</span>,
+                cell: ({ row }) =>
+                    row.original.form ? (
+                        <Badge variant="outline" className="text-xs capitalize font-normal bg-gray-50 dark:bg-gray-900">
+                            {row.original.form}
+                        </Badge>
+                    ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                    ),
+            },
+            {
+                id: 'dosage',
+                header: () => <span className="text-xs font-semibold">{t('medications.dosage', 'Dosage & Strength')}</span>,
+                cell: ({ row }) => {
+                    const medication = row.original;
+                    return medication.strength ? (
+                        <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 font-mono text-xs">
+                            {medication.strength} {medication.unit || ''}
+                        </Badge>
+                    ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                    );
+                },
+            },
+            {
+                accessorKey: 'is_active',
+                header: ({ column }) => (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                        className="-ml-3 h-8 text-xs font-semibold"
+                    >
+                        <span>{t('medications.is_active', 'Status')}</span>
+                        {column.getIsSorted() === 'asc' ? (
+                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+                        ) : (
+                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
+                        )}
+                    </Button>
+                ),
+                cell: ({ row }) => {
+                    const medication = row.original;
+                    return (
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                checked={medication.is_active}
+                                onCheckedChange={() => handleToggleStatus(medication)}
+                            />
+                            <Badge
+                                className={
+                                    medication.is_active
+                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
+                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
+                                }
+                            >
+                                {medication.is_active ? t('medications.active', 'Active') : t('medications.inactive', 'Inactive')}
+                            </Badge>
+                        </div>
+                    );
+                },
+            },
+            {
+                id: 'actions',
+                header: () => <div className="text-end text-xs font-semibold">{t('common.actions', 'Actions')}</div>,
+                cell: ({ row }) => {
+                    const medication = row.original;
+                    return (
+                        <div className="flex items-center justify-end gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenEdit(medication)}
+                                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                                title={t('medications.edit', 'Edit Medication')}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDeletingMedication(medication)}
+                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                title={t('medications.delete', 'Delete Medication')}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    );
+                },
+            },
+        ],
+        [t]
+    );
+
+    const table = useReactTable({
+        data: filteredMedications,
+        columns,
+        state: { sorting, pagination },
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
     return (
         <ClinicLayout title={t('medications.title', 'Medications Management')}>
             <div className="space-y-6">
-                {/* Header & Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                            <Pill className="h-7 w-7 text-orange-500" />
-                            {t('medications.title', 'Medications Management')}
-                        </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {t('medications.subtitle', 'Manage clinic pharmacy items, dosage forms, strengths, and units.')}
-                        </p>
-                    </div>
+                {/* Header */}
+                <PageHeader
+                    icon={<Pill className="h-7 w-7 text-primary" />}
+                    title={t('medications.title', 'Medications Management')}
+                    subtitle={t('medications.subtitle', 'Manage clinic pharmacy items, dosage forms, strengths, and units.')}
+                >
                     <Button
                         onClick={() => {
                             setEditingMedication(null);
                             setIsAddModalOpen(true);
                         }}
-                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm shrink-0"
+                        className="gap-2 shrink-0"
                     >
                         <Plus className="h-4 w-4" />
                         {t('medications.add_new', 'Add New Medication')}
                     </Button>
-                </div>
+                </PageHeader>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -259,7 +427,7 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                                     {stats.total}
                                 </p>
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center text-orange-600">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Pill className="h-5 w-5" />
                             </div>
                         </CardContent>
@@ -356,90 +524,40 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                     </CardContent>
                 </Card>
 
-                {/* Table */}
+                {/* Responsive: Cards on mobile, TanStack Table on desktop */}
                 <Card className="border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
-                            <TableRow>
-                                <TableHead>{t('medications.name', 'Medication Name')}</TableHead>
-                                <TableHead>{t('medications.generic_name', 'Generic Name')}</TableHead>
-                                <TableHead>{t('medications.form', 'Form')}</TableHead>
-                                <TableHead>{t('medications.dosage', 'Dosage & Strength')}</TableHead>
-                                <TableHead>{t('medications.is_active', 'Status')}</TableHead>
-                                <TableHead className="text-end">{t('common.actions', 'Actions')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredMedications.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-10 text-gray-500 dark:text-gray-400">
-                                        <Pill className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                        {t('medications.no_medications', 'No medications found.')}
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredMedications.map((medication) => (
-                                    <TableRow key={medication.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
-                                        <TableCell>
+                    {/* Mobile View: Cards */}
+                    <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                        {table.getRowModel().rows.length === 0 ? (
+                            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                                <Pill className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                {t('medications.no_medications', 'No medications found.')}
+                            </div>
+                        ) : (
+                            table.getRowModel().rows.map((row) => {
+                                const medication = row.original;
+                                return (
+                                    <div key={medication.id} className="p-4 space-y-3 bg-white dark:bg-gray-900">
+                                        <div className="flex items-start justify-between gap-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400 flex items-center justify-center font-bold shrink-0">
+                                                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                                     <Pill className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                    <p className="font-semibold text-gray-900 dark:text-white text-base">
                                                         {medication.name}
                                                     </p>
+                                                    {medication.generic_name && (
+                                                        <p className="text-xs text-gray-500 italic">{medication.generic_name}</p>
+                                                    )}
                                                 </div>
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <p className="text-xs text-gray-600 dark:text-gray-300 italic">
-                                                {medication.generic_name || '-'}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell>
-                                            {medication.form ? (
-                                                <Badge variant="outline" className="text-xs capitalize font-normal bg-gray-50 dark:bg-gray-900">
-                                                    {medication.form}
-                                                </Badge>
-                                            ) : (
-                                                <span className="text-xs text-gray-400">-</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {medication.strength ? (
-                                                <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 font-mono text-xs">
-                                                    {medication.strength} {medication.unit || ''}
-                                                </Badge>
-                                            ) : (
-                                                <span className="text-xs text-gray-400">-</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Switch
-                                                    checked={medication.is_active}
-                                                    onCheckedChange={() => handleToggleStatus(medication)}
-                                                />
-                                                <Badge
-                                                    className={
-                                                        medication.is_active
-                                                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
-                                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
-                                                    }
-                                                >
-                                                    {medication.is_active ? t('medications.active', 'Active') : t('medications.inactive', 'Inactive')}
-                                                </Badge>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-end">
-                                            <div className="flex items-center justify-end gap-1">
+                                            <div className="flex items-center gap-1 shrink-0">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => handleOpenEdit(medication)}
                                                     className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                                                    title={t('medications.edit', 'Edit Medication')}
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
@@ -448,17 +566,116 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                                                     size="icon"
                                                     onClick={() => setDeletingMedication(medication)}
                                                     className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
-                                                    title={t('medications.delete', 'Delete Medication')}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {medication.form && (
+                                                <Badge variant="outline" className="text-xs capitalize font-normal">
+                                                    {medication.form}
+                                                </Badge>
+                                            )}
+                                            {medication.strength && (
+                                                <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 font-mono text-xs">
+                                                    {medication.strength} {medication.unit || ''}
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Switch
+                                                checked={medication.is_active}
+                                                onCheckedChange={() => handleToggleStatus(medication)}
+                                            />
+                                            <Badge
+                                                className={
+                                                    medication.is_active
+                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
+                                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
+                                                }
+                                            >
+                                                {medication.is_active ? t('medications.active', 'Active') : t('medications.inactive', 'Inactive')}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    {/* Desktop View: TanStack Table */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(header.column.columnDef.header, header.getContext())}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={columns.length} className="text-center py-10 text-gray-500 dark:text-gray-400">
+                                            <Pill className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                            {t('medications.no_medications', 'No medications found.')}
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    table.getRowModel().rows.map((row) => (
+                                        <TableRow key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {table.getPageCount() > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 dark:border-gray-800">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {t('common.page', 'Page')} {table.getState().pagination.pageIndex + 1}{' '}
+                                {t('common.of', 'of')} {table.getPageCount()}
+                                {' · '}
+                                {filteredMedications.length} {t('medications.total', 'total')}
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                    className="h-8 w-8"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                    className="h-8 w-8"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </Card>
             </div>
 
@@ -467,7 +684,7 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            <Pill className="h-5 w-5 text-orange-500" />
+                            <Pill className="h-5 w-5 text-primary" />
                             {editingMedication ? t('medications.edit', 'Edit Medication') : t('medications.add_new', 'Add New Medication')}
                         </DialogTitle>
                         <DialogDescription>
@@ -479,7 +696,7 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
 
                     <form onSubmit={formik.handleSubmit} className="space-y-4">
                         <div>
-                            <Label htmlFor="name" className="required">
+                            <Label htmlFor="name">
                                 {t('medications.name', 'Medication Name')} *
                             </Label>
                             <Input
@@ -577,11 +794,7 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                             <Button type="button" variant="outline" onClick={handleCloseModal}>
                                 {t('common.cancel', 'Cancel')}
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={formik.isSubmitting}
-                                className="bg-orange-500 hover:bg-orange-600 text-white min-w-[100px]"
-                            >
+                            <Button type="submit" disabled={formik.isSubmitting}>
                                 {formik.isSubmitting
                                     ? t('common.processing', 'Processing...')
                                     : editingMedication
@@ -605,7 +818,10 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                             {t('medications.delete_confirm', 'Are you sure you want to delete this medication?')}
                             {deletingMedication && (
                                 <span className="block mt-2 font-bold text-gray-900 dark:text-white">
-                                    {deletingMedication.name} {deletingMedication.strength ? `(${deletingMedication.strength} ${deletingMedication.unit || ''})` : ''}
+                                    {deletingMedication.name}{' '}
+                                    {deletingMedication.strength
+                                        ? `(${deletingMedication.strength} ${deletingMedication.unit || ''})`
+                                        : ''}
                                 </span>
                             )}
                         </DialogDescription>
@@ -614,11 +830,7 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
                         <Button variant="outline" onClick={() => setDeletingMedication(null)}>
                             {t('common.cancel', 'Cancel')}
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
+                        <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
                             {isDeleting ? t('common.processing', 'Deleting...') : t('common.delete', 'Delete')}
                         </Button>
                     </DialogFooter>
@@ -627,3 +839,4 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
         </ClinicLayout>
     );
 }
+
