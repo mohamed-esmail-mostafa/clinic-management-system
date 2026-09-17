@@ -5,10 +5,11 @@ import React from 'react'
 export default function Logo() {
     const { settings } = useWebsiteSetting()
     const { appearance } = useImport()
-    console.log(settings)
+    const isDark = appearance === 'dark'
+
     return (
         <div>
-            <img src={settings?.logo || undefined} alt={settings?.title_ar || undefined} />
+            <img className='w-16 h-16' src={isDark ? settings?.dark_logo ?? null : settings?.logo ?? null} alt={settings?.title_ar || undefined} />
         </div>
     )
 }

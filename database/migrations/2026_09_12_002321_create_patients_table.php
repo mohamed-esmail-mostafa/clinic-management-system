@@ -18,8 +18,8 @@ return new class extends Migration
 
             // Basic Information
             $table->string('patient_number')->unique();
-            $table->string('first_name');
-            $table->string('last_name');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('gender')->nullable(); // male, female, other
             $table->date('date_of_birth')->nullable();
 
