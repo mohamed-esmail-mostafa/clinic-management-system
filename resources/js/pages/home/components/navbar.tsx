@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Stethoscope, Menu, Calendar, Phone, Search } from 'lucide-react';
+import Logo from '@/components/shared/logo';
 
 export default function Navbar() {
     const { t, isRtl } = useImport();
@@ -26,12 +27,12 @@ export default function Navbar() {
         : (settings?.title_en || 'ClinicCare Management');
 
     const navLinks = [
-        { label: t('landing.nav.features', 'Features'), href: '#features' },
-        { label: t('landing.nav.services', 'Services'), href: '#services' },
-        { label: t('landing.nav.specialties', 'Specialties'), href: '#specialties' },
-        { label: t('landing.nav.about', 'About Us'), href: '#about' },
-        { label: t('landing.nav.testimonials', 'Testimonials'), href: '#testimonials' },
-        { label: t('landing.nav.contact', 'Contact'), href: '#footer' },
+        { label: t('landing.nav.features'), href: '#features' },
+        { label: t('landing.nav.services'), href: '#services' },
+        { label: t('landing.nav.specialties'), href: '#specialties' },
+        { label: t('landing.nav.about'), href: '#about' },
+        { label: t('landing.nav.testimonials'), href: '#testimonials' },
+        { label: t('landing.nav.contact'), href: '#footer' },
     ];
 
     return (
@@ -39,25 +40,8 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
                 {/* Brand Logo */}
                 <Link href="/" className="flex items-center gap-3 group shrink-0">
-                    {logoSrc ? (
-                        <img
-                            src={logoSrc}
-                            alt={title}
-                            className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                            <Stethoscope size={22} className="stroke-[2.5]" />
-                        </div>
-                    )}
-                    <div className="flex flex-col">
-                        <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
-                            {title}
-                        </span>
-                        <span className="text-[11px] font-medium text-primary tracking-wide">
-                            {isRtl ? 'المنصة الطبية المتكاملة' : 'Medical Intelligence'}
-                        </span>
-                    </div>
+                   
+                    <Logo />
                 </Link>
 
                 {/* Desktop Navigation Links */}

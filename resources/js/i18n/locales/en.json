@@ -12,7 +12,9 @@
       "specialties": "Specialties",
       "pricing": "Pricing",
       "testimonials": "Testimonials",
-      "contact": "Contact"
+      "contact": "Contact",
+      "services":"Services",
+      "about":"About us"
     },
     "stats": {
       "clinics": "500+ Clinics",

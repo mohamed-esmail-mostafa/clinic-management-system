@@ -12,7 +12,9 @@
       "specialties": "التخصصات",
       "pricing": "الأسعار",
       "testimonials": "آراء العملاء",
-      "contact": "تواصل معنا"
+      "contact": "تواصل معنا",
+      "services":" الخدمات ",
+      "about":" من نحن "
     },
     "stats": {
       "clinics": "+500 عيادة ومركز",
