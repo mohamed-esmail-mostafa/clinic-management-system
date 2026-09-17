@@ -5,6 +5,7 @@ use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Visit;
+use App\Services\CloudinaryService;
 
 test('authenticated user can view patient visits page', function () {
     $user = User::factory()->create();
@@ -91,4 +92,83 @@ test('authenticated user can delete a visit', function () {
     $this->assertDatabaseMissing('visits', [
         'id' => $visit->id,
     ]);
+});
+
+test('authenticated user can upload prescription image for a visit', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patient = Patient::factory()->create(['clinic_id' => $clinic->id]);
+    $visit = Visit::factory()->create(['clinic_id' => $clinic->id, 'patient_id' => $patient->id]);
+
+    $mockCloudinary = Mockery::mock(CloudinaryService::class);
+    $mockCloudinary->shouldReceive('uploadToCloudinary')
+        ->once()
+        ->with('data:image/png;base64,dummybase64data', 'prescriptions')
+        ->andReturn([
+            'url' => 'https://res.cloudinary.com/test-clinic/image/upload/sample_prescription.webp',
+            'public_id' => 'prescriptions/sample_prescription',
+        ]);
+    $this->app->instance(CloudinaryService::class, $mockCloudinary);
+
+    $response = $this->actingAs($user)->postJson(
+        route('visits.prescription-image', [
+            'clinic' => $clinic->slug,
+            'patient' => $patient->id,
+            'visit' => $visit->id,
+        ]),
+        [
+            'image' => 'data:image/png;base64,dummybase64data',
+        ]
+    );
+
+    $response->assertOk()
+        ->assertJson([
+            'success' => true,
+            'url' => 'https://res.cloudinary.com/test-clinic/image/upload/sample_prescription.webp',
+        ]);
+
+    $this->assertDatabaseHas('visits', [
+        'id' => $visit->id,
+        'image_url' => 'https://res.cloudinary.com/test-clinic/image/upload/sample_prescription.webp',
+    ]);
+});
+
+test('upload prescription image validates image is required', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patient = Patient::factory()->create(['clinic_id' => $clinic->id]);
+    $visit = Visit::factory()->create(['clinic_id' => $clinic->id, 'patient_id' => $patient->id]);
+
+    $response = $this->actingAs($user)->postJson(
+        route('visits.prescription-image', [
+            'clinic' => $clinic->slug,
+            'patient' => $patient->id,
+            'visit' => $visit->id,
+        ]),
+        []
+    );
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['image']);
+});
+
+test('upload prescription image rejects visit belonging to different patient', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patient1 = Patient::factory()->create(['clinic_id' => $clinic->id]);
+    $patient2 = Patient::factory()->create(['clinic_id' => $clinic->id]);
+    $visit = Visit::factory()->create(['clinic_id' => $clinic->id, 'patient_id' => $patient1->id]);
+
+    $response = $this->actingAs($user)->postJson(
+        route('visits.prescription-image', [
+            'clinic' => $clinic->slug,
+            'patient' => $patient2->id,
+            'visit' => $visit->id,
+        ]),
+        [
+            'image' => 'data:image/png;base64,dummybase64data',
+        ]
+    );
+
+    $response->assertNotFound();
 });

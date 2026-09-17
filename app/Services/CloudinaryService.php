@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Cloudinary\Cloudinary;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
@@ -20,16 +22,20 @@ class CloudinaryService
         ]);
     }
 
-    public function uploadToCloudinary($file, string $folder): ?array
+    public function uploadToCloudinary(mixed $file, string $folder): ?array
     {
         try {
             $manager = ImageManager::usingDriver(
                 GdDriver::class
             );
 
-            $image = $manager->decodePath(
-                $file->getRealPath()
-            );
+            if ($file instanceof UploadedFile) {
+                $image = $manager->decodePath($file->getRealPath());
+            } elseif (is_string($file) && file_exists($file)) {
+                $image = $manager->decodePath($file);
+            } else {
+                $image = $manager->decode($file);
+            }
 
             $image->scale(
                 width: 1200
@@ -60,8 +66,34 @@ class CloudinaryService
                 'public_id' => $result['public_id'],
             ];
         } catch (\Exception $e) {
+            Log::error('Cloudinary upload error: '.$e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            // Fallback: If Intervention fails, try direct Cloudinary upload if file is a string/data URI
+            try {
+                if (is_string($file)) {
+                    $result = $this->cloudinary()->uploadApi()->upload(
+                        $file,
+                        ['folder' => $folder]
+                    );
+
+                    return [
+                        'url' => $result['secure_url'],
+                        'public_id' => $result['public_id'],
+                    ];
+                }
+            } catch (\Exception $fallbackException) {
+                Log::error('Cloudinary fallback direct upload error: '.$fallbackException->getMessage());
+            }
+
             return null;
         }
+    }
+
+    public function uploadBase64ToCloudinary(string $base64Data, string $folder): ?array
+    {
+        return $this->uploadToCloudinary($base64Data, $folder);
     }
 
     public function deleteFromCloudinary(?string $publicId): bool

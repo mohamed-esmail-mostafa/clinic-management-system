@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class VisitService
 {
+    public function __construct(
+        protected CloudinaryService $cloudinary_service
+    ) {}
+
     public function getPatientVisits(Clinic $clinic, Patient $patient): Collection
     {
         return Visit::where('clinic_id', $clinic->id)
@@ -77,5 +81,20 @@ class VisitService
     public function deleteVisit(Visit $visit): ?bool
     {
         return $visit->delete();
+    }
+
+    public function savePrescriptionImage(Visit $visit, string $imageData): ?string
+    {
+        $uploadResult = $this->cloudinary_service->uploadToCloudinary($imageData, 'prescriptions');
+
+        if (! $uploadResult || empty($uploadResult['url'])) {
+            return null;
+        }
+
+        $visit->update([
+            'image_url' => $uploadResult['url'],
+        ]);
+
+        return $uploadResult['url'];
     }
 }

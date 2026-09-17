@@ -46,7 +46,7 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                                 ${active
                                     ? 'bg-white text-primary shadow-sm'
-                                    : 'text-orange-100 hover:bg-white/10 hover:text-white'
+                                    : 'text-white hover:bg-white/10 hover:text-white'
                                 }
                                 ${collapsed ? 'justify-center' : ''}`}
                             title={collapsed ? t(`${key}`) : undefined}

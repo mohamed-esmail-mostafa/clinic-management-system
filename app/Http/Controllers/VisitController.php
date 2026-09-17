@@ -9,7 +9,9 @@ use App\Models\Visit;
 use App\Services\ClinicService;
 use App\Services\MedicationService;
 use App\Services\VisitService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -55,5 +57,34 @@ class VisitController extends Controller
         $this->visit_service->deleteVisit($visit);
 
         return redirect()->back()->with('success', 'Visit deleted successfully');
+    }
+
+    public function uploadPrescriptionImage(Request $request, $clinic, Patient $patient, Visit $visit): JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'string'],
+        ]);
+
+        if ($visit->patient_id !== $patient->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visit does not belong to this patient.',
+            ], 404);
+        }
+
+        $url = $this->visit_service->savePrescriptionImage($visit, $request->input('image'));
+
+        if (! $url) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload prescription image to Cloudinary.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'message' => 'Prescription image generated and uploaded successfully.',
+        ]);
     }
 }

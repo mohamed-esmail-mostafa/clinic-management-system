@@ -7,6 +7,7 @@
     "explore_demo": "Explore Demo",
     "dashboard_btn": "Go to Dashboard",
     "login": "Sign In",
+    "explore_services":"Explore Services",
     "nav": {
       "features": "Features",
       "specialties": "Specialties",
@@ -399,7 +400,8 @@
     "back_to_patients": "Back to Patients",
     "share_whatsapp": "Share via WhatsApp",
     "whatsapp": "WhatsApp",
-    "no_phone_error": "Patient phone number is not available for WhatsApp sharing."
+    "no_phone_error": "Patient phone number is not available for WhatsApp sharing.",
+    "no_medications_added": "No medications added yet. Click \"Add Medication\" above."
   },
   "bookings": {
     "title": "Bookings & Appointments",
@@ -473,7 +475,8 @@
     "previous":"Previous",
     "next":"Next",
     "create":"Create",
-    "save_changes":"Save Changes"
+    "save_changes":"Save Changes",
+    "edit":"Edit Visit"
   },
   "website_settings": {
     "title": "Website Settings",

@@ -682,16 +682,12 @@ export default function MedicationsPage({ clinic: serverClinic, medications = []
             {/* Create / Edit Dialog */}
             <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
                 <DialogContent className="max-w-lg">
-                    <DialogHeader>
+                    <DialogHeader className='mt-5'>
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">
                             <Pill className="h-5 w-5 text-primary" />
                             {editingMedication ? t('medications.edit', 'Edit Medication') : t('medications.add_new', 'Add New Medication')}
                         </DialogTitle>
-                        <DialogDescription>
-                            {editingMedication
-                                ? t('medications.edit_desc', 'Update medication details, dosage form, and strength.')
-                                : t('medications.add_desc', 'Enter the medication brand name, generic name, form, and dosage.')}
-                        </DialogDescription>
+                       
                     </DialogHeader>
 
                     <form onSubmit={formik.handleSubmit} className="space-y-4">

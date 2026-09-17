@@ -20,12 +20,6 @@ export default function Navbar() {
     const { t, isRtl } = useImport();
     const { settings } = useWebsiteSetting();
     const [isOpen, setIsOpen] = useState(false);
-
-    const logoSrc = settings?.logo;
-    const title = isRtl
-        ? (settings?.title_ar || 'نظام إدارة العيادات')
-        : (settings?.title_en || 'ClinicCare Management');
-
     const navLinks = [
         { label: t('landing.nav.features'), href: '#features' },
         { label: t('landing.nav.services'), href: '#services' },
@@ -81,14 +75,15 @@ export default function Navbar() {
                         <SheetContent side={isRtl ? 'left' : 'right'} className="w-[300px] sm:w-[350px] p-6">
                             <SheetHeader className="text-start pb-4 border-b border-gray-100 dark:border-gray-800">
                                 <SheetTitle className="flex items-center gap-2.5">
-                                    {logoSrc ? (
+                                    {/* {logoSrc ? (
                                         <img src={logoSrc} alt={title} className="h-8 w-auto" />
                                     ) : (
                                         <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
                                             <Stethoscope size={18} />
                                         </div>
                                     )}
-                                    <span className="font-bold text-base">{title}</span>
+                                    <span className="font-bold text-base">{title}</span> */}
+                                    <Logo />
                                 </SheetTitle>
                             </SheetHeader>
 

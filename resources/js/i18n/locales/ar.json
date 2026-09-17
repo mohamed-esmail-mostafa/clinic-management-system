@@ -7,14 +7,15 @@
     "explore_demo": "استكشف النظام",
     "dashboard_btn": "الانتقال للوحة التحكم",
     "login": "تسجيل الدخول",
+    "explore_services": " استكشف الخدمات ",
     "nav": {
       "features": "المميزات",
       "specialties": "التخصصات",
       "pricing": "الأسعار",
       "testimonials": "آراء العملاء",
       "contact": "تواصل معنا",
-      "services":" الخدمات ",
-      "about":" من نحن "
+      "services": " الخدمات ",
+      "about": " من نحن "
     },
     "stats": {
       "clinics": "+500 عيادة ومركز",
@@ -399,7 +400,8 @@
     "back_to_patients": "العودة لقائمة المرضى",
     "share_whatsapp": "مشاركة الوصفة عبر واتساب",
     "whatsapp": "واتساب",
-    "no_phone_error": "رقم هاتف المريض غير مسجل للمشاركة عبر واتساب."
+    "no_phone_error": "رقم هاتف المريض غير مسجل للمشاركة عبر واتساب.",
+    "no_medications_added": "لم تتم إضافة أي أدوية بعد. اضغط على \"إضافة دواء\" أعلاه."
   },
   "bookings": {
     "title": "إدارة الحجوزات والمواعيد",
@@ -470,10 +472,11 @@
     "admin-dashboard": " لوحة تحكم الادمن ",
     "clinic-dashboard": " لوحة تحكم العيادة ",
     "go_back": " العودة للخلف ",
-     "previous":" السابق ",
-    "next":" التالي ",
-    "create":" اضافة ",
-     "save_changes":"حفظ التغييرات"
+    "previous": " السابق ",
+    "next": " التالي ",
+    "create": " اضافة ",
+    "save_changes": "حفظ التغييرات",
+     "edit":"تعديل الزيارة"
   },
   "website_settings": {
     "title": "إعدادات الموقع",

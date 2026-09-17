@@ -9,5 +9,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/clinic/{slug}/patients/{patient}/visits', 'store')->name('clinics.patients.visits.store');
         Route::put('/clinic/{slug}/patients/{patient}/visits/{visit}', 'update')->name('clinics.patients.visits.update');
         Route::delete('/clinic/{slug}/patients/{patient}/visits/{visit}', 'destroy')->name('clinics.patients.visits.destroy');
+        Route::post('/clinic/{clinic}/patients/{patient}/visits/{visit}/prescription-image', 'uploadPrescriptionImage')->name('visits.prescription-image');
     });
 });

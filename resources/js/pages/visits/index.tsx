@@ -54,6 +54,12 @@ import {
     X,
     Share2,
 } from 'lucide-react';
+import PageHeader from '@/components/shared/page-header';
+import InputError from '@/components/input-error';
+import VisitDialog from './components/visit-dialog';
+import VisitsTable from './components/visits-table';
+import VisitsStats from './components/visits-stats';
+import VisitsFilterSearch from './components/visits-filter-search';
 
 interface Props {
     clinic?: any;
@@ -81,8 +87,8 @@ export default function PatientVisitsPage({
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
-    const [deletingVisit, setDeletingVisit] = useState<Visit | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
+    // const [deletingVisit, setDeletingVisit] = useState<Visit | null>(null);
+    // const [isDeleting, setIsDeleting] = useState(false);
 
     // Dynamic Prescription state for form
     const [prescriptions, setPrescriptions] = useState<
@@ -123,56 +129,56 @@ export default function PatientVisitsPage({
         type: Yup.string().required(t('common.required', 'This field is required')),
     });
 
-    const formik = useFormik<VisitFormValues>({
-        initialValues: {
-            visited_at: editingVisit?.visited_at
-                ? new Date(editingVisit.visited_at).toISOString().slice(0, 16)
-                : new Date().toISOString().slice(0, 16),
-            type: editingVisit?.type || 'examination',
-            medications: [],
-        },
-        enableReinitialize: true,
-        validationSchema,
-        onSubmit: (values, { setSubmitting, resetForm }) => {
-            if (!clinicSlug || !patient?.id) {
-                toast.error('Missing clinic or patient parameters.');
-                setSubmitting(false);
-                return;
-            }
+    // const formik = useFormik<VisitFormValues>({
+    //     initialValues: {
+    //         visited_at: editingVisit?.visited_at
+    //             ? new Date(editingVisit.visited_at).toISOString().slice(0, 16)
+    //             : new Date().toISOString().slice(0, 16),
+    //         type: editingVisit?.type || 'examination',
+    //         medications: [],
+    //     },
+    //     enableReinitialize: true,
+    //     validationSchema,
+    //     onSubmit: (values, { setSubmitting, resetForm }) => {
+    //         if (!clinicSlug || !patient?.id) {
+    //             toast.error('Missing clinic or patient parameters.');
+    //             setSubmitting(false);
+    //             return;
+    //         }
 
-            const payload = {
-                ...values,
-                medications: prescriptions.filter((p) => p.medication_name.trim() !== ''),
-            };
+    //         const payload = {
+    //             ...values,
+    //             medications: prescriptions.filter((p) => p.medication_name.trim() !== ''),
+    //         };
 
-            if (editingVisit) {
-                // Update Visit
-                router.put(`/clinic/${clinicSlug}/patients/${patient.id}/visits/${editingVisit.id}`, payload as any, {
-                    onSuccess: () => {
-                        toast.success(t('visits.updated_success', 'Visit updated successfully!'));
-                        handleCloseModal();
-                    },
-                    onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error updating visit');
-                    },
-                    onFinish: () => setSubmitting(false),
-                });
-            } else {
-                // Create Visit
-                router.post(`/clinic/${clinicSlug}/patients/${patient.id}/visits`, payload as any, {
-                    onSuccess: () => {
-                        toast.success(t('visits.created_success', 'Visit recorded successfully!'));
-                        handleCloseModal();
-                        resetForm();
-                    },
-                    onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error recording visit');
-                    },
-                    onFinish: () => setSubmitting(false),
-                });
-            }
-        },
-    });
+    //         if (editingVisit) {
+    //             // Update Visit
+    //             router.put(`/clinic/${clinicSlug}/patients/${patient.id}/visits/${editingVisit.id}`, payload as any, {
+    //                 onSuccess: () => {
+    //                     toast.success(t('visits.updated_success', 'Visit updated successfully!'));
+    //                     handleCloseModal();
+    //                 },
+    //                 onError: (errors) => {
+    //                     toast.error((Object.values(errors)[0] as string) || 'Error updating visit');
+    //                 },
+    //                 onFinish: () => setSubmitting(false),
+    //             });
+    //         } else {
+    //             // Create Visit
+    //             router.post(`/clinic/${clinicSlug}/patients/${patient.id}/visits`, payload as any, {
+    //                 onSuccess: () => {
+    //                     toast.success(t('visits.created_success', 'Visit recorded successfully!'));
+    //                     handleCloseModal();
+    //                     resetForm();
+    //                 },
+    //                 onError: (errors) => {
+    //                     toast.error((Object.values(errors)[0] as string) || 'Error recording visit');
+    //                 },
+    //                 onFinish: () => setSubmitting(false),
+    //             });
+    //         }
+    //     },
+    // });
 
     const handleOpenAdd = () => {
         setEditingVisit(null);
@@ -180,244 +186,154 @@ export default function PatientVisitsPage({
         setIsAddModalOpen(true);
     };
 
-    const handleOpenEdit = (visit: Visit) => {
-        setEditingVisit(visit);
-        const existingMeds = (visit.visit_medications || []).map((vm) => ({
-            medication_id: vm.medication_id || null,
-            medication_name: vm.medication_name,
-        }));
-        setPrescriptions(existingMeds.length > 0 ? existingMeds : [{ medication_id: null, medication_name: '' }]);
-        setIsAddModalOpen(true);
-    };
+    // const handleOpenEdit = (visit: Visit) => {
+    //     setEditingVisit(visit);
+    //     const existingMeds = (visit.visit_medications || []).map((vm) => ({
+    //         medication_id: vm.medication_id || null,
+    //         medication_name: vm.medication_name,
+    //     }));
+    //     setPrescriptions(existingMeds.length > 0 ? existingMeds : [{ medication_id: null, medication_name: '' }]);
+    //     setIsAddModalOpen(true);
+    // };
 
     const handleCloseModal = () => {
         setIsAddModalOpen(false);
         setEditingVisit(null);
         setPrescriptions([]);
-        formik.resetForm();
+        // formik.resetForm();
     };
 
-    const handleAddPrescriptionRow = () => {
-        setPrescriptions((prev) => [...prev, { medication_id: null, medication_name: '' }]);
-    };
+    // const handleAddPrescriptionRow = () => {
+    //     setPrescriptions((prev) => [...prev, { medication_id: null, medication_name: '' }]);
+    // };
 
-    const handleRemovePrescriptionRow = (index: number) => {
-        setPrescriptions((prev) => prev.filter((_, i) => i !== index));
-    };
+    // const handleRemovePrescriptionRow = (index: number) => {
+    //     setPrescriptions((prev) => prev.filter((_, i) => i !== index));
+    // };
 
-    const handleSelectMedication = (index: number, medicationIdStr: string) => {
-        if (medicationIdStr === 'custom') {
-            setPrescriptions((prev) => {
-                const next = [...prev];
-                next[index] = { medication_id: null, medication_name: '' };
-                return next;
-            });
-            return;
-        }
+    // const handleSelectMedication = (index: number, medicationIdStr: string) => {
+    //     if (medicationIdStr === 'custom') {
+    //         setPrescriptions((prev) => {
+    //             const next = [...prev];
+    //             next[index] = { medication_id: null, medication_name: '' };
+    //             return next;
+    //         });
+    //         return;
+    //     }
 
-        const medId = Number(medicationIdStr);
-        const found = medications.find((m) => m.id === medId);
-        if (found) {
-            const fullName = `${found.name} ${found.strength ? '(' + found.strength + (found.unit || '') + ')' : ''}`.trim();
-            setPrescriptions((prev) => {
-                const next = [...prev];
-                next[index] = { medication_id: found.id, medication_name: fullName };
-                return next;
-            });
-        }
-    };
+    //     const medId = Number(medicationIdStr);
+    //     const found = medications.find((m) => m.id === medId);
+    //     if (found) {
+    //         const fullName = `${found.name} ${found.strength ? '(' + found.strength + (found.unit || '') + ')' : ''}`.trim();
+    //         setPrescriptions((prev) => {
+    //             const next = [...prev];
+    //             next[index] = { medication_id: found.id, medication_name: fullName };
+    //             return next;
+    //         });
+    //     }
+    // };
 
-    const handleCustomMedNameChange = (index: number, name: string) => {
-        setPrescriptions((prev) => {
-            const next = [...prev];
-            next[index] = { ...next[index], medication_name: name };
-            return next;
-        });
-    };
+    // const handleCustomMedNameChange = (index: number, name: string) => {
+    //     setPrescriptions((prev) => {
+    //         const next = [...prev];
+    //         next[index] = { ...next[index], medication_name: name };
+    //         return next;
+    //     });
+    // };
 
-    const handleDelete = () => {
-        if (!deletingVisit || !clinicSlug || !patient?.id) return;
+    // const handleDelete = () => {
+    //     if (!deletingVisit || !clinicSlug || !patient?.id) return;
 
-        setIsDeleting(true);
-        router.delete(`/clinic/${clinicSlug}/patients/${patient.id}/visits/${deletingVisit.id}`, {
-            onSuccess: () => {
-                toast.success(t('visits.deleted_success', 'Visit record deleted successfully!'));
-                setDeletingVisit(null);
-            },
-            onError: () => {
-                toast.error('Failed to delete visit');
-            },
-            onFinish: () => setIsDeleting(false),
-        });
-    };
+    //     setIsDeleting(true);
+    //     router.delete(`/clinic/${clinicSlug}/patients/${patient.id}/visits/${deletingVisit.id}`, {
+    //         onSuccess: () => {
+    //             toast.success(t('visits.deleted_success', 'Visit record deleted successfully!'));
+    //             setDeletingVisit(null);
+    //         },
+    //         onError: () => {
+    //             toast.error('Failed to delete visit');
+    //         },
+    //         onFinish: () => setIsDeleting(false),
+    //     });
+    // };
 
-    const handleShareWhatsApp = (visit: Visit) => {
-        const rawPhone = patient.phone || patient.secondary_phone;
-        if (!rawPhone || !rawPhone.trim()) {
-            toast.error(t('visits.no_phone_error', 'Patient phone number is not available for WhatsApp sharing.'));
-            return;
-        }
+    //     const handleShareWhatsApp = (visit: Visit) => {
+    //         const rawPhone = patient.phone || patient.secondary_phone;
+    //         if (!rawPhone || !rawPhone.trim()) {
+    //             toast.error(t('visits.no_phone_error', 'Patient phone number is not available for WhatsApp sharing.'));
+    //             return;
+    //         }
 
-        let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-        if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
-            cleanPhone = '2' + cleanPhone;
-        }
+    //         let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+    //         if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+    //             cleanPhone = '2' + cleanPhone;
+    //         }
 
-        const clinicName = serverClinic?.name || 'Medical Clinic';
-        const patientName = `${patient.first_name || ''} ${patient.middle_name ? patient.middle_name + ' ' : ''}${patient.last_name || ''}`.trim();
-        const visitTypeStr = visit.type === 'examination' ? 'كشف / Examination' : 'إعادة / Follow-up';
-        const visitDateStr = new Date(visit.visited_at).toLocaleString();
+    //         const clinicName = serverClinic?.name || 'Medical Clinic';
+    //         const patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
+    //         const visitTypeStr = visit.type === 'examination' ? 'كشف / Examination' : 'إعادة / Follow-up';
+    //         const visitDateStr = new Date(visit.visited_at).toLocaleString();
 
-        const medsList = (visit.visit_medications || [])
-            .map((m, i) => `${i + 1}. ${m.medication_name}`)
-            .join('\n');
+    //         const medsList = (visit.visit_medications || [])
+    //             .map((m, i) => `${i + 1}. ${m.medication_name}`)
+    //             .join('\n');
 
-        const message = `🏥 *${clinicName}*
-------------------------------
-👤 *المريض / Patient:* ${patientName}
-📋 *نوع الزيارة / Visit Type:* ${visitTypeStr}
-📅 *التاريخ / Date:* ${visitDateStr}
+    //         const message = `🏥 *${clinicName}*
+    // ------------------------------
+    // 👤 *المريض / Patient:* ${patientName}
+    // 📋 *نوع الزيارة / Visit Type:* ${visitTypeStr}
+    // 📅 *التاريخ / Date:* ${visitDateStr}
 
-💊 *الروشتة والأدوية الموصوفة / Prescribed Medications:*
-${medsList || 'لا توجد أدوية موصوفة / No medications prescribed'}
+    // 💊 *الروشتة والأدوية الموصوفة / Prescribed Medications:*
+    // ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed'}
 
-✨ *مع تمنياتنا بالشفاء العاجل! / Get well soon!*`;
+    // ✨ *مع تمنياتنا بالشفاء العاجل! / Get well soon!*`;
 
-        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-    };
+    //         const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    //         window.open(whatsappUrl, '_blank');
+    //     };
 
-    const patientFullName = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''}`.trim();
+    const patientFullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
 
     return (
         <ClinicLayout title={`${t('visits.title', 'Visits')} - ${patientFullName}`}>
             <div className="space-y-6">
-                {/* Back Link & Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
+
+
+                <PageHeader icon={<Stethoscope className="h-7 w-7 text-primary" />} title={`${patientFullName} - ${patient.patient_number}`}
+                    subtitle={t('visits.subtitle')}
+                >
+                    <div className='flex gap-4 items-center'>
                         <Link
                             href={`/clinic/${clinicSlug}/patients`}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline mb-2"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary dark:text-primary hover:underline mb-2"
                         >
                             {isRtl ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
                             {t('visits.back_to_patients', 'Back to Patients')}
                         </Link>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                            <Stethoscope className="h-7 w-7 text-orange-500" />
-                            {patientFullName}
-                            <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 font-mono text-xs">
-                                {patient.patient_number}
-                            </Badge>
-                        </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {t('visits.subtitle', 'View examination and follow-up history, prescribed medications, and visit logs for patient.')}
-                        </p>
+
+                        <Button
+                            onClick={handleOpenAdd}
+
+                        >
+                            <Plus className="h-4 w-4" />
+                            {t('visits.add_new', 'Add New Visit')}
+                        </Button>
                     </div>
+                </PageHeader>
 
-                    <Button
-                        onClick={handleOpenAdd}
-                        className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm shrink-0"
-                    >
-                        <Plus className="h-4 w-4" />
-                        {t('visits.add_new', 'Add New Visit')}
-                    </Button>
-                </div>
+                <VisitsStats stats={stats} />
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('visits.total', 'Total Visits')}
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                                    {stats.total}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center text-orange-600">
-                                <Stethoscope className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('visits.examinations', 'Examinations')}
-                                </p>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                                    {stats.examinations}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600">
-                                <Activity className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('visits.follow_ups', 'Follow-ups')}
-                                </p>
-                                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
-                                    {stats.followUps}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center text-purple-600">
-                                <CheckCircle2 className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {t('visits.last_visit', 'Latest Visit')}
-                                </p>
-                                <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">
-                                    {stats.lastVisitDate ? new Date(stats.lastVisitDate).toLocaleDateString() : '-'}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600">
-                                <Calendar className="h-5 w-5" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Filter & Search Bar */}
-                <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                    <CardContent className="p-4 flex flex-col md:flex-row gap-3">
-                        <div className="relative flex-1">
-                            <Search className={`absolute top-1/2 -translate-y-1/2 ${isRtl ? 'right-3' : 'left-3'} h-4 w-4 text-gray-400`} />
-                            <Input
-                                placeholder={t('visits.search_placeholder', 'Search by date, type, or medication...')}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className={isRtl ? 'pr-9' : 'pl-9'}
-                            />
-                        </div>
-
-                        <Select value={typeFilter} onValueChange={setTypeFilter}>
-                            <SelectTrigger className="w-full md:w-[180px]">
-                                <SelectValue placeholder={t('visits.type', 'Visit Type')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">{t('visits.all_types', 'All Visit Types')}</SelectItem>
-                                <SelectItem value="examination">{t('visits.examination', 'Examination')}</SelectItem>
-                                <SelectItem value="follow_up">{t('visits.follow_up', 'Follow-up')}</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </CardContent>
-                </Card>
+                <VisitsFilterSearch
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    typeFilter={typeFilter}
+                    setTypeFilter={setTypeFilter} />
 
                 {/* Visits List */}
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                     {filteredVisits.length === 0 ? (
                         <Card className="border-gray-200 dark:border-gray-800 shadow-xs text-center py-12">
                             <CardContent>
@@ -445,11 +361,10 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
-                                                        isExamination
+                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${isExamination
                                                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
                                                             : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <Stethoscope className="h-5 w-5" />
                                                 </div>
@@ -506,7 +421,7 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                                             </div>
                                         </div>
 
-                                        {/* Prescribed Medications */}
+                                
                                         <div>
                                             <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                                 <Pill className="h-3.5 w-3.5 text-orange-500" />
@@ -534,19 +449,26 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                             );
                         })
                     )}
-                </div>
+                </div> */}
+                <VisitsTable
+                    filteredVisits={filteredVisits}
+                    handleOpenAdd={handleOpenAdd}
+                    setPrescriptions={setPrescriptions}
+                    setIsAddModalOpen={setIsAddModalOpen}
+                    patient={patient}
+                />
             </div>
 
             {/* Create / Edit Visit Modal */}
-            <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
+            {/* <Dialog open={isAddModalOpen} onOpenChange={handleCloseModal}>
                 <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
+                    <DialogHeader className='mt-5'>
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            <Stethoscope className="h-5 w-5 text-orange-500" />
+                            <Stethoscope className="h-5 w-5 text-primary" />
                             {editingVisit ? t('visits.edit', 'Edit Visit') : t('visits.add_new', 'Add New Visit')}
                         </DialogTitle>
                         <DialogDescription>
-                            {t('visits.subtitle', 'Record visit date, type, and prescribe medications.')}
+                            {t('visits.subtitle')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -554,7 +476,7 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="visited_at" className="required">
-                                    {t('visits.visited_at', 'Visit Date & Time')} *
+                                    {t('visits.visited_at')} *
                                 </Label>
                                 <Input
                                     id="visited_at"
@@ -566,57 +488,57 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                                     className="mt-1"
                                 />
                                 {formik.touched.visited_at && formik.errors.visited_at && (
-                                    <p className="text-xs text-red-500 mt-1">{formik.errors.visited_at}</p>
+                                    <InputError message={formik.errors.visited_at} />
                                 )}
                             </div>
 
                             <div>
                                 <Label htmlFor="type" className="required">
-                                    {t('visits.type', 'Visit Type')} *
+                                    {t('visits.type')} *
                                 </Label>
                                 <Select
                                     value={formik.values.type}
                                     onValueChange={(val) => formik.setFieldValue('type', val)}
                                 >
                                     <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder={t('visits.type', 'Select Visit Type')} />
+                                        <SelectValue placeholder={t('visits.type')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="examination">{t('visits.examination', 'Examination / كشف')}</SelectItem>
-                                        <SelectItem value="follow_up">{t('visits.follow_up', 'Follow-up / إعادة')}</SelectItem>
+                                        <SelectItem value="examination">{t('visits.examination')}</SelectItem>
+                                        <SelectItem value="follow_up">{t('visits.follow_up')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
-                        {/* Prescription Builder */}
+                       
                         <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-200 dark:border-gray-800 space-y-3">
                             <div className="flex items-center justify-between">
                                 <Label className="font-semibold text-sm flex items-center gap-1.5">
-                                    <Pill className="h-4 w-4 text-orange-500" />
-                                    {t('visits.prescribed_medications', 'Prescribed Medications (الروشتة)')}
+                                    <Pill className="h-4 w-4 text-primary" />
+                                    {t('visits.prescribed_medications')}
                                 </Label>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={handleAddPrescriptionRow}
-                                    className="h-8 text-xs gap-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+                                    
                                 >
                                     <PlusCircle className="h-3.5 w-3.5" />
-                                    {t('visits.add_medication', 'Add Medication')}
+                                    {t('visits.add_medication')}
                                 </Button>
                             </div>
 
                             {prescriptions.length === 0 ? (
                                 <p className="text-xs text-gray-400 italic text-center py-2">
-                                    No medications added yet. Click &quot;Add Medication&quot; above.
+                                    {t('visits.no_medications_added')}
                                 </p>
                             ) : (
                                 <div className="space-y-3">
                                     {prescriptions.map((presc, idx) => (
                                         <div key={idx} className="flex items-center gap-2 bg-white dark:bg-gray-900 p-2 rounded-lg border">
-                                            {/* Clinic Medication Dropdown */}
+                                            
                                             {medications.length > 0 && (
                                                 <div className="w-1/2">
                                                     <Select
@@ -638,7 +560,7 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                                                 </div>
                                             )}
 
-                                            {/* Medication Name Input */}
+                                       
                                             <div className="flex-1">
                                                 <Input
                                                     placeholder={t('visits.custom_name', 'Medication Name & Dosage')}
@@ -648,7 +570,7 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                                                 />
                                             </div>
 
-                                            {/* Delete row */}
+                                         
                                             <Button
                                                 type="button"
                                                 variant="ghost"
@@ -670,22 +592,23 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={formik.isSubmitting}
-                                className="bg-orange-500 hover:bg-orange-600 text-white min-w-[100px]"
+                                disabled={formik.isSubmitting}                               
                             >
                                 {formik.isSubmitting
                                     ? t('common.processing', 'Processing...')
                                     : editingVisit
-                                    ? t('common.save', 'Save Changes')
-                                    : t('common.save', 'Save Visit')}
+                                        ? t('common.save')
+                                        : t('common.save')}
                             </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
+
+            <VisitDialog isAddModalOpen={isAddModalOpen} handleCloseModal={handleCloseModal} editingVisit={editingVisit} patient={patient} medications={medications} />
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={Boolean(deletingVisit)} onOpenChange={() => setDeletingVisit(null)}>
+            {/* <Dialog open={Boolean(deletingVisit)} onOpenChange={() => setDeletingVisit(null)}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="text-red-600 flex items-center gap-2">
@@ -709,7 +632,7 @@ ${medsList || 'لا توجد أدوية موصوفة / No medications prescribed
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </ClinicLayout>
     );
 }

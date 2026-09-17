@@ -17,6 +17,7 @@ export interface Visit {
     patient_id: number;
     visited_at: string;
     type: 'examination' | 'follow_up';
+    image_url?: string | null;
     patient?: Patient;
     visit_medications?: VisitMedication[];
     created_at?: string;

@@ -18,6 +18,7 @@ class Visit extends Model
         'patient_id',
         'visited_at',
         'type',
+        'image_url',
     ];
 
     protected function casts(): array

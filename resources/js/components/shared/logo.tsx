@@ -9,7 +9,7 @@ export default function Logo() {
 
     return (
         <div>
-            <img className='w-16 h-16' src={isDark ? settings?.dark_logo ?? null : settings?.logo ?? null} alt={settings?.title_ar || undefined} />
+            <img className='w-16 h-16' src={isDark ? settings?.dark_logo ?? undefined : settings?.logo ?? undefined} alt={settings?.title_ar || undefined} />
         </div>
     )
 }

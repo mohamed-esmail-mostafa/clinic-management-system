@@ -76,10 +76,7 @@ export default function Hero() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     {/* Left Text Column */}
                     <div className="lg:col-span-7 space-y-6 text-start">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
-                            <Activity className="h-3.5 w-3.5" />
-                            <span>{t('landing.tagline', 'Your Health, Our Priority')}</span>
-                        </div>
+                       
 
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.15]">
                             {isRtl ? (
@@ -93,6 +90,7 @@ export default function Hero() {
                                     <span className="text-primary">Brighter Tomorrow</span>
                                 </>
                             )}
+                            
                         </h1>
 
                         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
@@ -110,7 +108,7 @@ export default function Hero() {
 
                             <a href="#services">
                                 <Button variant="outline" className="border-gray-300 dark:border-gray-700 font-semibold px-6 py-6 rounded-xl text-base cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
-                                    {t('landing.explore_services', 'Explore Services')}
+                                    {t('landing.explore_services')}
                                 </Button>
                             </a>
                         </div>
