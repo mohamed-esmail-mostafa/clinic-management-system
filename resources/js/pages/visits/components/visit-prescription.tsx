@@ -113,6 +113,17 @@ export default function VisitPrescription({ clinic, patient, visit }: VisitPresc
     const clinicAddress = clinic?.address || 'ش التأمينات القديمة - خلف خير زمان - فوق القصر البريطاني للستاير';
     const primaryPhone = clinic?.phone || '01090218001';
 
+    const clinicPhones: any[] = clinic?.phones || [];
+    const activePhones = clinicPhones.filter((p: any) => p.is_active !== false);
+    const displayPhones = activePhones.length > 0
+        ? activePhones.slice(0, 4)
+        : [
+            { phone: primaryPhone, is_whatsapp: true },
+            { phone: '01111933668', is_whatsapp: true },
+            { phone: '01064925184', is_whatsapp: false },
+            { phone: '045/3692122', is_whatsapp: false },
+        ];
+
     const medications = visit.visit_medications || [];
 
     return (
@@ -288,23 +299,20 @@ export default function VisitPrescription({ clinic, patient, visit }: VisitPresc
 
                     {/* Contact Numbers (Center) */}
                     <div className="flex flex-col items-center gap-1.5 flex-1" dir="ltr">
-                        <div className="flex items-center gap-4 text-xs font-bold text-slate-800">
-                            <div className="flex items-center gap-1 text-[#133E87]">
-                                <WhatsAppIcon className="w-3.5 h-3.5 text-green-600" />
-                                <span>{primaryPhone}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-slate-700">
-                                <WhatsAppIcon className="w-3.5 h-3.5 text-green-600" />
-                                <span>01111933668</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-slate-700">
-                                <Phone className="w-3.5 h-3.5 text-[#133E87]" />
-                                <span>01064925184</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-slate-700">
-                                <Phone className="w-3.5 h-3.5 text-[#133E87]" />
-                                <span>045/3692122</span>
-                            </div>
+                        <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-800">
+                            {displayPhones.map((p: any, idx: number) => (
+                                <div key={idx} className="flex items-center gap-1 text-slate-800">
+                                    {p.is_whatsapp ? (
+                                        <WhatsAppIcon className="w-3.5 h-3.5 text-green-600" />
+                                    ) : (
+                                        <Phone className="w-3.5 h-3.5 text-[#133E87]" />
+                                    )}
+                                    <span>
+                                        {p.country_code ? `${p.country_code} ` : ''}
+                                        {p.phone}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
 
                         {/* Clinic Address */}

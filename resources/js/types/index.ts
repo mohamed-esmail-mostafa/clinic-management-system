@@ -7,5 +7,6 @@ export type * from './visit';
 export type * from './booking';
 export type * from './clinic-type';
 export type * from './website-setting';
+export type * from './clinic-phone';
 
 

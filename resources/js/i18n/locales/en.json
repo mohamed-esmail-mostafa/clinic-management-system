@@ -114,7 +114,8 @@
       "medicines": "Medicines",
       "employees": "Employees",
       "settings": "Settings",
-      "profile": "Profile"
+      "profile": "Profile",
+      "phones":"Clinic Phones"
     }
   },
   "admin": {
@@ -480,7 +481,7 @@
     "next":"Next",
     "create":"Create",
     "save_changes":"Save Changes",
-    "edit":"Edit Visit"
+    "edit":"Edit"
   },
   "website_settings": {
     "title": "Website Settings",
@@ -650,5 +651,50 @@
     "peak_day": "Peak Day",
     "daily_average": "Daily Average",
     "visits_count": "visits"
+  },
+  "clinic_phones": {
+    "title": "Clinic Phone Numbers",
+    "subtitle": "Manage direct phone lines, WhatsApp numbers, emergency hotlines, and reception contacts.",
+    "add_new": "Add Phone Number",
+    "edit": "Edit Phone Number",
+    "delete": "Delete Phone Number",
+    "delete_confirm": "Are you sure you want to delete this phone number?",
+    "search_placeholder": "Search phone numbers, labels...",
+    "total": "Total Numbers",
+    "primary_count": "Primary Line",
+    "whatsapp_count": "WhatsApp Lines",
+    "active_count": "Active Lines",
+    "inactive_count": "Inactive Lines",
+    "phone": "Phone Number",
+    "phone_placeholder": "e.g. 01012345678 or 0453312345",
+    "country_code": "Country Code",
+    "country_code_placeholder": "e.g. +20",
+    "type": "Phone Type",
+    "type_placeholder": "Select phone type",
+    "types": {
+      "phone": "General Phone",
+      "mobile": "Mobile",
+      "landline": "Landline",
+      "emergency": "Emergency",
+      "whatsapp": "WhatsApp Only",
+      "hotline": "Hotline"
+    },
+    "label": "Label / Description",
+    "label_placeholder": "e.g. Main Reception, Doctor Private, Appointments",
+    "is_whatsapp": "WhatsApp Enabled",
+    "is_whatsapp_desc": "This number is active on WhatsApp and can receive patient messages",
+    "is_primary": "Primary Number",
+    "is_primary_desc": "Main clinic contact shown on prescriptions and official invoices",
+    "is_active": "Active Status",
+    "sort_order": "Sort Order",
+    "created_success": "Phone number added successfully!",
+    "updated_success": "Phone number updated successfully!",
+    "deleted_success": "Phone number deleted successfully!",
+    "status_updated": "Phone status updated successfully!",
+    "primary_updated": "Primary phone number updated!",
+    "no_phones": "No phone numbers found.",
+    "set_as_primary": "Set as Primary",
+    "primary_badge": "Primary",
+    "whatsapp_badge": "WhatsApp"
   }
 }

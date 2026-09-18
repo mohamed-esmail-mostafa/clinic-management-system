@@ -22,6 +22,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->dateTime('visited_at');
+            $table->text('image_url')->nullable();
 
             $table->enum('type', ['examination', 'follow_up']);
             $table->timestamps();

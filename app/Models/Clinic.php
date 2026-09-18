@@ -102,4 +102,9 @@ class Clinic extends Model
     {
         return $this->hasMany(PatientFields::class)->orderBy('sort_order', 'asc');
     }
+
+    public function phones(): HasMany
+    {
+        return $this->hasMany(ClinicPhone::class);
+    }
 }

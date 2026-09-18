@@ -26,6 +26,7 @@ require __DIR__.'/booking.php';
 require __DIR__.'/clinic-types.php';
 require __DIR__.'/website-setting.php';
 require __DIR__.'/users.php';
+require __DIR__.'/clinic-phones.php';
 
 Route::get('/admin/dashboard', function () {
     return Inertia::render('admin/index');

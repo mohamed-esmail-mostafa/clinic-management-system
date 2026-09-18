@@ -114,7 +114,8 @@
       "medicines": " الادوية ",
       "employees": " الموظفين ",
       "settings": " الاعدادات ",
-      "profile": " الملف الشخصي "
+      "profile": " الملف الشخصي ",
+      "phones":" ارقام هواتف العيادة "
     }
   },
   "admin": {
@@ -480,7 +481,7 @@
     "next": " التالي ",
     "create": " اضافة ",
     "save_changes": "حفظ التغييرات",
-     "edit":"تعديل الزيارة"
+    "edit":"تعديل "
   },
   "website_settings": {
     "title": "إعدادات الموقع",
@@ -650,5 +651,50 @@
     "peak_day": "أعلى يوم",
     "daily_average": "المعدل اليومي",
     "visits_count": "زيارة"
+  },
+  "clinic_phones": {
+    "title": "أرقام هواتف العيادة",
+    "subtitle": "إدارة خطوط الاتصال المباشرة، أرقام الواتساب، طوارئ العيادة، ومكتب الاستقبال.",
+    "add_new": "إضافة رقم هاتف",
+    "edit": "تعديل رقم الهاتف",
+    "delete": "حذف رقم الهاتف",
+    "delete_confirm": "هل أنت متأكد من رغبتك في حذف هذا الرقم؟",
+    "search_placeholder": "البحث في أرقام الهواتف والتسميات...",
+    "total": "إجمالي الأرقام",
+    "primary_count": "الرقم الأساسي",
+    "whatsapp_count": "أرقام الواتساب",
+    "active_count": "الخطوط النشطة",
+    "inactive_count": "الخطوط المعطلة",
+    "phone": "رقم الهاتف",
+    "phone_placeholder": "مثال: 01012345678 أو 0453312345",
+    "country_code": "كود الدولة",
+    "country_code_placeholder": "مثال: +20",
+    "type": "نوع الخط",
+    "type_placeholder": "اختر نوع الخط",
+    "types": {
+      "phone": "هاتف عام",
+      "mobile": "محمول",
+      "landline": "هاتف أرضي",
+      "emergency": "طوارئ",
+      "whatsapp": "واتساب فقط",
+      "hotline": "الخط الساخن"
+    },
+    "label": "التسمية / الوصف",
+    "label_placeholder": "مثال: الاستقبال الرئيسي، رقم الطبيب، الحجوزات",
+    "is_whatsapp": "مفعل على واتساب",
+    "is_whatsapp_desc": "هذا الرقم يعمل على تطبيق واتساب ويمكن مراسلته",
+    "is_primary": "الرقم الأساسي",
+    "is_primary_desc": "يظهر هذا الرقم كرقم رئيسي في الروشتات والفواتير",
+    "is_active": "حالة التفعيل",
+    "sort_order": "ترتيب الظهور",
+    "created_success": "تمت إضافة رقم الهاتف بنجاح!",
+    "updated_success": "تم تحديث رقم الهاتف بنجاح!",
+    "deleted_success": "تم حذف رقم الهاتف بنجاح!",
+    "status_updated": "تم تحديث حالة الرقم بنجاح!",
+    "primary_updated": "تم تعيين الرقم الأساسي بنجاح!",
+    "no_phones": "لا توجد أرقام هواتف مسجلة.",
+    "set_as_primary": "تعيين كأساسي",
+    "primary_badge": "أساسي",
+    "whatsapp_badge": "واتساب"
   }
 }
