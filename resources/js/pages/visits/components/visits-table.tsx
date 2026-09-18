@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import useImport from '@/hooks/use-import';
 import { Visit } from '@/types';
-import { AlertCircle, Clock, Download, ExternalLink, Eye, FileImage, Loader2, Pencil, Pill, Plus, Share2, Stethoscope, Trash2 } from 'lucide-react';
+import { AlertCircle, Clock, Download, ExternalLink, Eye, MoreHorizontal, FileImage, Loader2, Pencil, Pill, Plus, Share2, Stethoscope, Trash2 } from 'lucide-react';
 import React, { useState, useRef } from 'react'
 import { toast } from 'sonner';
 import {
@@ -18,6 +18,14 @@ import {
 import { router } from '@inertiajs/react';
 import VisitPrescription from './visit-prescription';
 import { toPng } from 'html-to-image';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+
 
 export default function VisitsTable({ filteredVisits, handleOpenAdd, setPrescriptions, setIsAddModalOpen, patient }: any) {
     const { t } = useImport()
@@ -202,7 +210,7 @@ ${prescriptionImageSection}
                                 className="border-gray-200 dark:border-gray-800 shadow-xs hover:border-orange-300 dark:hover:border-orange-900 transition-colors"
                             >
                                 <CardContent className="p-5">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
+                                    <div className="flex md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${isExamination
@@ -233,7 +241,7 @@ ${prescriptionImageSection}
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
+                                        {/* <div className="flex items-center gap-2">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -298,6 +306,97 @@ ${prescriptionImageSection}
                                                     </>
                                                 )}
                                             </Button>
+                                        </div> */}
+
+
+                                        <div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="default"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                    >
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">
+                                                            {t('common.actions', 'Actions')}
+                                                        </span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+
+                                                <DropdownMenuContent align="end" className="w-52">
+
+                                                    {/* WhatsApp */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleShareWhatsApp(visit)}
+                                                        className="text-emerald-600 focus:text-emerald-600"
+                                                    >
+                                                        <Share2 className="h-4 w-4 mr-2" />
+                                                        {t('visits.whatsapp', 'WhatsApp')}
+                                                    </DropdownMenuItem>
+
+                                                    {/* Edit */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleOpenEdit(visit)}
+                                                        className="text-amber-600 focus:text-amber-600"
+                                                    >
+                                                        <Pencil className="h-4 w-4 mr-2" />
+                                                        {t('common.edit')}
+                                                    </DropdownMenuItem>
+
+                                                    {/* View Prescription */}
+                                                    {visit.image_url && (
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                setPreviewImageUrl(visit.image_url || null)
+                                                            }
+                                                            className="text-emerald-600 focus:text-emerald-600"
+                                                        >
+                                                            <Eye className="h-4 w-4 mr-2" />
+                                                            {t(
+                                                                'visits.view_prescription',
+                                                                'View Prescription'
+                                                            )}
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    {/* Generate / Regenerate Prescription */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => generateAndUploadPrescription(visit)}
+                                                        disabled={generatingVisitId === visit.id}
+                                                        className="text-blue-600 focus:text-blue-600"
+                                                    >
+                                                        {generatingVisitId === visit.id ? (
+                                                            <>
+                                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                                {t('visits.generating', 'Generating...')}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FileImage className="h-4 w-4 mr-2" />
+                                                                {visit.image_url
+                                                                    ? t(
+                                                                        'visits.regenerate_prescription',
+                                                                        'Regenerate'
+                                                                    )
+                                                                    : t(
+                                                                        'visits.generate_prescription',
+                                                                    )}
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuItem>
+
+                                                    {/* Delete */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => setDeletingVisit(visit)}
+                                                        className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950/40"
+                                                    >
+                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                        {t('common.delete', 'Delete')}
+                                                    </DropdownMenuItem>
+
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </div>
 

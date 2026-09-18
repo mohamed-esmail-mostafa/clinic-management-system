@@ -848,15 +848,14 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
             {/* Delete Dialog */}
             <Dialog open={!!deletingPatient} onOpenChange={(open) => !open && setDeletingPatient(null)}>
                 <DialogContent>
-                    <DialogHeader>
+                    <DialogHeader className='mt-10'>
                         <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            {t('patients.delete_confirm_title', 'Delete Patient')}
+                            {t('patients.delete_confirm_title')}
                         </DialogTitle>
                         <DialogDescription>
                             {t(
                                 'patients.delete_confirm_desc',
-                                'Are you sure you want to delete this patient record? This action cannot be undone.'
                             )}
                         </DialogDescription>
                     </DialogHeader>
@@ -872,7 +871,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                         </div>
                     )}
 
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogFooter className="gap-2 sm:gap-4">
                         <Button variant="outline" onClick={() => setDeletingPatient(null)} disabled={isDeleting}>
                             {t('common.cancel', 'Cancel')}
                         </Button>

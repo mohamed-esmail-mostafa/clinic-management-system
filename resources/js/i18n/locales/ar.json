@@ -339,7 +339,10 @@
     "tab_custom_fields": "معلومات إضافية",
     "emergency_name": "اسم جهة الاتصال في حالات الطوارئ",
     "emergency_phone": "هاتف جهة الاتصال في حالات الطوارئ",
-    "emergency_relation": "صلة القرابة"
+    "emergency_relation": "صلة القرابة",
+    "delete_confirm_title": "تأكيد حذف المريض",
+            "delete_confirm_desc": "هل أنت متأكد أنك تريد حذف سجل هذا المريض؟ لا يمكن التراجع عن هذا الإجراء."
+
   },
   "medications": {
     "title": "إدارة الأدوية",
@@ -401,7 +404,8 @@
     "share_whatsapp": "مشاركة الوصفة عبر واتساب",
     "whatsapp": "واتساب",
     "no_phone_error": "رقم هاتف المريض غير مسجل للمشاركة عبر واتساب.",
-    "no_medications_added": "لم تتم إضافة أي أدوية بعد. اضغط على \"إضافة دواء\" أعلاه."
+    "no_medications_added": "لم تتم إضافة أي أدوية بعد. اضغط على \"إضافة دواء\" أعلاه.",
+    "generate_prescription":" انشاء الروشتة "
   },
   "bookings": {
     "title": "إدارة الحجوزات والمواعيد",

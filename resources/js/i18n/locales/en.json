@@ -339,7 +339,10 @@
     "tab_custom_fields":"Extra Info",
     "emergency_name":"Emergency Name",
     "emergency_phone":"Emergency Phone",
-    "emergency_relation":"Emergency Relation"
+    "emergency_relation":"Emergency Relation",
+    "delete_confirm_title": "Delete Patient",
+    "delete_confirm_desc": "Are you sure you want to delete this patient record? This action cannot be undone."
+
   },
   "medications": {
     "title": "Medications Management",
@@ -401,7 +404,8 @@
     "share_whatsapp": "Share via WhatsApp",
     "whatsapp": "WhatsApp",
     "no_phone_error": "Patient phone number is not available for WhatsApp sharing.",
-    "no_medications_added": "No medications added yet. Click \"Add Medication\" above."
+    "no_medications_added": "No medications added yet. Click \"Add Medication\" above.",
+    "generate_prescription":"Generate Prescription"
   },
   "bookings": {
     "title": "Bookings & Appointments",
