@@ -115,7 +115,8 @@
       "employees": "Employees",
       "settings": "Settings",
       "profile": "Profile",
-      "phones":"Clinic Phones"
+      "phones":"Clinic Phones",
+      "working-hours": "Working Hours"
     }
   },
   "admin": {
@@ -696,5 +697,50 @@
     "set_as_primary": "Set as Primary",
     "primary_badge": "Primary",
     "whatsapp_badge": "WhatsApp"
+  },
+  "days": {
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday"
+  },
+  "clinic_working_hours": {
+    "title": "Clinic Working Hours",
+    "subtitle": "Configure clinic opening times, daily shifts, reception hours, and weekly schedule.",
+    "add_shift": "Add Working Shift",
+    "edit_shift": "Edit Shift",
+    "delete_shift": "Delete Shift",
+    "delete_confirm": "Are you sure you want to delete this working hour shift?",
+    "day": "Day of the Week",
+    "select_day": "Select day",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "shifts": "shifts",
+    "shift": "shift",
+    "no_shifts": "Closed / Day Off",
+    "no_shifts_desc": "No working shifts scheduled for this day.",
+    "add_first_shift": "Add Hours",
+    "status_open": "Currently Open",
+    "status_closed": "Currently Closed",
+    "active_days": "Active Working Days",
+    "total_shifts": "Total Active Shifts",
+    "today_schedule": "Today's Schedule",
+    "quick_presets": "Quick Weekly Presets",
+    "apply_preset": "Apply Template",
+    "preset_regular": "Regular Week (Sat-Thu: 09:00 - 17:00)",
+    "preset_two_shifts": "Two Shifts (Sat-Thu: 10:00 - 14:00 & 18:00 - 22:00)",
+    "preset_applied": "Schedule template applied! Click Save to confirm.",
+    "created_success": "Working hour shift added successfully!",
+    "updated_success": "Working hour shift updated successfully!",
+    "deleted_success": "Working hour shift deleted successfully!",
+    "status_updated": "Working hour status updated successfully!",
+    "synced_success": "Weekly schedule updated successfully!",
+    "sort_order": "Sort Order",
+    "is_active": "Active Status",
+    "morning_shift": "Morning Shift",
+    "evening_shift": "Evening Shift"
   }
 }

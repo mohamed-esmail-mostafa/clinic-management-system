@@ -1,5 +1,5 @@
 import useImport from '@/hooks/use-import';
-import { Calendar, Globe, LayoutDashboard, Phone, Pill, Settings2, Store, Sun, User, User2Icon, Users } from 'lucide-react';
+import { Calendar, Globe, LayoutDashboard, Phone, Pill, Settings2, Store, Sun, Timer, User, User2Icon, Users } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 
@@ -13,6 +13,7 @@ export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) 
         { key: t('clinics.sidebar.bookings'), href: `/clinic/${authClinic?.slug}/booking`, icon: Calendar },
         { key: t('clinics.sidebar.medicines'), href: `/clinic/${authClinic?.slug}/medications`, icon: Pill },
         { key: t('clinics.sidebar.phones'), href: `/clinic/${authClinic?.slug}/phones/page`, icon: Phone },
+        { key: t('clinics.sidebar.working-hours'), href: `/clinic/${authClinic?.slug}/working/hours`, icon: Timer },
         { key: t('clinics.sidebar.profile'), href: '/auth/profile', icon: User },
     ];
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';

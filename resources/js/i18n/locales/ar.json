@@ -115,7 +115,8 @@
       "employees": " الموظفين ",
       "settings": " الاعدادات ",
       "profile": " الملف الشخصي ",
-      "phones":" ارقام هواتف العيادة "
+      "phones":" ارقام هواتف العيادة ",
+      "working-hours": "مواعيد العمل"
     }
   },
   "admin": {
@@ -696,5 +697,50 @@
     "set_as_primary": "تعيين كأساسي",
     "primary_badge": "أساسي",
     "whatsapp_badge": "واتساب"
+  },
+  "days": {
+    "saturday": "السبت",
+    "sunday": "الأحد",
+    "monday": "الإثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة"
+  },
+  "clinic_working_hours": {
+    "title": "مواعيد عمل العيادة",
+    "subtitle": "إدارة أوقات العمل الأسبوعية، فترات الاستقبال، الشفتات الصباحية والمسائية للعيادة.",
+    "add_shift": "إضافة فترة عمل",
+    "edit_shift": "تعديل الفترة",
+    "delete_shift": "حذف الفترة",
+    "delete_confirm": "هل أنت متأكد من رغبتك في حذف فترة العمل هذه؟",
+    "day": "اليوم",
+    "select_day": "اختر اليوم",
+    "start_time": "وقت البدء",
+    "end_time": "وقت الانتهاء",
+    "shifts": "فترات",
+    "shift": "فترة",
+    "no_shifts": "مغلق / يوم عطلة",
+    "no_shifts_desc": "لا توجد فترات عمل محددة لهذا اليوم.",
+    "add_first_shift": "إضافة مواعيد",
+    "status_open": "مفتوح الآن",
+    "status_closed": "مغلق الآن",
+    "active_days": "أيام العمل المفعلة",
+    "total_shifts": "إجمالي فترات العمل",
+    "today_schedule": "مواعيد اليوم",
+    "quick_presets": "نماذج جاهزة للجدول",
+    "apply_preset": "تطبيق النموذج",
+    "preset_regular": "أسبوع عمل عادي (السبت - الخميس: 09:00 - 17:00)",
+    "preset_two_shifts": "شفتين يومياً (السبت - الخميس: 10:00 - 14:00 و 18:00 - 22:00)",
+    "preset_applied": "تم تطبيق النموذج! اضغط حفظ للتأكيد.",
+    "created_success": "تمت إضافة فترة العمل بنجاح!",
+    "updated_success": "تم تحديث فترة العمل بنجاح!",
+    "deleted_success": "تم حذف فترة العمل بنجاح!",
+    "status_updated": "تم تحديث حالة فترة العمل بنجاح!",
+    "synced_success": "تم حفظ الجدول الأسبوعي بنجاح!",
+    "sort_order": "الترتيب",
+    "is_active": "حالة التفعيل",
+    "morning_shift": "فترة صباحية",
+    "evening_shift": "فترة مسائية"
   }
 }

@@ -107,4 +107,12 @@ class Clinic extends Model
     {
         return $this->hasMany(ClinicPhone::class);
     }
+
+    public function workingHours(): HasMany
+    {
+        return $this->hasMany(ClinicWorkingHour::class)
+            ->orderBy('day_of_week', 'asc')
+            ->orderBy('start_time', 'asc')
+            ->orderBy('sort_order', 'asc');
+    }
 }
