@@ -21,7 +21,7 @@ class BookingController extends Controller
         protected PatientService $patient_service
     ) {}
 
-    public function index($slug): Response
+    public function index(string $slug): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $bookings = $this->booking_service->getClinicBookings($clinic);
@@ -67,5 +67,20 @@ class BookingController extends Controller
         $this->booking_service->deleteBooking($booking);
 
         return redirect()->back()->with('success', 'Appointment deleted successfully');
+    }
+
+    public function today_bookings(string $slug): Response
+    {
+        $clinic = $this->clinic_service->getClinic($slug);
+        $bookings = $this->booking_service->getClinicTodayBookings($clinic);
+        $patients = $this->patient_service->getClinicPatients($clinic);
+        $doctors = $clinic->users;
+
+        return Inertia::render('booking/today-bookings', [
+            'clinic' => $clinic,
+            'bookings' => $bookings,
+            'patients' => $patients,
+            'doctors' => $doctors,
+        ]);
     }
 }

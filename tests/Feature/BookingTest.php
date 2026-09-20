@@ -123,3 +123,54 @@ test('authenticated user can delete a booking', function () {
         'id' => $booking->id,
     ]);
 });
+
+test('authenticated user can view clinic today bookings page', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('clinics.today.booking', $clinic->slug));
+
+    $response->assertStatus(200);
+});
+
+test('today bookings returns only bookings scheduled for today including pending and completed', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+
+    $today = now()->toDateString();
+    $tomorrow = now()->addDay()->toDateString();
+
+    // Today pending
+    $todayPending = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'appointment_date' => $today,
+        'appointment_time' => '09:00',
+        'status' => 'pending',
+    ]);
+
+    // Today completed
+    $todayCompleted = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'appointment_date' => $today,
+        'appointment_time' => '11:00',
+        'status' => 'completed',
+    ]);
+
+    // Tomorrow booking
+    $tomorrowBooking = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'appointment_date' => $tomorrow,
+        'appointment_time' => '10:00',
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('clinics.today.booking', $clinic->slug));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('booking/today-bookings')
+        ->has('bookings', 2)
+        ->where('bookings.0.id', $todayPending->id)
+        ->where('bookings.1.id', $todayCompleted->id)
+    );
+});

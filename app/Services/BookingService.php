@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Clinic;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class BookingService
 {
@@ -31,7 +33,9 @@ class BookingService
         $booking->type = $data['type'] ?? 'new';
         $booking->status = $data['status'] ?? 'pending';
         $booking->booking_source = $data['booking_source'] ?? 'reception';
-        $booking->booked_by = $data['booked_by'] ?? auth()->user()?->name ?? 'Reception';
+        $booking->booked_by = $data['booked_by'] ?? Auth::user()?->name ?? 'Reception';
+        $booking->payment_method = $data['payment_method'] ?? 'cash';
+        $booking->amount = $data['amount'] ?? 0;
         $booking->notes = $data['notes'] ?? null;
 
         $booking->save();
@@ -57,6 +61,12 @@ class BookingService
         if (isset($data['booked_by'])) {
             $booking->booked_by = $data['booked_by'];
         }
+        if (isset($data['payment_method'])) {
+            $booking->payment_method = $data['payment_method'];
+        }
+        if (isset($data['amount'])) {
+            $booking->amount = $data['amount'];
+        }
         $booking->notes = $data['notes'] ?? null;
 
         $booking->save();
@@ -75,5 +85,18 @@ class BookingService
     public function deleteBooking(Booking $booking): ?bool
     {
         return $booking->delete();
+    }
+
+    public function getClinicTodayBookings(Clinic|string $clinic): Collection
+    {
+        $clinicModel = is_string($clinic)
+            ? Clinic::where('slug', $clinic)->firstOrFail()
+            : $clinic;
+
+        return $clinicModel->bookings()
+            ->with(['patient', 'doctor'])
+            ->whereDate('appointment_date', Carbon::today())
+            ->orderBy('appointment_time', 'asc')
+            ->get();
     }
 }

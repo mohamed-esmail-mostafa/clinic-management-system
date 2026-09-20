@@ -18,6 +18,8 @@ export interface Booking {
     status: BookingStatus;
     booking_source: BookingSource;
     booked_by?: string | null;
+    payment_method?: string | null;
+    amount?: number | string | null;
     notes?: string | null;
     patient?: Patient | null;
     doctor?: User | null;
@@ -36,5 +38,7 @@ export interface BookingFormValues {
     status: BookingStatus;
     booking_source: BookingSource;
     booked_by?: string;
+    payment_method?: string;
+    amount?: number | string;
     notes?: string;
 }

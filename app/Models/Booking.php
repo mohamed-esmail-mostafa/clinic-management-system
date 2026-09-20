@@ -24,6 +24,8 @@ class Booking extends Model
         'status',
         'booking_source',
         'booked_by',
+        'payment_method',
+        'amount',
         'notes',
     ];
 
