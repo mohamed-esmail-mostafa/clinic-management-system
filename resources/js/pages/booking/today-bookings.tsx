@@ -225,13 +225,28 @@ export default function TodayBookingsPage({
         notes: editingBooking?.notes || '',
     };
 
+    const getPaymentMethodLabel = (method?: string | null) => {
+        switch (method) {
+            case 'cash':
+                return t('bookings.payment_cash', 'Cash');
+            case 'card':
+                return t('bookings.payment_card', 'Card / POS');
+            case 'insurance':
+                return t('bookings.payment_insurance', 'Insurance');
+            case 'other':
+                return t('bookings.payment_other', 'Other');
+            default:
+                return method || '';
+        }
+    };
+
     const formik = useFormik<BookingFormValues>({
         initialValues,
         enableReinitialize: true,
         validationSchema,
         onSubmit: (values, { setSubmitting, resetForm }) => {
             if (!clinicSlug) {
-                toast.error('Clinic slug is missing.');
+                toast.error(t('bookings.missing_clinic_slug', 'Clinic slug is missing.'));
                 setSubmitting(false);
                 return;
             }
@@ -253,7 +268,7 @@ export default function TodayBookingsPage({
                         handleCloseModal();
                     },
                     onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error updating booking');
+                        toast.error((Object.values(errors)[0] as string) || t('bookings.updated_error', 'Error updating booking'));
                     },
                     onFinish: () => setSubmitting(false),
                 });
@@ -265,7 +280,7 @@ export default function TodayBookingsPage({
                         resetForm();
                     },
                     onError: (errors) => {
-                        toast.error((Object.values(errors)[0] as string) || 'Error creating booking');
+                        toast.error((Object.values(errors)[0] as string) || t('bookings.created_error', 'Error creating booking'));
                     },
                     onFinish: () => setSubmitting(false),
                 });
@@ -309,7 +324,7 @@ export default function TodayBookingsPage({
                     toast.success(t('bookings.status_updated', 'Booking status updated!'));
                 },
                 onError: () => {
-                    toast.error('Failed to update status');
+                    toast.error(t('bookings.status_update_failed', 'Failed to update status'));
                 },
             }
         );
@@ -326,7 +341,7 @@ export default function TodayBookingsPage({
                 setDeletingBooking(null);
             },
             onError: () => {
-                toast.error('Failed to delete booking');
+                toast.error(t('bookings.delete_failed', 'Failed to delete booking'));
             },
             onFinish: () => setIsDeleting(false),
         });
@@ -643,7 +658,7 @@ export default function TodayBookingsPage({
                 {/* Page Header */}
                 <PageHeader
                     title={t('bookings.todays_bookings', "Today's Bookings")}
-                    subtitle={`${formattedToday} • ${bookings.length} ${t('bookings.todays_bookings', 'scheduled appointments')}`}
+                    subtitle={`${formattedToday} • ${bookings.length} ${t('bookings.scheduled_appointments', 'scheduled appointments')}`}
                     icon={<CalendarCheck className="h-6 w-6 text-primary" />}
                     count={bookings.length}
                 >
@@ -685,7 +700,7 @@ export default function TodayBookingsPage({
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-muted-foreground">
-                                    {t('bookings.todays_bookings', "Today's Total")}
+                                    {t('bookings.todays_total', "Today's Total")}
                                 </p>
                                 <p className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">
                                     {stats.total}
@@ -949,7 +964,7 @@ export default function TodayBookingsPage({
                             {bookings.length === 0 ? (
                                 <Button size="sm" onClick={handleOpenAdd} className="gap-1.5 mt-2">
                                     <Plus className="h-4 w-4" />
-                                    <span>{t('bookings.add_new', 'Schedule Today')}</span>
+                                    <span>{t('bookings.schedule_today', 'Schedule Today')}</span>
                                 </Button>
                             ) : (
                                 <Button
@@ -1025,7 +1040,7 @@ export default function TodayBookingsPage({
                                                             variant="outline"
                                                             className="text-[10px] py-0 px-1.5 text-muted-foreground"
                                                         >
-                                                            {t('bookings.unregistered_patient', 'Walk-in / Unregistered')}
+                                                            {t('bookings.walk_in_unregistered', 'Walk-in / Unregistered')}
                                                         </Badge>
                                                     ) : (
                                                         booking.patient?.patient_number && (
@@ -1069,7 +1084,7 @@ export default function TodayBookingsPage({
                                                         <span className="flex items-center gap-0.5 text-gray-900 dark:text-gray-100 font-medium">
                                                             <DollarSign className="h-3 w-3 text-emerald-600" />
                                                             <span>
-                                                                {booking.amount} {booking.payment_method ? `(${booking.payment_method})` : ''}
+                                                                {booking.amount} {booking.payment_method ? `(${getPaymentMethodLabel(booking.payment_method)})` : ''}
                                                             </span>
                                                         </span>
                                                     ) : null}
@@ -1521,10 +1536,10 @@ export default function TodayBookingsPage({
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="cash">Cash</SelectItem>
-                                            <SelectItem value="card">Card / POS</SelectItem>
-                                            <SelectItem value="insurance">Insurance</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value="cash">{t('bookings.payment_cash', 'Cash')}</SelectItem>
+                                            <SelectItem value="card">{t('bookings.payment_card', 'Card / POS')}</SelectItem>
+                                            <SelectItem value="insurance">{t('bookings.payment_insurance', 'Insurance')}</SelectItem>
+                                            <SelectItem value="other">{t('bookings.payment_other', 'Other')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
