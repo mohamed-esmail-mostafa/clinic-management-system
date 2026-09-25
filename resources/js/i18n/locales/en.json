@@ -649,7 +649,10 @@
     "login_link": "Sign In",
     "logout":"Logout",
     "profile":" Profile ",
-    "login":"Sign In"
+    "login":"Sign In",
+    "forget-password":"Forgot Password",
+    "reset-link":"Send Reset Link",
+    "or-return":" Or, return to "
   },
   "profile": {
     "title": "Profile Settings",

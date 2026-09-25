@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patient_field_options', function (Blueprint $table) {
+        Schema::create('visit_field_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_field_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('visit_field_id')->constrained()->cascadeOnDelete();
             $table->string('label');
             $table->string('value');
             $table->unsignedInteger('sort_order')->default(0);
+            $table->boolean("is_active")->default(true);
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patient_field_options');
+        Schema::dropIfExists('visit_field_options');
     }
 };

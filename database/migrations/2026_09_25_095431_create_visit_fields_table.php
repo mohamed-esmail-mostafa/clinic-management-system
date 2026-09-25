@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patient_fields', function (Blueprint $table) {
+        Schema::create('visit_fields', function (Blueprint $table) {
             $table->id();
             $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
             $table->foreignId('clinic_type_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('name');
-            $table->string('label');
-            $table->string('type');
+            $table->string('name')->nullable();
+            $table->string('label')->nullable();
+            $table->string('type')->nullable();
+            $table->string('unit')->nullable();
             $table->boolean('is_required')->default(false);
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('sort_order')->default(0);
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patient_fields');
+        Schema::dropIfExists('visit_fields');
     }
 };

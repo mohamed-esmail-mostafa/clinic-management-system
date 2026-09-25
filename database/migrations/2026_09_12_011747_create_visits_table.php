@@ -13,18 +13,12 @@ return new class extends Migration
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            $table->foreignId('patient_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
+            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->dateTime('visited_at');
             $table->text('image_url')->nullable();
-
             $table->enum('type', ['examination', 'follow_up']);
+            $table->string("notes")->nullable();
             $table->timestamps();
         });
     }

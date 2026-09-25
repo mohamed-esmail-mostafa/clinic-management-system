@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patient_field_values', function (Blueprint $table) {
+        Schema::create('visit_field_values', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('patient_field_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('visit_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('visit_field_id')->constrained()->cascadeOnDelete();
             $table->text('value')->nullable();
             $table->timestamps();
 
             $table->unique([
-                'patient_id',
-                'patient_field_id',
+                'visit_id',
+                'visit_field_id',
             ]);
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patient_field_values');
+        Schema::dropIfExists('visit_field_values');
     }
 };

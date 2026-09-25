@@ -20,8 +20,8 @@ export default function HomePage() {
     const { settings } = useWebsiteSetting();
 
     const title = isRtl
-        ? (settings?.title_ar || 'نظام إدارة العيادات الطبية')
-        : (settings?.title_en || 'ClinicCare Management System');
+        ? (settings?.title_ar || '')
+        : (settings?.title_en || '');
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary selection:text-primary-foreground transition-colors duration-300">
