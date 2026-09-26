@@ -4,6 +4,18 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
+          {{-- PWA --}}
+        <link rel="manifest" href="/build/manifest.webmanifest">
+        <meta name="theme-color" content="#ffffff">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="عيادتي">
+
+        {{-- PWA Icons --}}
+        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {

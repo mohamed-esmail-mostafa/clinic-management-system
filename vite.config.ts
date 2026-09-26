@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
     plugins: [
@@ -27,5 +28,41 @@ export default defineConfig({
         wayfinder({
             formVariants: true,
         }),
+
+         VitePWA({
+            registerType: 'autoUpdate',
+
+            manifest: {
+                name: 'عيادتي',
+                short_name: 'عيادتي',
+                description: 'نظام إدارة العيادات',
+
+                start_url: '/',
+                scope: '/',
+
+                display: 'standalone',
+
+                theme_color: '#ffffff',
+                background_color: '#ffffff',
+
+                icons: [
+                    {
+                        src: '/icons/icon-192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                    },
+                    {
+                        src: '/icons/icon-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                    },
+                ],
+            },
+
+            workbox: {
+                cleanupOutdatedCaches: true,
+            },
+        }),
+
     ],
 });

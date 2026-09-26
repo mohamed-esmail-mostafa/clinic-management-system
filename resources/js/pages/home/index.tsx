@@ -14,6 +14,7 @@ import StatsBanner from './components/stats-banner';
 import Testimonials from './components/testimonials';
 import CtaBanner from './components/cta-banner';
 import Footer from './components/footer';
+import InstallAppButton from '@/components/shared/install-app-button';
 
 export default function HomePage() {
     const { isRtl } = useImport();
@@ -41,7 +42,7 @@ export default function HomePage() {
                 <Testimonials />
                 <CtaBanner />
             </main>
-
+<InstallAppButton />
             {/* Footer */}
             <Footer />
         </div>
