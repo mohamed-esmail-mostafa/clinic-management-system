@@ -98,6 +98,7 @@ export default function ClinicLayout({ children, title }: Props) {
                     overflow-hidden
                     transition-all
                     duration-300
+                    pb-20
                     ${collapsed ? 'lg:ms-16' : 'lg:ms-60'}
                 `}
             >
@@ -126,8 +127,9 @@ export default function ClinicLayout({ children, title }: Props) {
                 </main>
 
                 {/* Mobile Bottom Navigation */}
-                <ClinicBottomNav />
+               
             </div>
+             <ClinicBottomNav />
         </div>
     )
 }

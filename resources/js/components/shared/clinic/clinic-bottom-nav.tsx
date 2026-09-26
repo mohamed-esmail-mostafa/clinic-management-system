@@ -32,7 +32,7 @@ export default function ClinicBottomNav() {
                         inset-x-0
                         bottom-0
                         h-16
-                        rounded-t-[30px]
+                        
                         bg-primary
                         shadow-[0_-4px_20px_rgba(0,0,0,0.12)]
                     "
