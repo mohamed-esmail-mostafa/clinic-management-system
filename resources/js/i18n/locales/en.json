@@ -117,7 +117,8 @@
       "settings": "Settings",
       "profile": "Profile",
       "phones":"Clinic Phones",
-      "working-hours": "Working Hours"
+      "working-hours": "Working Hours",
+      "options":"Options"
     }
   },
   "admin": {

@@ -117,7 +117,8 @@
       "settings": " الاعدادات ",
       "profile": " الملف الشخصي ",
       "phones":" ارقام هواتف العيادة ",
-      "working-hours": "مواعيد العمل"
+      "working-hours": "مواعيد العمل",
+      "options":" الخيارات "
     }
   },
   "admin": {
