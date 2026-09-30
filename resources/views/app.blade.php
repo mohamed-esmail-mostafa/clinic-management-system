@@ -44,7 +44,7 @@
 
         <link rel="icon" href="/favicon.jpeg" sizes="any">
         <link rel="icon" href="/favicon.jpeg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/favicon.jpeg">
+        <link rel="apple-touch-icon" href="/favicon.jpg">
 
         @fonts
 

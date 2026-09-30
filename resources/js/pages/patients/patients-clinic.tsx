@@ -81,6 +81,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/shared/page-header';
 import PatientStats from './components/patient-stats';
+import PatientFilterSearch from './components/patient-filter-search';
 
 interface Props {
     clinic?: any;
@@ -89,6 +90,7 @@ interface Props {
 }
 
 export default function PatientsClinic({ clinic: serverClinic, patients = [], custom_fields = [] }: Props) {
+    console.log("patients",patients)
     const { t, isRtl } = useImport();
     const { clinics } = useAuthClinics() as { clinics?: any[] };
 
@@ -436,44 +438,13 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                 <PatientStats stats={stats} />
 
                 {/* Filters & Search */}
-                <Card className="border-gray-200 dark:border-gray-800 shadow-xs">
-                    <CardContent className="p-4 flex flex-col md:flex-row gap-3">
-                        <div className="relative flex-1">
-                            <Search className={`absolute top-1/2 -translate-y-1/2 ${isRtl ? 'right-3' : 'left-3'} h-4 w-4 text-gray-400`} />
-                            <Input
-                                placeholder={t('patients.search_placeholder', 'Search by name, phone, patient number...')}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className={isRtl ? 'pr-9' : 'pl-9'}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:w-auto">
-                            <Select value={genderFilter} onValueChange={setGenderFilter}>
-                                <SelectTrigger className="w-full md:w-[160px]">
-                                    <SelectValue placeholder={t('patients.gender', 'Gender')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">{t('patients.all_genders', 'All Genders')}</SelectItem>
-                                    <SelectItem value="male">{t('patients.male', 'Male')}</SelectItem>
-                                    <SelectItem value="female">{t('patients.female', 'Female')}</SelectItem>
-                                    <SelectItem value="other">{t('patients.other', 'Other')}</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full md:w-[160px]">
-                                    <SelectValue placeholder={t('patients.is_active', 'Status')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">{t('patients.all_statuses', 'All Statuses')}</SelectItem>
-                                    <SelectItem value="active">{t('patients.active', 'Active')}</SelectItem>
-                                    <SelectItem value="inactive">{t('patients.inactive', 'Inactive')}</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
+                <PatientFilterSearch
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    genderFilter={genderFilter}
+                    setGenderFilter={setGenderFilter}
+                    statusFilter={statusFilter}
+                    setStatusFilter={setStatusFilter} />
 
                 {/* Responsive View (Cards on mobile, TanStack Table on desktop) */}
                 <Card className="border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
@@ -716,22 +687,20 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                 <button
                                     type="button"
                                     onClick={() => setViewTab('info')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                        viewTab === 'info'
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'info'
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                    }`}
+                                        }`}
                                 >
                                     {t('patients.tab_basic', 'Basic & Contact Info')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setViewTab('emergency')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
-                                        viewTab === 'emergency'
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'emergency'
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                    }`}
+                                        }`}
                                 >
                                     {t('patients.tab_emergency', 'Emergency & Notes')}
                                 </button>
@@ -739,11 +708,10 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                     <button
                                         type="button"
                                         onClick={() => setViewTab('custom')}
-                                        className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${
-                                            viewTab === 'custom'
+                                        className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${viewTab === 'custom'
                                                 ? 'border-primary text-primary'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
+                                            }`}
                                     >
                                         <Sliders className="h-3.5 w-3.5" />
                                         {t('patients.tab_custom_fields', 'Clinic Custom Fields')}
