@@ -127,9 +127,9 @@ export default function ClinicLayout({ children, title }: Props) {
                 </main>
 
                 {/* Mobile Bottom Navigation */}
-               
+
             </div>
-             <ClinicBottomNav />
+            <ClinicBottomNav />
         </div>
     )
 }
