@@ -302,7 +302,7 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
     };
 
     return (
-        <Card className="border-gray-200 dark:border-gray-800 shadow-sm max-w-4xl mx-auto w-full">
+        <Card className="border-gray-200 dark:border-gray-800 shadow-sm  mx-auto w-full">
             <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-4">
                 <div className="flex items-center justify-between">
                     <div>
@@ -310,11 +310,6 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                             <User className="h-5 w-5 text-primary" />
                             {patient ? t('patients.edit') : t('patients.add_new')}
                         </CardTitle>
-                        {/* <CardDescription className="text-xs mt-1">
-                            {patient
-                                ? t('patients.edit_desc', 'Update patient profile, emergency details, and custom fields.')
-                                : t('patients.add_desc', 'Fill in patient personal details, contact info, and clinic specific fields.')}
-                        </CardDescription> */}
                     </div>
                     <div className="flex items-center gap-2">
                         <Label htmlFor="is_active" className="text-xs font-semibold cursor-pointer">
@@ -429,16 +424,17 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                                 <div>
                                     <Label htmlFor="gender">{t('patients.gender', 'Gender')}</Label>
                                     <Select
+                            
                                         value={formik.values.gender || ''}
                                         onValueChange={(val) => formik.setFieldValue('gender', val)}
                                     >
-                                        <SelectTrigger id="gender" className="mt-1">
-                                            <SelectValue placeholder={t('patients.select_gender', 'Select gender')} />
+                                        <SelectTrigger id="gender" className="mt-1 w-full">
+                                            <SelectValue placeholder={t('patients.select_gender')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="male">{t('patients.male', 'Male')}</SelectItem>
-                                            <SelectItem value="female">{t('patients.female', 'Female')}</SelectItem>
-                                            <SelectItem value="other">{t('patients.other', 'Other')}</SelectItem>
+                                            <SelectItem value="male">{t('patients.male')}</SelectItem>
+                                            <SelectItem value="female">{t('patients.female')}</SelectItem>
+                                            <SelectItem value="other">{t('patients.other')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -527,7 +523,7 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                                     <Input
                                         id="emergency_contact_relation"
                                         name="emergency_contact_relation"
-                                        placeholder="e.g. Spouse, Parent, Sibling"
+                                        placeholder={t("patients.emergency_relation.placeholder")}
                                         value={formik.values.emergency_contact_relation || ''}
                                         onChange={formik.handleChange}
                                         className="mt-1"
@@ -540,8 +536,8 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                                         value={formik.values.blood_type || ''}
                                         onValueChange={(val) => formik.setFieldValue('blood_type', val)}
                                     >
-                                        <SelectTrigger id="blood_type" className="mt-1">
-                                            <SelectValue placeholder={t('common.select', 'Select blood type')} />
+                                        <SelectTrigger id="blood_type" className="mt-1 w-full">
+                                            <SelectValue placeholder={t('patients.select-blood-type')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bt) => (
@@ -554,13 +550,13 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="marital_status">{t('patients.marital_status', 'Marital Status')}</Label>
+                                    <Label htmlFor="marital_status">{t('patients.marital_status')}</Label>
                                     <Select
                                         value={formik.values.marital_status || ''}
                                         onValueChange={(val) => formik.setFieldValue('marital_status', val)}
                                     >
                                         <SelectTrigger id="marital_status" className="mt-1">
-                                            <SelectValue placeholder={t('common.select', 'Select status')} />
+                                            <SelectValue placeholder={t('patients.marital_status')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="single">{t('patients.single', 'Single')}</SelectItem>
@@ -581,8 +577,9 @@ export default function PatientForm({ clinic, patient, custom_fields = [] }: Pat
                                     value={formik.values.notes || ''}
                                     onChange={formik.handleChange}
                                     className="w-full mt-1 p-3 text-sm border rounded-md bg-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
-                                    placeholder={t('patients.notes_placeholder', 'Add any relevant medical history, allergies, or notes...')}
+                                    placeholder={t('patients.notes_placeholder', '')}
                                 />
+                                
                             </div>
                         </div>
                     )}

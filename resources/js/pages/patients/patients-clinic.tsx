@@ -1,26 +1,17 @@
-import useAuthClinics from '@/hooks/use-auth-clinics';
-import ClinicLayout from '@/layouts/clinic-layout';
-import React, { useState, useMemo } from 'react';
-import { Patient, PatientField } from '@/types/patient';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
+import useAuthClinics from '@/hooks/use-auth-clinics';
+import ClinicLayout from '@/layouts/clinic-layout';
 import useImport from '@/hooks/use-import';
+import { Patient, PatientField, PaginatedPatients } from '@/types/patient';
 
 // UI Components
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     Dialog,
     DialogContent,
@@ -29,24 +20,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-
-import { flexRender, SortingState } from '@tanstack/react-table';
-import {
-    useLegacyTable as useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    getPaginationRowModel,
-    LegacyColumnDef as ColumnDef,
-} from '@tanstack/react-table/legacy';
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -60,47 +33,65 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Search,
     Users,
     Eye,
     Phone,
     MapPin,
     Calendar,
     AlertCircle,
-    FileText,
-    User,
     Stethoscope,
     Sliders,
-    ArrowUpDown,
-    ChevronUp,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
     MoreHorizontal,
-    Heart,
 } from 'lucide-react';
+
 import PageHeader from '@/components/shared/page-header';
+import Pagination from '@/components/shared/pagination';
 import PatientStats from './components/patient-stats';
 import PatientFilterSearch from './components/patient-filter-search';
+import NoPatientsFound from './components/no-patients-found';
 
 interface Props {
     clinic?: any;
-    patients?: Patient[];
+    patients: PaginatedPatients | Patient[];
     custom_fields?: PatientField[];
+    filters?: {
+        search?: string;
+        gender?: string;
+        status?: string;
+    };
+    stats?: {
+        total: number;
+        active: number;
+        inactive: number;
+        customFieldsCount?: number;
+    };
 }
 
-export default function PatientsClinic({ clinic: serverClinic, patients = [], custom_fields = [] }: Props) {
-    console.log("patients",patients)
+export default function PatientsClinic({
+    clinic: serverClinic,
+    patients,
+    custom_fields = [],
+    filters,
+    stats: serverStats,
+}: Props) {
     const { t, isRtl } = useImport();
     const { clinics } = useAuthClinics() as { clinics?: any[] };
 
     // Determine current clinic slug
     const clinicSlug = serverClinic?.slug || (Array.isArray(clinics) && clinics.length > 0 ? clinics[0].slug : '');
 
-    // Search and filter states
-    const [searchTerm, setSearchTerm] = useState('');
-    const [genderFilter, setGenderFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
+    // Extract paginated patients list and pagination metadata
+    const isPaginated = !Array.isArray(patients) && patients !== null && typeof patients === 'object' && 'data' in patients;
+    const patientList: Patient[] = isPaginated ? (patients as PaginatedPatients).data : (Array.isArray(patients) ? patients : []);
+    const paginationLinks = isPaginated ? (patients as PaginatedPatients).links : [];
+    const paginationFrom = isPaginated ? (patients as PaginatedPatients).from : (patientList.length > 0 ? 1 : 0);
+    const paginationTo = isPaginated ? (patients as PaginatedPatients).to : patientList.length;
+    const paginationTotal = isPaginated ? (patients as PaginatedPatients).total : patientList.length;
+
+    // Search and filter states (synced with backend)
+    const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+    const [genderFilter, setGenderFilter] = useState(filters?.gender || 'all');
+    const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
 
     // Modals state (Viewing details & Deleting)
     const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
@@ -108,43 +99,55 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
     const [isDeleting, setIsDeleting] = useState(false);
     const [viewTab, setViewTab] = useState<'info' | 'emergency' | 'custom'>('info');
 
-    // Filter patients
-    const filteredPatients = useMemo(() => {
-        return patients.filter((patient) => {
-            const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase();
-            const patientNum = (patient.patient_number || '').toLowerCase();
-            const phone = (patient.phone || '').toLowerCase();
-            const search = searchTerm.toLowerCase().trim();
+    // Debounced Backend Search & Filter query dispatch
+    const isInitialMount = useRef(true);
 
-            const matchesSearch =
-                !search ||
-                fullName.includes(search) ||
-                patientNum.includes(search) ||
-                phone.includes(search);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
 
-            const matchesGender = genderFilter === 'all' || patient.gender === genderFilter;
-            const matchesStatus =
-                statusFilter === 'all' ||
-                (statusFilter === 'active' && patient.is_active) ||
-                (statusFilter === 'inactive' && !patient.is_active);
+        const timeoutId = setTimeout(() => {
+            if (!clinicSlug) return;
 
-            return matchesSearch && matchesGender && matchesStatus;
-        });
-    }, [patients, searchTerm, genderFilter, statusFilter]);
+            router.get(
+                `/clinic/${clinicSlug}/patients`,
+                {
+                    search: searchTerm.trim() ? searchTerm.trim() : undefined,
+                    gender: genderFilter !== 'all' ? genderFilter : undefined,
+                    status: statusFilter !== 'all' ? statusFilter : undefined,
+                    page: 1, // Reset to page 1 on new filter criteria
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                }
+            );
+        }, 350);
 
-    // Summary statistics
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, genderFilter, statusFilter, clinicSlug]);
+
+    // Statistics computation
     const stats = useMemo(() => {
+        if (serverStats) {
+            return serverStats;
+        }
+
         return {
-            total: patients.length,
-            active: patients.filter((p) => p.is_active).length,
-            inactive: patients.filter((p) => !p.is_active).length,
+            total: paginationTotal,
+            active: patientList.filter((p) => p.is_active).length,
+            inactive: patientList.filter((p) => !p.is_active).length,
             customFieldsCount: custom_fields.length,
         };
-    }, [patients, custom_fields]);
+    }, [serverStats, paginationTotal, patientList, custom_fields]);
 
     const handleToggleStatus = (patient: Patient) => {
         if (!clinicSlug) return;
         router.patch(`/clinic/${clinicSlug}/patients/${patient.id}/toggle-status`, {}, {
+            preserveScroll: true,
             onSuccess: () => {
                 toast.success(t('patients.status_updated', 'Patient status updated!'));
             },
@@ -159,6 +162,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
 
         setIsDeleting(true);
         router.delete(`/clinic/${clinicSlug}/patients/${deletingPatient.id}`, {
+            preserveScroll: true,
             onSuccess: () => {
                 toast.success(t('patients.deleted_success', 'Patient deleted successfully!'));
                 setDeletingPatient(null);
@@ -170,234 +174,11 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
         });
     };
 
-    const getInitials = (firstName: string, lastName: string) => {
+    const getInitials = (firstName?: string | null, lastName?: string | null) => {
         const f = firstName ? firstName.charAt(0).toUpperCase() : '';
         const l = lastName ? lastName.charAt(0).toUpperCase() : '';
         return `${f}${l}` || 'P';
     };
-
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [pagination, setPagination] = useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
-
-    const columns = useMemo<ColumnDef<Patient>[]>(
-        () => [
-            {
-                accessorKey: 'patient_number',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="-ml-3 h-8 text-xs font-semibold data-[state=open]:bg-accent"
-                    >
-                        <span>{t('patients.patient_number', 'Patient')}</span>
-                        {column.getIsSorted() === 'asc' ? (
-                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
-                        ) : (
-                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
-                        )}
-                    </Button>
-                ),
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
-                    return (
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9 bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0">
-                                <AvatarFallback>{getInitials(patient.first_name, patient.last_name)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                                    {fullName}
-                                </p>
-                                <p className="text-xs text-primary font-mono">
-                                    {patient.patient_number}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                },
-            },
-            {
-                accessorKey: 'phone',
-                header: () => <span className="text-xs font-semibold">{t('patients.phone', 'Contact Info')}</span>,
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    return (
-                        <div className="space-y-0.5 text-xs text-gray-600 dark:text-gray-300">
-                            {patient.phone && (
-                                <p className="flex items-center gap-1.5">
-                                    <Phone className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                                    {patient.phone}
-                                </p>
-                            )}
-                            {patient.address && (
-                                <p className="flex items-center gap-1.5 text-gray-500">
-                                    <MapPin className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                                    {patient.address}
-                                </p>
-                            )}
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'gender_dob',
-                header: () => <span className="text-xs font-semibold">{t('patients.gender', 'Gender / DOB')}</span>,
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    return (
-                        <div className="text-xs space-y-1">
-                            {patient.gender && (
-                                <Badge variant="outline" className="capitalize text-[11px] font-normal">
-                                    {t(`patients.${patient.gender}`, patient.gender)}
-                                </Badge>
-                            )}
-                            {patient.date_of_birth && (
-                                <p className="text-gray-500 text-[11px] flex items-center gap-1">
-                                    <Calendar className="h-3 w-3 text-gray-400" />
-                                    {patient.date_of_birth}
-                                </p>
-                            )}
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'blood_marital',
-                header: () => <span className="text-xs font-semibold">{t('patients.blood_type', 'Blood & Marital')}</span>,
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    return (
-                        <div className="flex items-center gap-2">
-                            {patient.blood_type && (
-                                <Badge className="bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 font-bold text-[11px]">
-                                    {patient.blood_type}
-                                </Badge>
-                            )}
-                            {patient.marital_status && (
-                                <Badge variant="secondary" className="capitalize text-[11px]">
-                                    {t(`patients.${patient.marital_status}`, patient.marital_status)}
-                                </Badge>
-                            )}
-                        </div>
-                    );
-                },
-            },
-            {
-                accessorKey: 'is_active',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="-ml-3 h-8 text-xs font-semibold data-[state=open]:bg-accent"
-                    >
-                        <span>{t('patients.is_active', 'Status')}</span>
-                        {column.getIsSorted() === 'asc' ? (
-                            <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
-                        ) : (
-                            <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
-                        )}
-                    </Button>
-                ),
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    return (
-                        <div className="flex items-center gap-2">
-                            <Switch
-                                checked={patient.is_active}
-                                onCheckedChange={() => handleToggleStatus(patient)}
-                            />
-                            <Badge
-                                className={
-                                    patient.is_active
-                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100'
-                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-100'
-                                }
-                            >
-                                {patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
-                            </Badge>
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'actions',
-                header: () => <div className="text-end text-xs font-semibold">{t('common.actions', 'Actions')}</div>,
-                cell: ({ row }) => {
-                    const patient = row.original;
-                    return (
-                        <div className="flex justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:hover:text-white">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                        <span className="sr-only">Open menu</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}
-                                            className="flex items-center gap-2 cursor-pointer text-emerald-600 dark:text-emerald-400 font-medium"
-                                        >
-                                            <Stethoscope className="h-4 w-4" />
-                                            {t('visits.title', 'Patient Visits')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setViewingPatient(patient)}
-                                        className="flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                        {t('patients.view', 'View Details')}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}
-                                            className="flex items-center gap-2 cursor-pointer text-amber-600 dark:text-amber-400"
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                            {t('patients.edit', 'Edit Patient')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={() => setDeletingPatient(patient)}
-                                        className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 font-medium"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        {t('patients.delete', 'Delete Patient')}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    );
-                },
-            },
-        ],
-        [clinicSlug, t]
-    );
-
-    const table = useReactTable({
-        data: filteredPatients,
-        columns,
-        state: {
-            sorting,
-            pagination,
-        },
-        onSortingChange: setSorting,
-        onPaginationChange: setPagination,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-    });
 
     const renderFieldValueDisplay = (field: PatientField, patient: Patient) => {
         const fieldValues = patient.field_values || (patient as any).fieldValues || [];
@@ -427,7 +208,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                     subtitle={t('patients.subtitle', 'View and manage clinic patients, contact info, and custom clinic details.')}
                 >
                     <Link href={`/clinic/${clinicSlug}/patients/create`}>
-                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-xs shrink-0">
+                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-xs shrink-0 cursor-pointer">
                             <Plus className="h-4 w-4" />
                             {t('patients.add_new', 'Add New Patient')}
                         </Button>
@@ -437,57 +218,75 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                 {/* Stats Cards */}
                 <PatientStats stats={stats} />
 
-                {/* Filters & Search */}
+                {/* Filters & Backend Search */}
                 <PatientFilterSearch
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     genderFilter={genderFilter}
                     setGenderFilter={setGenderFilter}
                     statusFilter={statusFilter}
-                    setStatusFilter={setStatusFilter} />
+                    setStatusFilter={setStatusFilter}
+                />
 
-                {/* Responsive View (Cards on mobile, TanStack Table on desktop) */}
-                <Card className="border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
-                    {/* Mobile View: Cards */}
-                    <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800">
-                        {table.getRowModel().rows.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                                <Users className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                {t('patients.no_patients', 'No patients found.')}
-                            </div>
-                        ) : (
-                            table.getRowModel().rows.map((row) => {
-                                const patient = row.original;
-                                const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
-                                return (
-                                    <div key={patient.id} className="p-4 space-y-3 bg-white dark:bg-gray-900">
+                {/* Patients Cards List View */}
+                {patientList.length === 0 ? (
+                    <NoPatientsFound
+                        searchTerm={searchTerm}
+                        genderFilter={genderFilter}
+                        statusFilter={statusFilter}
+                        setSearchTerm={setSearchTerm}
+                        setGenderFilter={setGenderFilter}
+                        setStatusFilter={setStatusFilter}
+                        clinicSlug={clinicSlug} />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {patientList.map((patient) => {
+                            const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.full_name || t('patients.unnamed', 'Unnamed Patient');
+                            return (
+                                <Card
+                                    key={patient.id}
+                                    className="group border-gray-200 dark:border-gray-800 shadow-xs hover:shadow-md hover:border-primary/40 dark:hover:border-primary/40 transition-all flex flex-col justify-between overflow-hidden"
+                                >
+                                    <CardContent className="p-5 space-y-4">
+                                        {/* Header: Avatar, Name, Number, Status Switch & Actions Menu */}
                                         <div className="flex items-start justify-between gap-3">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10 bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <Avatar className="h-11 w-11 bg-primary/10 text-primary border border-primary/20 font-bold shrink-0">
                                                     <AvatarFallback>{getInitials(patient.first_name, patient.last_name)}</AvatarFallback>
                                                 </Avatar>
-                                                <div>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-base">
+                                                <div className="min-w-0">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setViewingPatient(patient)}
+                                                        className="font-bold text-gray-900 dark:text-white text-base hover:text-primary transition-colors text-start truncate block max-w-[180px] sm:max-w-[200px]"
+                                                        title={fullName}
+                                                    >
                                                         {fullName}
-                                                    </p>
-                                                    <p className="text-xs text-primary font-mono font-medium">
+                                                    </button>
+                                                    <span className="text-xs text-primary font-mono font-medium block">
                                                         {patient.patient_number}
-                                                    </p>
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+
+                                            <div className="flex items-center gap-1.5 shrink-0">
                                                 <Switch
                                                     checked={patient.is_active}
                                                     onCheckedChange={() => handleToggleStatus(patient)}
+                                                    title={patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
                                                 />
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                                                        >
                                                             <MoreHorizontal className="h-4 w-4" />
                                                             <span className="sr-only">Open menu</span>
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuContent align="end" className="w-52">
                                                         <DropdownMenuItem asChild>
                                                             <Link
                                                                 href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}
@@ -526,141 +325,137 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 dark:bg-gray-800/40 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800">
+                                        {/* Quick Badges row */}
+                                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                            <Badge
+                                                className={
+                                                    patient.is_active
+                                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 text-[11px] font-medium'
+                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[11px] font-medium'
+                                                }
+                                            >
+                                                {patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
+                                            </Badge>
+
+                                            {patient.gender && (
+                                                <Badge variant="outline" className="capitalize text-[11px] font-normal">
+                                                    {t(`patients.${patient.gender}`, patient.gender)}
+                                                </Badge>
+                                            )}
+
+                                            {patient.blood_type && (
+                                                <Badge className="bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 font-bold text-[11px]">
+                                                    {patient.blood_type}
+                                                </Badge>
+                                            )}
+
+                                            {patient.marital_status && (
+                                                <Badge variant="secondary" className="capitalize text-[11px] font-normal">
+                                                    {t(`patients.${patient.marital_status}`, patient.marital_status)}
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        {/* Details Grid */}
+                                        <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50/80 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
                                             <div>
-                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.phone', 'Phone')}</span>
-                                                <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-1 mt-0.5">
-                                                    <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-                                                    {patient.phone || '-'}
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">
+                                                    {t('patients.phone', 'Phone')}
+                                                </span>
+                                                {patient.phone ? (
+                                                    <a
+                                                        href={`tel:${patient.phone}`}
+                                                        className="font-medium text-gray-800 dark:text-gray-200 hover:text-primary flex items-center gap-1 mt-0.5 truncate"
+                                                        dir="ltr"
+                                                    >
+                                                        <Phone className="h-3 w-3 text-gray-400 shrink-0" />
+                                                        <span>{patient.phone}</span>
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-400 mt-0.5 block">-</span>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">
+                                                    {t('patients.date_of_birth', 'Date of Birth')}
+                                                </span>
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-1 mt-0.5 truncate">
+                                                    <Calendar className="h-3 w-3 text-gray-400 shrink-0" />
+                                                    <span>{patient.date_of_birth || '-'}</span>
                                                 </p>
                                             </div>
-                                            <div>
-                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.gender', 'Gender / DOB')}</span>
-                                                <p className="font-medium text-gray-800 dark:text-gray-200 mt-0.5">
-                                                    {patient.gender ? t(`patients.${patient.gender}`, patient.gender) : '-'}
-                                                    {patient.date_of_birth ? ` (${patient.date_of_birth})` : ''}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.blood_type', 'Blood / Marital')}</span>
-                                                <p className="font-medium text-gray-800 dark:text-gray-200 mt-0.5">
-                                                    {patient.blood_type || '-'} {patient.marital_status ? `/ ${patient.marital_status}` : ''}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t('patients.address', 'Address')}</span>
-                                                <p className="font-medium text-gray-800 dark:text-gray-200 truncate mt-0.5 flex items-center gap-1">
+
+                                            <div className="col-span-2">
+                                                <span className="text-gray-400 block text-[10px] uppercase font-semibold">
+                                                    {t('patients.address', 'Address')}
+                                                </span>
+                                                <p className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1 mt-0.5 truncate">
                                                     {patient.address ? (
                                                         <>
                                                             <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
-                                                            {patient.address}
+                                                            <span className="truncate">{patient.address}</span>
                                                         </>
-                                                    ) : '-'}
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })
-                        )}
+
+                                        {/* Bottom Quick Card Actions */}
+                                        <div className="pt-2 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 gap-2">
+                                            <Link
+                                                href={`/clinic/${clinicSlug}/patients/${patient.id}/visits`}
+                                                className="flex-1"
+                                            >
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 gap-1.5 h-8 cursor-pointer"
+                                                >
+                                                    <Stethoscope className="h-3.5 w-3.5" />
+                                                    {t('visits.title', 'Visits')}
+                                                </Button>
+                                            </Link>
+
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setViewingPatient(patient)}
+                                                className="text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 gap-1 h-8 px-2.5 cursor-pointer"
+                                            >
+                                                <Eye className="h-3.5 w-3.5" />
+                                                {t('patients.view', 'View')}
+                                            </Button>
+
+                                            <Link href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 gap-1 h-8 px-2.5 cursor-pointer"
+                                                >
+                                                    <Pencil className="h-3.5 w-3.5" />
+                                                    {t('common.edit', 'Edit')}
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
+                )}
 
-                    {/* Desktop View: TanStack Table */}
-                    <div className="hidden md:block">
-                        <Table>
-                            <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(header.column.columnDef.header, header.getContext())}
-                                            </TableHead>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className="text-center py-10 text-gray-500 dark:text-gray-400">
-                                            <Users className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                            {t('patients.no_patients', 'No patients found.')}
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-
-                    {/* Pagination Controls */}
-                    {table.getPageCount() > 0 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
-                            <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <span>
-                                    {t('common.showing', 'Page')} <strong className="text-gray-900 dark:text-white">{table.getState().pagination.pageIndex + 1}</strong> {t('common.of', 'of')} <strong className="text-gray-900 dark:text-white">{table.getPageCount()}</strong>
-                                </span>
-                                <span>•</span>
-                                <span>
-                                    <strong className="text-gray-900 dark:text-white">{filteredPatients.length}</strong> {t('patients.total', 'total patients')}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">{t('common.rows_per_page', 'Rows per page')}</span>
-                                    <Select
-                                        value={String(table.getState().pagination.pageSize)}
-                                        onValueChange={(val) => table.setPageSize(Number(val))}
-                                    >
-                                        <SelectTrigger className="h-8 w-[70px] text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {[10, 20, 30, 50].map((size) => (
-                                                <SelectItem key={size} value={String(size)} className="text-xs">
-                                                    {size}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={() => table.previousPage()}
-                                        disabled={!table.getCanPreviousPage()}
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={() => table.nextPage()}
-                                        disabled={!table.getCanNextPage()}
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </Card>
+                {/* Pagination Controls */}
+                <div className="pt-2">
+                    <Pagination
+                        links={paginationLinks}
+                        from={paginationFrom ?? undefined}
+                        to={paginationTo ?? undefined}
+                        total={paginationTotal ?? undefined}
+                    />
+                </div>
             </div>
 
             {/* View Details Dialog */}
@@ -687,7 +482,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                 <button
                                     type="button"
                                     onClick={() => setViewTab('info')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'info'
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 cursor-pointer ${viewTab === 'info'
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                                         }`}
@@ -697,7 +492,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                 <button
                                     type="button"
                                     onClick={() => setViewTab('emergency')}
-                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 ${viewTab === 'emergency'
+                                    className={`pb-2 text-sm font-medium transition-colors border-b-2 cursor-pointer ${viewTab === 'emergency'
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                                         }`}
@@ -708,7 +503,7 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
                                     <button
                                         type="button"
                                         onClick={() => setViewTab('custom')}
-                                        className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 ${viewTab === 'custom'
+                                        className={`pb-2 text-sm font-medium transition-colors border-b-2 flex items-center gap-1.5 cursor-pointer ${viewTab === 'custom'
                                                 ? 'border-primary text-primary'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                                             }`}
@@ -816,15 +611,13 @@ export default function PatientsClinic({ clinic: serverClinic, patients = [], cu
             {/* Delete Dialog */}
             <Dialog open={!!deletingPatient} onOpenChange={(open) => !open && setDeletingPatient(null)}>
                 <DialogContent>
-                    <DialogHeader className='mt-10'>
+                    <DialogHeader className="mt-6">
                         <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            {t('patients.delete_confirm_title')}
+                            {t('patients.delete_confirm_title', 'Delete Patient')}
                         </DialogTitle>
                         <DialogDescription>
-                            {t(
-                                'patients.delete_confirm_desc',
-                            )}
+                            {t('patients.delete_confirm_desc', 'Are you sure you want to delete this patient record? This action cannot be undone.')}
                         </DialogDescription>
                     </DialogHeader>
 

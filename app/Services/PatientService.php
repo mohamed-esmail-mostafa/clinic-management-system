@@ -5,16 +5,43 @@ namespace App\Services;
 use App\Models\Clinic;
 use App\Models\Patient;
 use App\Models\PatientFieldValue;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PatientService
 {
-    public function getClinicPatients(Clinic $clinic): Collection
+    // public function getClinicPatients(Clinic $clinic): Collection
+    // {
+    //     return $clinic->patients()
+    //         ->with(['fieldValues.field'])
+    //         ->orderBy('id', 'desc')
+    //         ->get();
+    // }
+
+    public function getClinicPatients(Clinic $clinic, ?string $search = null, ?string $gender = null, ?string $status = null, int $perPage = 10): LengthAwarePaginator
     {
         return $clinic->patients()
             ->with(['fieldValues.field'])
-            ->orderBy('id', 'desc')
-            ->get();
+
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('patient_number', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
+
+            ->when($gender && $gender !== 'all', function ($query) use ($gender) {
+                $query->where('gender', $gender);
+            })
+
+            ->when($status && $status !== 'all', function ($query) use ($status) {
+                $query->where('is_active', $status === 'active');
+            })
+
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function generatePatientNumber(Clinic $clinic): string

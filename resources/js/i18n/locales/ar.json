@@ -111,15 +111,15 @@
       "patients": " المرضي ",
       "patients-settings": " إعدادات المرضى ",
       "bookings": " الحجوزات ",
-      "today_bookings":" حجوزات اليوم ",
+      "today_bookings": " حجوزات اليوم ",
       "medicines": " الادوية ",
       "employees": " الموظفين ",
       "settings": " الاعدادات ",
       "profile": " الملف الشخصي ",
-      "phones":" ارقام هواتف العيادة ",
+      "phones": " ارقام هواتف العيادة ",
       "working-hours": "مواعيد العمل",
-      "options":" الخيارات ",
-      "visit-settings":" اعدادت الزيارات "
+      "options": " الخيارات ",
+      "visit-settings": " اعدادت الزيارات "
     }
   },
   "admin": {
@@ -346,8 +346,12 @@
     "emergency_phone": "هاتف جهة الاتصال في حالات الطوارئ",
     "emergency_relation": "صلة القرابة",
     "delete_confirm_title": "تأكيد حذف المريض",
-            "delete_confirm_desc": "هل أنت متأكد أنك تريد حذف سجل هذا المريض؟ لا يمكن التراجع عن هذا الإجراء."
-
+    "delete_confirm_desc": "هل أنت متأكد أنك تريد حذف سجل هذا المريض؟ لا يمكن التراجع عن هذا الإجراء.",
+    "select_gender": " اختر النوع ",
+    "address_placeholder": " اكتب العنوان ",
+    "select-blood-type": " اختر فصيلة الدم ",
+    "notes_placeholder": " اضف اي ملاحظات ",
+     "emergency_relation.placeholder":" زوج ، اخ ، اب "
   },
   "medications": {
     "title": "إدارة الأدوية",
@@ -410,7 +414,7 @@
     "whatsapp": "واتساب",
     "no_phone_error": "رقم هاتف المريض غير مسجل للمشاركة عبر واتساب.",
     "no_medications_added": "لم تتم إضافة أي أدوية بعد. اضغط على \"إضافة دواء\" أعلاه.",
-    "generate_prescription":" انشاء الروشتة "
+    "generate_prescription": " انشاء الروشتة "
   },
   "bookings": {
     "title": "إدارة الحجوزات والمواعيد",
@@ -524,13 +528,15 @@
     "next": " التالي ",
     "create": " اضافة ",
     "save_changes": "حفظ التغييرات",
-    "edit":"تعديل ",
+    "edit": "تعديل ",
     "refresh": "تحديث",
     "refreshed": "تم تحديث البيانات",
     "all": "الكل",
     "reset_filters": "إعادة ضبط الفلاتر",
     "showing": "عرض",
     "of": "من",
+    "to": " الي ",
+    "results": " النتائج ",
     "saving": "جاري الحفظ...",
     "deleting": "جاري الحذف..."
   },
@@ -725,10 +731,10 @@
     "login_link": "تسجيل الدخول",
     "logout": " تسجيل الخروج ",
     "profile": " الملف الشخصي ",
-    "login": "تسجيل الدخول" , 
-    "forget-password":" نسيت الرقم السري ",
-    "reset-link":" ارسال رسالة اعادة الضبط ",
-    "or-return":" او يمكنك العودة الي "
+    "login": "تسجيل الدخول",
+    "forget-password": " نسيت الرقم السري ",
+    "reset-link": " ارسال رسالة اعادة الضبط ",
+    "or-return": " او يمكنك العودة الي "
   },
   "profile": {
     "title": "الملف الشخصي",

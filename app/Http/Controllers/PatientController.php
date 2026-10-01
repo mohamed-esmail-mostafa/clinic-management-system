@@ -9,6 +9,7 @@ use App\Models\PatientFields;
 use App\Services\ClinicService;
 use App\Services\PatientService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,24 +20,44 @@ class PatientController extends Controller
         protected PatientService $patient_service
     ) {}
 
-    public function clinics_patients($slug): Response
+    public function clinics_patients(Request $request, string $slug): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
-        $patients = $this->patient_service->getClinicPatients($clinic);
+        // $patients = $this->patient_service->getClinicPatients($clinic);
+        $patients = $this->patient_service->getClinicPatients(
+            clinic: $clinic,
+            search: $request->input('search'),
+            gender: $request->input('gender'),
+            status: $request->input('status'),
+            perPage: (int) $request->input('per_page', 10),
+        );
         $customFields = PatientFields::where('clinic_id', $clinic->id)
             ->where('is_active', true)
             ->with('options')
             ->orderBy('sort_order', 'asc')
             ->get();
 
+        $stats = [
+            'total' => $clinic->patients()->count(),
+            'active' => $clinic->patients()->where('is_active', true)->count(),
+            'inactive' => $clinic->patients()->where('is_active', false)->count(),
+            'customFieldsCount' => $customFields->count(),
+        ];
+
         return Inertia::render('patients/patients-clinic', [
             'clinic' => $clinic,
             'patients' => $patients,
             'custom_fields' => $customFields,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'gender' => $request->input('gender', 'all'),
+                'status' => $request->input('status', 'all'),
+            ],
+            'stats' => $stats,
         ]);
     }
 
-    public function create($slug): Response
+    public function create(string $slug): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $customFields = PatientFields::where('clinic_id', $clinic->id)
@@ -51,7 +72,7 @@ class PatientController extends Controller
         ]);
     }
 
-    public function edit($slug, Patient $patient): Response
+    public function edit(string $slug, Patient $patient): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $patient->load(['fieldValues']);
@@ -68,7 +89,7 @@ class PatientController extends Controller
         ]);
     }
 
-    public function store(StorePatientRequest $request, $slug): RedirectResponse
+    public function store(StorePatientRequest $request, string $slug): RedirectResponse
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $this->patient_service->createPatient($clinic, $request->validated());
@@ -76,7 +97,7 @@ class PatientController extends Controller
         return redirect()->route('clinics.patients', ['slug' => $slug])->with('success', 'Patient created successfully');
     }
 
-    public function update(UpdatePatientRequest $request, $slug, Patient $patient): RedirectResponse
+    public function update(UpdatePatientRequest $request, string $slug, Patient $patient): RedirectResponse
     {
         $this->patient_service->updatePatient($patient, $request->validated());
 

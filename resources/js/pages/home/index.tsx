@@ -42,7 +42,7 @@ export default function HomePage() {
                 <Testimonials />
                 <CtaBanner />
             </main>
-<InstallAppButton />
+
             {/* Footer */}
             <Footer />
         </div>

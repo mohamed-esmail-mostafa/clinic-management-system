@@ -16,6 +16,7 @@ import {
     Activity,
     ChevronRight,
 } from 'lucide-react';
+import InstallAppButton from '@/components/shared/install-app-button';
 
 export default function Hero() {
     const { t, isRtl } = useImport();
@@ -150,7 +151,10 @@ export default function Hero() {
                                     </p>
                                 </div>
                             </div>
+
+                            
                         </div>
+                        <InstallAppButton variant="button" />
                     </div>
 
                     {/* Right Hero Image Column */}

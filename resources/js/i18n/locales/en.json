@@ -346,7 +346,12 @@
     "emergency_phone":"Emergency Phone",
     "emergency_relation":"Emergency Relation",
     "delete_confirm_title": "Delete Patient",
-    "delete_confirm_desc": "Are you sure you want to delete this patient record? This action cannot be undone."
+    "delete_confirm_desc": "Are you sure you want to delete this patient record? This action cannot be undone.",
+    "select_gender":"Select Gender",
+    "address_placeholder":" Writer Address ",
+    "select-blood-type":" Select blood type ",
+    "notes_placeholder":" Add any relevant medical history, allergies, or notes... ",
+    "emergency_relation.placeholder":" Husband , Brother , Dad "
 
   },
   "medications": {
@@ -531,6 +536,8 @@
     "reset_filters": "Reset Filters",
     "showing": "Showing",
     "of": "of",
+    "to":"To",
+    "results":" Results ",
     "saving": "Saving...",
     "deleting": "Deleting..."
   },
