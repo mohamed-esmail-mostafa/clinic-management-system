@@ -2,65 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreVisitFieldOptionRequest;
-use App\Http\Requests\UpdateVisitFieldOptionRequest;
+use App\Models\VisitField;
 use App\Models\VisitFieldOption;
+use App\Services\VisitFieldService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class VisitFieldOptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(protected VisitFieldService $visitFieldService) {}
+
+    public function store(Request $request, string $slug, VisitField $field): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:255'],
+            'value' => ['nullable', 'string', 'max:255'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $this->visitFieldService->addOptionToField($field, $validated);
+
+        return redirect()->back()->with('success', 'Option added successfully');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function update(Request $request, string $slug, VisitFieldOption $option): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:255'],
+            'value' => ['nullable', 'string', 'max:255'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $this->visitFieldService->updateOption($option, $validated);
+
+        return redirect()->back()->with('success', 'Option updated successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreVisitFieldOptionRequest $request)
+    public function destroy(string $slug, VisitFieldOption $option): RedirectResponse
     {
-        //
-    }
+        $this->visitFieldService->deleteOption($option);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(VisitFieldOption $visitFieldOption)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(VisitFieldOption $visitFieldOption)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateVisitFieldOptionRequest $request, VisitFieldOption $visitFieldOption)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(VisitFieldOption $visitFieldOption)
-    {
-        //
+        return redirect()->back()->with('success', 'Option deleted successfully');
     }
 }

@@ -2,11 +2,57 @@
 
 namespace App\Models;
 
+use Database\Factories\VisitFieldFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VisitField extends Model
 {
-    /** @use HasFactory<\Database\Factories\VisitFieldFactory> */
+    /** @use HasFactory<VisitFieldFactory> */
     use HasFactory;
+
+    protected $table = 'visit_fields';
+
+    protected $fillable = [
+        'clinic_id',
+        'clinic_type_id',
+        'name',
+        'label',
+        'type',
+        'unit',
+        'is_required',
+        'is_active',
+        'sort_order',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_required' => 'boolean',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+        ];
+    }
+
+    public function clinic(): BelongsTo
+    {
+        return $this->belongsTo(Clinic::class);
+    }
+
+    public function clinicType(): BelongsTo
+    {
+        return $this->belongsTo(ClinicType::class);
+    }
+
+    public function options(): HasMany
+    {
+        return $this->hasMany(VisitFieldOption::class, 'visit_field_id')->orderBy('sort_order', 'asc');
+    }
+
+    public function values(): HasMany
+    {
+        return $this->hasMany(VisitFieldValue::class, 'visit_field_id');
+    }
 }

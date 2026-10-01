@@ -2,21 +2,23 @@ import useImport from '@/hooks/use-import';
 import { Calendar, Globe, LayoutDashboard, Phone, Pill, Settings2, Store, Sun, Timer, User, User2Icon, Users } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import useAuthClinics from '@/hooks/use-auth-clinics';
+import useClinicNavlinks from '@/hooks/use-clinic-navlinks';
 
 export default function ClinicSidebarContent({ collapsed, setMobileOpen }: any) {
     const { t, toggleLanguage, i18n, toggleTheme, appearance } = useImport()
+    const {NAV_ITEMS}=useClinicNavlinks()
     const {authClinic}=useAuthClinics()
-    const NAV_ITEMS = [
-        { key: t('clinics.sidebar.overview'), href: '/clinic/overview', icon: LayoutDashboard },
-        { key: t('clinics.sidebar.patients'), href: `/clinic/${authClinic?.slug}/patients`, icon: Users },
-        { key: t('clinics.sidebar.patients-settings'), href: `/clinic/settings/${authClinic?.slug}/patients`, icon: Users },
-        { key: t('clinics.sidebar.bookings'), href: `/clinic/${authClinic?.slug}/booking`, icon: Calendar },
-        { key: t('clinics.sidebar.today_bookings'), href: `/clinic/${authClinic?.slug}/today/booking`, icon: Calendar },
-        { key: t('clinics.sidebar.medicines'), href: `/clinic/${authClinic?.slug}/medications`, icon: Pill },
-        { key: t('clinics.sidebar.phones'), href: `/clinic/${authClinic?.slug}/phones/page`, icon: Phone },
-        { key: t('clinics.sidebar.working-hours'), href: `/clinic/${authClinic?.slug}/working/hours`, icon: Timer },
-        { key: t('clinics.sidebar.profile'), href: '/auth/profile', icon: User },
-    ];
+    // const NAV_ITEMS = [
+    //     { key: t('clinics.sidebar.overview'), href: '/clinic/overview', icon: LayoutDashboard },
+    //     { key: t('clinics.sidebar.patients'), href: `/clinic/${authClinic?.slug}/patients`, icon: Users },
+    //     { key: t('clinics.sidebar.patients-settings'), href: `/clinic/settings/${authClinic?.slug}/patients`, icon: Users },
+    //     { key: t('clinics.sidebar.bookings'), href: `/clinic/${authClinic?.slug}/booking`, icon: Calendar },
+    //     { key: t('clinics.sidebar.today_bookings'), href: `/clinic/${authClinic?.slug}/today/booking`, icon: Calendar },
+    //     { key: t('clinics.sidebar.medicines'), href: `/clinic/${authClinic?.slug}/medications`, icon: Pill },
+    //     { key: t('clinics.sidebar.phones'), href: `/clinic/${authClinic?.slug}/phones/page`, icon: Phone },
+    //     { key: t('clinics.sidebar.working-hours'), href: `/clinic/${authClinic?.slug}/working/hours`, icon: Timer },
+    //     { key: t('clinics.sidebar.profile'), href: '/auth/profile', icon: User },
+    // ];
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     return (
         <div className="flex flex-col h-full">

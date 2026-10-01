@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\WebsiteSetting;
+use Illuminate\Support\Facades\Cache;
 
 class WebsiteSettingService
 {
@@ -87,6 +88,7 @@ class WebsiteSettingService
             $setting->public_favicon_id = null;
         }
 
+        Cache::forget('settings');
         $setting->save();
 
         return $setting;

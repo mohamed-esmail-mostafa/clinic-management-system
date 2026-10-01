@@ -42,4 +42,9 @@ class Visit extends Model
     {
         return $this->hasMany(VisitMedication::class);
     }
+
+    public function fieldValues(): HasMany
+    {
+        return $this->hasMany(VisitFieldValue::class);
+    }
 }

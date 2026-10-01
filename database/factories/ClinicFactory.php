@@ -26,7 +26,7 @@ class ClinicFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(100, 999),
-            'description' => fake()->paragraph(),
+            'description' => fake()->text(200),
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'country_id' => Country::factory(),
