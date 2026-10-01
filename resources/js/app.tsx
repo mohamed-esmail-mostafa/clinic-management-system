@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import '@/i18n/index'
+import '@/hooks/use-pwa-install';
 import { registerSW } from 'virtual:pwa-register';
 const appName = import.meta.env.VITE_APP_NAME || 'عيادتي';
 

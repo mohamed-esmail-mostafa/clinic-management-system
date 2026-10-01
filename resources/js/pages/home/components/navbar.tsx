@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Stethoscope, Menu, Calendar, Phone, Search } from 'lucide-react';
 import Logo from '@/components/shared/logo';
+import InstallAppButton from '@/components/shared/install-app-button';
 
 export default function Navbar() {
     const { t, isRtl } = useImport();
@@ -102,6 +103,7 @@ export default function Navbar() {
 
                             <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3">
                                 <AuthMenu />
+                                <InstallAppButton variant="menu" onInstalled={() => setIsOpen(false)} />
                             </div>
                         </SheetContent>
                     </Sheet>
