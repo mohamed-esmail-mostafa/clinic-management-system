@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import useImport from '@/hooks/use-import';
-import { Visit } from '@/types';
-import { AlertCircle, Clock, Download, ExternalLink, Eye, MoreHorizontal, FileImage, Loader2, Pencil, Pill, Plus, Share2, Stethoscope, Trash2 } from 'lucide-react';
+import { Visit, VisitField } from '@/types';
+import { Activity, AlertCircle, Clock, Download, ExternalLink, Eye, MoreHorizontal, FileImage, Loader2, Pencil, Pill, Plus, Share2, Stethoscope, Trash2 } from 'lucide-react';
 import React, { useState, useRef } from 'react'
 import { toast } from 'sonner';
 import {
@@ -25,11 +25,26 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+interface VisitsTableProps {
+    filteredVisits: Visit[];
+    handleOpenAdd: () => void;
+    setPrescriptions: (meds: any) => void;
+    setIsAddModalOpen: (open: boolean) => void;
+    setEditingVisit: (visit: Visit | null) => void;
+    patient: any;
+    visit_fields?: VisitField[];
+}
 
-
-export default function VisitsTable({ filteredVisits, handleOpenAdd, setPrescriptions, setIsAddModalOpen, patient }: any) {
+export default function VisitsTable({
+    filteredVisits,
+    handleOpenAdd,
+    setPrescriptions,
+    setIsAddModalOpen,
+    setEditingVisit,
+    patient,
+    visit_fields = [],
+}: VisitsTableProps) {
     const { t } = useImport()
-    const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
     const [deletingVisit, setDeletingVisit] = useState<Visit | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const { authClinic } = useAuthClinics()
@@ -37,6 +52,48 @@ export default function VisitsTable({ filteredVisits, handleOpenAdd, setPrescrip
     const [prescriptionVisit, setPrescriptionVisit] = useState<Visit | null>(null);
     const [generatingVisitId, setGeneratingVisitId] = useState<number | null>(null);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+    const renderVisitFieldValue = (field: VisitField, rawValue: string | null | undefined) => {
+        if (!rawValue || rawValue.trim() === '') return <span className="text-gray-400">-</span>;
+
+        if (field.type === 'checkbox') {
+            try {
+                const parsed = JSON.parse(rawValue);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return (
+                        <div className="flex flex-wrap gap-1">
+                            {parsed.map((val: string, idx: number) => {
+                                const opt = field.options?.find((o) => o.value === val);
+                                return (
+                                    <Badge
+                                        key={idx}
+                                        variant="secondary"
+                                        className="text-xs py-0 px-2 bg-blue-50 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200"
+                                    >
+                                        {opt?.label || val}
+                                    </Badge>
+                                );
+                            })}
+                        </div>
+                    );
+                }
+            } catch {
+                return <span>{rawValue}</span>;
+            }
+        }
+
+        if (field.type === 'select' || field.type === 'radio') {
+            const opt = field.options?.find((o) => o.value === rawValue);
+            return <span>{opt?.label || rawValue}</span>;
+        }
+
+        return (
+            <span className={field.type === 'textarea' ? 'whitespace-pre-wrap font-normal text-gray-700 dark:text-gray-300' : ''}>
+                {rawValue}
+                {field.unit && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal ml-1">({field.unit})</span>}
+            </span>
+        );
+    };
 
 
     const handleShareWhatsApp = async (visit: Visit) => {
@@ -203,6 +260,16 @@ ${prescriptionImageSection}
                     filteredVisits.map((visit: Visit) => {
                         const isExamination = visit.type === 'examination';
                         const meds = visit.visit_medications || [];
+                        const fieldValuesList = visit.field_values || (visit as any).fieldValues || [];
+                        const recordedFieldValues = fieldValuesList
+                            .map((fv: any) => {
+                                const field = fv.field || (visit_fields && visit_fields.find((f: any) => f.id === fv.visit_field_id));
+                                return {
+                                    field,
+                                    value: fv.value,
+                                };
+                            })
+                            .filter((item: any) => item.field && item.value !== null && item.value !== undefined && item.value !== '' && item.value !== '[]');
 
                         return (
                             <Card
@@ -399,6 +466,36 @@ ${prescriptionImageSection}
                                             </DropdownMenu>
                                         </div>
                                     </div>
+
+                                    {/* Clinical Details / Dynamic Fields */}
+                                    {recordedFieldValues.length > 0 && (
+                                        <div className="mb-4">
+                                            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                                <Activity className="h-3.5 w-3.5 text-blue-500" />
+                                                {t('visits.clinical_details', 'Clinical Findings & Vitals')} ({recordedFieldValues.length})
+                                            </h4>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                                                {recordedFieldValues.map(({ field, value }: any, idx: number) => {
+                                                    const isLong = field.type === 'textarea';
+                                                    return (
+                                                        <div
+                                                            key={idx}
+                                                            className={`bg-gray-50 dark:bg-gray-800/60 rounded-lg p-2.5 border border-gray-100 dark:border-gray-800 text-xs ${
+                                                                isLong ? 'col-span-2 sm:col-span-3 md:col-span-4' : ''
+                                                            }`}
+                                                        >
+                                                            <span className="text-gray-500 dark:text-gray-400 font-medium block truncate mb-1">
+                                                                {field.label}
+                                                            </span>
+                                                            <div className="font-semibold text-gray-800 dark:text-gray-200">
+                                                                {renderVisitFieldValue(field, value)}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Prescribed Medications */}
                                     <div>

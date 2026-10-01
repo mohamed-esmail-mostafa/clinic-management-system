@@ -6,6 +6,7 @@ use App\Http\Requests\StoreVisitRequest;
 use App\Http\Requests\UpdateVisitRequest;
 use App\Models\Patient;
 use App\Models\Visit;
+use App\Models\VisitField;
 use App\Services\ClinicService;
 use App\Services\MedicationService;
 use App\Services\VisitService;
@@ -28,12 +29,19 @@ class VisitController extends Controller
         $clinic = $this->clinic_service->getClinic($slug);
         $visits = $this->visit_service->getPatientVisits($clinic, $patient);
         $medications = $this->medication_service->getClinicMedications($clinic);
+        $visitFields = VisitField::where('clinic_id', $clinic->id)
+            ->where('is_active', true)
+            ->with('options')
+            ->orderBy('sort_order', 'asc')
+            ->get();
 
         return Inertia::render('visits/index', [
             'clinic' => $clinic,
             'patient' => $patient,
             'visits' => $visits,
             'medications' => $medications,
+            'visit_fields' => $visitFields,
+            'custom_fields' => $visitFields,
         ]);
     }
 

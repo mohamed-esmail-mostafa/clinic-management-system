@@ -5,6 +5,8 @@ use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Visit;
+use App\Models\VisitField;
+use App\Models\VisitFieldValue;
 use App\Services\CloudinaryService;
 
 test('authenticated user can view patient visits page', function () {
@@ -171,4 +173,96 @@ test('upload prescription image rejects visit belonging to different patient', f
     );
 
     $response->assertNotFound();
+});
+
+test('authenticated user can record a visit with custom field values', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patient = Patient::factory()->create(['clinic_id' => $clinic->id]);
+
+    $field1 = VisitField::create([
+        'clinic_id' => $clinic->id,
+        'label' => 'Blood Pressure',
+        'type' => 'text',
+        'unit' => 'mmHg',
+        'is_required' => false,
+        'is_active' => true,
+        'sort_order' => 1,
+    ]);
+
+    $field2 = VisitField::create([
+        'clinic_id' => $clinic->id,
+        'label' => 'Symptoms',
+        'type' => 'checkbox',
+        'is_required' => false,
+        'is_active' => true,
+        'sort_order' => 2,
+    ]);
+
+    $response = $this->actingAs($user)->post(route('clinics.patients.visits.store', [$clinic->slug, $patient->id]), [
+        'visited_at' => now()->toDateTimeString(),
+        'type' => 'examination',
+        'medications' => [],
+        'custom_fields' => [
+            $field1->id => '120/80',
+            $field2->id => ['Fever', 'Cough'],
+        ],
+    ]);
+
+    $response->assertRedirect();
+
+    $visit = Visit::where('clinic_id', $clinic->id)->where('patient_id', $patient->id)->first();
+    expect($visit)->not->toBeNull();
+
+    $this->assertDatabaseHas('visit_field_values', [
+        'visit_id' => $visit->id,
+        'visit_field_id' => $field1->id,
+        'value' => '120/80',
+    ]);
+
+    $this->assertDatabaseHas('visit_field_values', [
+        'visit_id' => $visit->id,
+        'visit_field_id' => $field2->id,
+        'value' => json_encode(['Fever', 'Cough']),
+    ]);
+});
+
+test('authenticated user can update a visit with custom field values', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patient = Patient::factory()->create(['clinic_id' => $clinic->id]);
+    $visit = Visit::factory()->create(['clinic_id' => $clinic->id, 'patient_id' => $patient->id]);
+
+    $field = VisitField::create([
+        'clinic_id' => $clinic->id,
+        'label' => 'Temperature',
+        'type' => 'number',
+        'unit' => 'C',
+        'is_required' => false,
+        'is_active' => true,
+        'sort_order' => 1,
+    ]);
+
+    VisitFieldValue::create([
+        'visit_id' => $visit->id,
+        'visit_field_id' => $field->id,
+        'value' => '37.5',
+    ]);
+
+    $response = $this->actingAs($user)->put(route('clinics.patients.visits.update', [$clinic->slug, $patient->id, $visit->id]), [
+        'visited_at' => now()->toDateTimeString(),
+        'type' => 'follow_up',
+        'medications' => [],
+        'custom_fields' => [
+            $field->id => '38.2',
+        ],
+    ]);
+
+    $response->assertRedirect();
+
+    $this->assertDatabaseHas('visit_field_values', [
+        'visit_id' => $visit->id,
+        'visit_field_id' => $field->id,
+        'value' => '38.2',
+    ]);
 });

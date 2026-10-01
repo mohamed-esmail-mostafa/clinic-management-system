@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Clinic;
 use App\Models\Patient;
 use App\Models\Visit;
+use App\Models\VisitFieldValue;
 use App\Models\VisitMedication;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class VisitService
     {
         return Visit::where('clinic_id', $clinic->id)
             ->where('patient_id', $patient->id)
-            ->with(['visitMedications.medication'])
+            ->with(['visitMedications.medication', 'fieldValues.field.options'])
             ->orderBy('visited_at', 'desc')
             ->get();
     }
@@ -47,7 +48,11 @@ class VisitService
                 }
             }
 
-            return $visit->load('visitMedications.medication');
+            if (isset($data['custom_fields']) && is_array($data['custom_fields'])) {
+                $this->saveCustomFieldValues($visit, $data['custom_fields']);
+            }
+
+            return $visit->load(['visitMedications.medication', 'fieldValues.field.options']);
         });
     }
 
@@ -74,7 +79,11 @@ class VisitService
                 }
             }
 
-            return $visit->load('visitMedications.medication');
+            if (isset($data['custom_fields']) && is_array($data['custom_fields'])) {
+                $this->saveCustomFieldValues($visit, $data['custom_fields']);
+            }
+
+            return $visit->load(['visitMedications.medication', 'fieldValues.field.options']);
         });
     }
 
@@ -96,5 +105,32 @@ class VisitService
         ]);
 
         return $uploadResult['url'];
+    }
+
+    protected function saveCustomFieldValues(Visit $visit, array $customFields): void
+    {
+        foreach ($customFields as $fieldId => $value) {
+            if (is_array($value)) {
+                $value = json_encode(array_values($value));
+            } elseif ($value !== null) {
+                $value = (string) $value;
+            }
+
+            if ($value === null || $value === '') {
+                VisitFieldValue::where('visit_id', $visit->id)
+                    ->where('visit_field_id', $fieldId)
+                    ->delete();
+            } else {
+                VisitFieldValue::updateOrCreate(
+                    [
+                        'visit_id' => $visit->id,
+                        'visit_field_id' => $fieldId,
+                    ],
+                    [
+                        'value' => $value,
+                    ]
+                );
+            }
+        }
     }
 }

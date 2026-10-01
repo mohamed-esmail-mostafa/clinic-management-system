@@ -28,6 +28,7 @@ class StoreVisitRequest extends FormRequest
             'medications' => ['nullable', 'array'],
             'medications.*.medication_id' => ['nullable', 'exists:medications,id'],
             'medications.*.medication_name' => ['required', 'string', 'max:255'],
+            'custom_fields' => ['nullable', 'array'],
         ];
     }
 }
