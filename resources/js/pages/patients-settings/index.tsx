@@ -61,6 +61,9 @@ import {
     AlertCircle,
     ArrowUpDown,
 } from 'lucide-react';
+import PageHeader from '@/components/shared/page-header';
+import Stats from './components/stats.';
+import FieldsGrid from './components/fields-grid';
 
 interface FieldTypeOption {
     value: PatientFieldType;
@@ -318,108 +321,35 @@ export default function PatientSettingsPage({ clinic, fields = [], field_types =
 
     return (
         <ClinicLayout title={t('patients_settings.page_title', 'Patient Settings')}>
-            <div className="space-y-6 max-w-7xl mx-auto">
-                {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2.5">
-                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                                <Sliders size={22} />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    {t('patients_settings.header_title', 'Patient Fields Settings')}
-                                </h1>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {t(
-                                        'patients_settings.header_subtitle',
-                                        'Customize additional data fields for patients in your clinic.'
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <Button
-                            onClick={() => {
-                                setEditingField(null);
-                                formik.resetForm();
-                                setIsAddModalOpen(true);
-                            }}
-                            className="w-full sm:w-auto rounded-xl gap-2 h-10 px-5 cursor-pointer shadow-xs"
-                        >
-                            <Plus size={18} />
-                            <span>{t('patients_settings.add_field_button', 'Add Custom Field')}</span>
-                        </Button>
-                    </div>
-                </div>
+            <div className="space-y-6  mx-auto">
+
+
+                <PageHeader
+                    title={t('patients_settings.header_title')}
+                    subtitle={t('patients_settings.header_subtitle')}
+                    icon={<Sliders size={22} />}
+                >
+                    <Button
+                        onClick={() => {
+                            setEditingField(null);
+                            formik.resetForm();
+                            setIsAddModalOpen(true);
+                        }}
+
+                    >
+                        <Plus size={18} />
+                        <span>{t('patients_settings.add_field_button', 'Add Custom Field')}</span>
+                    </Button>
+                </PageHeader>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center gap-3.5">
-                            <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                                <Layers size={20} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                    {t('patients_settings.stat_total_fields', 'Total Fields')}
-                                </p>
-                                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    {fields.length}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center gap-3.5">
-                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                    {t('patients_settings.stat_active_fields', 'Active Fields')}
-                                </p>
-                                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    {activeCount}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center gap-3.5">
-                            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
-                                <AlertCircle size={20} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                    {t('patients_settings.stat_required_fields', 'Required Fields')}
-                                </p>
-                                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    {requiredCount}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
-                        <CardContent className="p-4 flex items-center gap-3.5">
-                            <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                                <ListFilter size={20} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                    {t('patients_settings.stat_choice_fields', 'Fields with Options')}
-                                </p>
-                                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    {optionsCount}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                <Stats
+                    fields={fields}
+                    activeCount={activeCount}
+                    requiredCount={requiredCount}
+                    optionsCount={optionsCount}
+                />
 
                 {/* Filters & Search */}
                 <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
@@ -460,148 +390,16 @@ export default function PatientSettingsPage({ clinic, fields = [], field_types =
                 </Card>
 
                 {/* Fields Table */}
-                <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs overflow-hidden">
-                    <CardContent className="p-0">
-                        {filteredFields.length === 0 ? (
-                            <div className="py-16 text-center space-y-3">
-                                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto text-gray-400">
-                                    <Sliders size={24} />
-                                </div>
-                                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                    {t('patients_settings.no_fields_title', 'No Custom Fields Found')}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-                                    {t(
-                                        'patients_settings.no_fields_desc',
-                                        'Click the button above to add custom fields for patient registration.'
-                                    )}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader className="bg-gray-50/50 dark:bg-gray-900/50">
-                                        <TableRow>
-                                            <TableHead className="w-16 text-center">{t('patients_settings.col_order', 'Order')}</TableHead>
-                                            <TableHead>{t('patients_settings.col_field', 'Field Name')}</TableHead>
-                                            <TableHead>{t('patients_settings.col_type', 'Type')}</TableHead>
-                                            <TableHead>{t('patients_settings.col_options', 'Options')}</TableHead>
-                                            <TableHead className="text-center">{t('patients_settings.col_required', 'Required')}</TableHead>
-                                            <TableHead className="text-center">{t('patients_settings.col_status', 'Status')}</TableHead>
-                                            <TableHead className="text-end pe-6">{t('patients_settings.col_actions', 'Actions')}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredFields.map((field) => (
-                                            <TableRow key={field.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-900/40">
-                                                <TableCell className="text-center font-semibold text-xs text-gray-500">
-                                                    <Badge variant="outline" className="rounded-lg font-mono">
-                                                        #{field.sort_order}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div>
-                                                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                                                            {field.label}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 font-mono">
-                                                            key: {field.name}
-                                                        </p>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1.5">
-                                                        {getTypeIcon(field.type)}
-                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                                            {getTypeLabel(field.type)}
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {field.options && field.options.length > 0 ? (
-                                                        <div className="flex flex-wrap gap-1 max-w-xs">
-                                                            {field.options.slice(0, 3).map((opt) => (
-                                                                <Badge
-                                                                    key={opt.id || opt.label}
-                                                                    variant="secondary"
-                                                                    className="text-[11px] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                                                                >
-                                                                    {opt.label}
-                                                                </Badge>
-                                                            ))}
-                                                            {field.options.length > 3 && (
-                                                                <Badge
-                                                                    variant="outline"
-                                                                    className="text-[11px] rounded-lg text-gray-400"
-                                                                >
-                                                                    +{field.options.length - 3}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-xs text-gray-400">—</span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {field.is_required ? (
-                                                        <Badge className="bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 rounded-lg text-[11px] border border-rose-200 dark:border-rose-900">
-                                                            {t('patients_settings.required', 'Required')}
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="outline" className="text-gray-400 rounded-lg text-[11px]">
-                                                            {t('patients_settings.optional', 'Optional')}
-                                                        </Badge>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <Switch
-                                                        checked={field.is_active}
-                                                        onCheckedChange={() => handleToggleStatus(field)}
-                                                        className="data-[state=checked]:bg-primary"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="text-end pe-6">
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        {['select', 'radio', 'checkbox'].includes(field.type) && (
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => setOptionsField(field)}
-                                                                className="h-8 w-8 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                                                                title={t('patients_settings.manage_options', 'Manage Options')}
-                                                            >
-                                                                <ListFilter size={15} />
-                                                            </Button>
-                                                        )}
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => setEditingField(field)}
-                                                            className="h-8 w-8 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                                                        >
-                                                            <Pencil size={15} />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => setDeletingField(field)}
-                                                            className="h-8 w-8 rounded-lg text-gray-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                                                        >
-                                                            <Trash2 size={15} />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                <FieldsGrid
+                    filteredFields={filteredFields}
+                    getTypeIcon={getTypeIcon}
+                    handleToggleStatus={handleToggleStatus}
+                    getTypeLabel={getTypeLabel}
+                    setOptionsField={setOptionsField}
+                    setEditingField={setEditingField}
+                    setDeletingField={setDeletingField} />
+
+
 
                 {/* Create / Edit Dialog */}
                 <Dialog
@@ -827,8 +625,8 @@ export default function PatientSettingsPage({ clinic, fields = [], field_types =
                                     {formik.isSubmitting
                                         ? t('common.saving', 'Saving...')
                                         : editingField
-                                        ? t('patients_settings.save_changes', 'Save Changes')
-                                        : t('patients_settings.create_field', 'Create Field')}
+                                            ? t('patients_settings.save_changes', 'Save Changes')
+                                            : t('patients_settings.create_field', 'Create Field')}
                                 </Button>
                             </DialogFooter>
                         </form>
