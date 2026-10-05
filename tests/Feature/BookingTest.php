@@ -227,8 +227,49 @@ test('today bookings returns only bookings scheduled for today including pending
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
         ->component('booking/today-bookings')
-        ->has('bookings', 2)
-        ->where('bookings.0.id', $todayPending->id)
-        ->where('bookings.1.id', $todayCompleted->id)
+        ->has('bookings.data', 2)
+        ->where('bookings.total', 2)
+        ->where('bookings.data.0.id', $todayPending->id)
+        ->where('bookings.data.1.id', $todayCompleted->id)
+        ->where('stats.total', 2)
+        ->where('stats.pending', 1)
+        ->where('stats.completed', 1)
+        ->has('filters')
+    );
+});
+
+test('today bookings can be filtered by status and search', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $today = now()->toDateString();
+
+    $bookingA = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'name' => 'Special Patient Alpha',
+        'appointment_date' => $today,
+        'status' => 'pending',
+    ]);
+
+    $bookingB = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'name' => 'Other Patient Beta',
+        'appointment_date' => $today,
+        'status' => 'confirmed',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('clinics.today.booking', [
+        'slug' => $clinic->slug,
+        'search' => 'Alpha',
+        'status' => 'pending',
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('booking/today-bookings')
+        ->has('bookings.data', 1)
+        ->where('bookings.data.0.id', $bookingA->id)
+        ->where('stats.total', 2)
+        ->where('filters.search', 'Alpha')
+        ->where('filters.status', 'pending')
     );
 });

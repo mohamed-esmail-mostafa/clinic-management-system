@@ -23,7 +23,7 @@ export default function ClinicBottomNav() {
     )
 
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
             <div className="relative h-20">
                 {/* Bottom Navigation Bar */}
                 <div

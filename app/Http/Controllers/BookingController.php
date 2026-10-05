@@ -92,18 +92,50 @@ class BookingController extends Controller
         return redirect()->back()->with('success', 'Appointment deleted successfully');
     }
 
-    public function today_bookings(string $slug): Response
+    public function today_bookings(Request $request, string $slug): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
-        $bookings = $this->booking_service->getClinicTodayBookings($clinic);
+        $bookings = $this->booking_service->getClinicTodayBookings(
+            clinic: $clinic,
+            search: $request->input('search'),
+            status: $request->input('status'),
+            type: $request->input('type'),
+            doctorId: $request->input('doctor_id'),
+            perPage: (int) $request->input('per_page', 10),
+        );
         $patients = $this->patient_service->getClinicPatients($clinic);
         $doctors = $clinic->users;
+
+        $today = Carbon::today()->toDateString();
+        $todayBookingsQuery = $clinic->bookings()->whereDate('appointment_date', $today);
+        $total = (clone $todayBookingsQuery)->count();
+        $pending = (clone $todayBookingsQuery)->where('status', 'pending')->count();
+        $confirmed = (clone $todayBookingsQuery)->where('status', 'confirmed')->count();
+        $completed = (clone $todayBookingsQuery)->where('status', 'completed')->count();
+        $cancelled = (clone $todayBookingsQuery)->whereIn('status', ['cancelled', 'no_show'])->count();
+        $completionRate = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+
+        $stats = [
+            'total' => $total,
+            'pending' => $pending,
+            'confirmed' => $confirmed,
+            'completed' => $completed,
+            'cancelled' => $cancelled,
+            'completionRate' => $completionRate,
+        ];
 
         return Inertia::render('booking/today-bookings', [
             'clinic' => $clinic,
             'bookings' => $bookings,
             'patients' => $patients,
             'doctors' => $doctors,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'status' => $request->input('status', 'all'),
+                'type' => $request->input('type', 'all'),
+                'doctor_id' => $request->input('doctor_id', 'all'),
+            ],
+            'stats' => $stats,
         ]);
     }
 }

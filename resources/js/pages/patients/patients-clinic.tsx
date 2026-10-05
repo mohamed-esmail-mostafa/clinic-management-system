@@ -429,7 +429,7 @@ export default function PatientsClinic({
                                                 {t('patients.view', 'View')}
                                             </Button>
 
-                                            <Link href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}>
+                                            {/* <Link href={`/clinic/${clinicSlug}/patients/${patient.id}/edit`}>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
@@ -438,7 +438,7 @@ export default function PatientsClinic({
                                                     <Pencil className="h-3.5 w-3.5" />
                                                     {t('common.edit', 'Edit')}
                                                 </Button>
-                                            </Link>
+                                            </Link> */}
                                         </div>
                                     </CardContent>
                                 </Card>

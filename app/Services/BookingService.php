@@ -6,7 +6,6 @@ use App\Models\Booking;
 use App\Models\Clinic;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class BookingService
@@ -119,8 +118,14 @@ class BookingService
         return $booking->delete();
     }
 
-    public function getClinicTodayBookings(Clinic|string $clinic): Collection
-    {
+    public function getClinicTodayBookings(
+        Clinic|string $clinic,
+        ?string $search = null,
+        ?string $status = null,
+        ?string $type = null,
+        ?string $doctorId = null,
+        int $perPage = 10
+    ): LengthAwarePaginator {
         $clinicModel = is_string($clinic)
             ? Clinic::where('slug', $clinic)->firstOrFail()
             : $clinic;
@@ -128,7 +133,35 @@ class BookingService
         return $clinicModel->bookings()
             ->with(['patient', 'doctor'])
             ->whereDate('appointment_date', Carbon::today())
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%")
+                        ->orWhere('booked_by', 'like', "%{$search}%")
+                        ->orWhereHas('patient', function ($pq) use ($search) {
+                            $pq->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('patient_number', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('doctor', function ($dq) use ($search) {
+                            $dq->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($status && $status !== 'all', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($type && $type !== 'all', function ($query) use ($type) {
+                $query->where('type', $type);
+            })
+            ->when($doctorId && $doctorId !== 'all', function ($query) use ($doctorId) {
+                $query->where('doctor_id', $doctorId);
+            })
             ->orderBy('appointment_time', 'asc')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 }

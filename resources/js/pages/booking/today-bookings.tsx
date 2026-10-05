@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import ClinicLayout from '@/layouts/clinic-layout';
 import PageHeader from '@/components/shared/page-header';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import useImport from '@/hooks/use-import';
-import { Booking, BookingFormValues, BookingStatus } from '@/types/booking';
+import Pagination from '@/components/shared/pagination';
+import { Booking, BookingFormValues, BookingStatus, PaginatedBookings } from '@/types/booking';
 import { Patient, PaginatedPatients } from '@/types/patient';
 import { User } from '@/types/auth';
 import { router, Link } from '@inertiajs/react';
@@ -17,7 +18,6 @@ import {
     useLegacyTable as useReactTable,
     getCoreRowModel,
     getSortedRowModel,
-    getPaginationRowModel,
     LegacyColumnDef as ColumnDef,
 } from '@tanstack/react-table/legacy';
 
@@ -91,16 +91,32 @@ import {
 
 interface Props {
     clinic?: any;
-    bookings?: Booking[];
+    bookings?: PaginatedBookings | Booking[];
     patients?: PaginatedPatients | Patient[];
     doctors?: User[];
+    filters?: {
+        search?: string;
+        status?: string;
+        type?: string;
+        doctor_id?: string;
+    };
+    stats?: {
+        total: number;
+        pending: number;
+        confirmed: number;
+        completed: number;
+        cancelled: number;
+        completionRate: number;
+    };
 }
 
 export default function TodayBookingsPage({
     clinic: serverClinic,
-    bookings = [],
+    bookings,
     patients = [],
     doctors = [],
+    filters,
+    stats: serverStats,
 }: Props) {
     const { t, isRtl } = useImport();
     const { clinics } = useAuthClinics() as { clinics?: any[] };
@@ -109,15 +125,57 @@ export default function TodayBookingsPage({
     const clinicSlug =
         serverClinic?.slug || (Array.isArray(clinics) && clinics.length > 0 ? clinics[0].slug : '');
 
+    // Extract bookings list and pagination metadata
+    const isBookingsPaginated = !Array.isArray(bookings) && bookings !== null && typeof bookings === 'object' && 'data' in bookings;
+    const bookingList: Booking[] = isBookingsPaginated
+        ? (bookings as PaginatedBookings).data
+        : (Array.isArray(bookings) ? bookings : []);
+    const paginationLinks = isBookingsPaginated ? (bookings as PaginatedBookings).links : [];
+    const paginationFrom = isBookingsPaginated ? (bookings as PaginatedBookings).from : (bookingList.length > 0 ? 1 : 0);
+    const paginationTo = isBookingsPaginated ? (bookings as PaginatedBookings).to : bookingList.length;
+    const paginationTotal = isBookingsPaginated ? (bookings as PaginatedBookings).total : bookingList.length;
+
     // View mode: 'cards' (Queue / Timeline) or 'table'
     const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
-    // Search and filter states
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus>('all');
-    const [typeFilter, setTypeFilter] = useState('all');
-    const [doctorFilter, setDoctorFilter] = useState('all');
+    // Search and filter states (synced with backend)
+    const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+    const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus>((filters?.status as BookingStatus) || 'all');
+    const [typeFilter, setTypeFilter] = useState(filters?.type || 'all');
+    const [doctorFilter, setDoctorFilter] = useState(filters?.doctor_id || 'all');
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Debounced Backend Search & Filter query dispatch
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            if (!clinicSlug) return;
+
+            router.get(
+                `/clinic/${clinicSlug}/today/booking`,
+                {
+                    search: searchTerm.trim() ? searchTerm.trim() : undefined,
+                    status: statusFilter !== 'all' ? statusFilter : undefined,
+                    type: typeFilter !== 'all' ? typeFilter : undefined,
+                    doctor_id: doctorFilter !== 'all' ? doctorFilter : undefined,
+                    page: 1,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                }
+            );
+        }, 350);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, statusFilter, typeFilter, doctorFilter, clinicSlug]);
 
     // Modals state
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -128,9 +186,8 @@ export default function TodayBookingsPage({
     // Patient selection mode: registered or unregistered
     const [patientType, setPatientType] = useState<'registered' | 'unregistered'>('registered');
 
-    // Sorting & Pagination for Table View
+    // Sorting for Table View
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     // Today's Date representation
     const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -162,19 +219,25 @@ export default function TodayBookingsPage({
 
     // Statistics counts
     const stats = useMemo(() => {
-        const total = bookings.length;
-        const pending = bookings.filter((b) => b.status === 'pending').length;
-        const confirmed = bookings.filter((b) => b.status === 'confirmed').length;
-        const completed = bookings.filter((b) => b.status === 'completed').length;
-        const cancelled = bookings.filter((b) => b.status === 'cancelled' || b.status === 'no_show').length;
+        if (serverStats) {
+            return serverStats;
+        }
+        const total = bookingList.length;
+        const pending = bookingList.filter((b) => b.status === 'pending').length;
+        const confirmed = bookingList.filter((b) => b.status === 'confirmed').length;
+        const completed = bookingList.filter((b) => b.status === 'completed').length;
+        const cancelled = bookingList.filter((b) => b.status === 'cancelled' || b.status === 'no_show').length;
         const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         return { total, pending, confirmed, completed, cancelled, completionRate };
-    }, [bookings]);
+    }, [serverStats, bookingList]);
 
-    // Filtered bookings
-    const filteredBookings = useMemo(() => {
-        return bookings.filter((booking) => {
+    // Filtered bookings: If server-paginated, data is already filtered on backend; fallback to client filtering otherwise
+    const displayBookings = useMemo(() => {
+        if (isBookingsPaginated) {
+            return bookingList;
+        }
+        return bookingList.filter((booking) => {
             const registeredName = booking.patient
                 ? `${booking.patient.first_name || ''} ${booking.patient.last_name || ''}`.toLowerCase()
                 : '';
@@ -202,7 +265,7 @@ export default function TodayBookingsPage({
 
             return matchesSearch && matchesStatus && matchesType && matchesDoctor;
         });
-    }, [bookings, searchTerm, statusFilter, typeFilter, doctorFilter]);
+    }, [isBookingsPaginated, bookingList, searchTerm, statusFilter, typeFilter, doctorFilter]);
 
     // Validation Schema for Add/Edit
     const validationSchema = Yup.object({
@@ -363,7 +426,7 @@ export default function TodayBookingsPage({
     const handleRefresh = () => {
         setIsRefreshing(true);
         router.reload({
-            only: ['bookings'],
+            only: ['bookings', 'stats'],
             onFinish: () => {
                 setIsRefreshing(false);
                 toast.success(t('common.refreshed', 'Data refreshed'));
@@ -652,28 +715,25 @@ export default function TodayBookingsPage({
     );
 
     const table = useReactTable({
-        data: filteredBookings,
+        data: displayBookings,
         columns,
         state: {
             sorting,
-            pagination,
         },
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
     });
 
     return (
         <ClinicLayout title={t('bookings.todays_bookings', "Today's Bookings")}>
-            <div className="space-y-6 w-full max-w-full pb-10">
+            <div className="space-y-6 w-full max-w-full">
                 {/* Page Header */}
                 <PageHeader
                     title={t('bookings.todays_bookings', "Today's Bookings")}
-                    subtitle={`${formattedToday} • ${bookings.length} ${t('bookings.scheduled_appointments', 'scheduled appointments')}`}
+                    subtitle={`${formattedToday} • ${stats.total} ${t('bookings.scheduled_appointments', 'scheduled appointments')}`}
                     icon={<CalendarCheck className="h-6 w-6 text-primary" />}
-                    count={bookings.length}
+                    count={stats.total}
                 >
                     <div className="flex flex-wrap items-center gap-2">
                         {clinicSlug && (
@@ -955,26 +1015,26 @@ export default function TodayBookingsPage({
                 </div>
 
                 {/* Main Content Area: Queue Cards View or Table View */}
-                {filteredBookings.length === 0 ? (
+                {displayBookings.length === 0 ? (
                     <Card className="border-dashed py-12 text-center bg-gray-50/50 dark:bg-gray-900/40">
                         <CardContent className="flex flex-col items-center justify-center space-y-3">
                             <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                 <CalendarCheck className="h-7 w-7" />
                             </div>
                             <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                                {bookings.length === 0
+                                {stats.total === 0
                                     ? t('bookings.no_bookings_today', 'No appointments scheduled for today.')
                                     : t('bookings.no_matching_bookings', 'No bookings match your current filters.')}
                             </h3>
                             <p className="text-xs text-muted-foreground max-w-sm">
-                                {bookings.length === 0
+                                {stats.total === 0
                                     ? t(
                                           'bookings.no_bookings_today_desc',
                                           'Patients booked for today will appear here chronologically. Schedule your first appointment for today.'
                                       )
                                     : t('bookings.reset_filters_hint', 'Try clearing your search keyword or changing the status filter.')}
                             </p>
-                            {bookings.length === 0 ? (
+                            {stats.total === 0 ? (
                                 <Button size="sm" onClick={handleOpenAdd} className="gap-1.5 mt-2">
                                     <Plus className="h-4 w-4" />
                                     <span>{t('bookings.schedule_today', 'Schedule Today')}</span>
@@ -997,45 +1057,47 @@ export default function TodayBookingsPage({
                             )}
                         </CardContent>
                     </Card>
-                ) : viewMode === 'cards' ? (
-                    /* Queue Cards View */
-                    <div className="space-y-3">
-                        {filteredBookings.map((booking, index) => {
-                            const isRegistered = Boolean(booking.patient);
-                            const patientName = isRegistered
-                                ? `${booking.patient?.first_name} ${booking.patient?.last_name}`
-                                : booking.name || t('bookings.unregistered_patient', 'Unregistered Patient');
-                            const phone = booking.patient?.phone || booking.phone;
-                            const isCompleted = booking.status === 'completed';
-                            const isPending = booking.status === 'pending';
-                            const isConfirmed = booking.status === 'confirmed';
+                ) : (
+                    <div className="space-y-4">
+                        {viewMode === 'cards' ? (
+                            /* Queue Cards View */
+                            <div className="space-y-3">
+                                {displayBookings.map((booking, index) => {
+                                    const isRegistered = Boolean(booking.patient);
+                                    const patientName = isRegistered
+                                        ? `${booking.patient?.first_name} ${booking.patient?.last_name}`
+                                        : booking.name || t('bookings.unregistered_patient', 'Unregistered Patient');
+                                    const phone = booking.patient?.phone || booking.phone;
+                                    const isCompleted = booking.status === 'completed';
+                                    const isPending = booking.status === 'pending';
+                                    const isConfirmed = booking.status === 'confirmed';
 
-                            return (
-                                <Card
-                                    key={booking.id}
-                                    className={`transition-all duration-200 border-l-4 hover:shadow-sm ${
-                                        isCompleted
-                                            ? 'border-l-blue-500 bg-blue-50/15 dark:bg-blue-950/10'
-                                            : isConfirmed
-                                            ? 'border-l-emerald-500 bg-white dark:bg-gray-900'
-                                            : isPending
-                                            ? 'border-l-amber-500 bg-white dark:bg-gray-900'
-                                            : 'border-l-gray-300 dark:border-l-gray-700 bg-white dark:bg-gray-900 opacity-80'
-                                    }`}
-                                >
-                                    <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        {/* Left Side: Time, Patient Info, Doctor & Badges */}
-                                        <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                                            {/* Order / Time Badge */}
-                                            <div className="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shrink-0 min-w-[75px]">
-                                                <span className="text-xs font-mono text-muted-foreground">
-                                                    #{index + 1}
-                                                </span>
-                                                <span className="text-sm font-bold flex items-center gap-1 mt-0.5">
-                                                    <Clock className="h-3 w-3 text-primary" />
-                                                    {booking.appointment_time}
-                                                </span>
-                                            </div>
+                                    return (
+                                        <Card
+                                            key={booking.id}
+                                            className={`transition-all duration-200 border-l-4 hover:shadow-sm ${
+                                                isCompleted
+                                                    ? 'border-l-blue-500 bg-blue-50/15 dark:bg-blue-950/10'
+                                                    : isConfirmed
+                                                    ? 'border-l-emerald-500 bg-white dark:bg-gray-900'
+                                                    : isPending
+                                                    ? 'border-l-amber-500 bg-white dark:bg-gray-900'
+                                                    : 'border-l-gray-300 dark:border-l-gray-700 bg-white dark:bg-gray-900 opacity-80'
+                                            }`}
+                                        >
+                                            <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                {/* Left Side: Time, Patient Info, Doctor & Badges */}
+                                                <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                                                    {/* Order / Time Badge */}
+                                                    <div className="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shrink-0 min-w-[75px]">
+                                                        <span className="text-xs font-mono text-muted-foreground">
+                                                            #{((paginationFrom || 1) + index)}
+                                                        </span>
+                                                        <span className="text-sm font-bold flex items-center gap-1 mt-0.5">
+                                                            <Clock className="h-3 w-3 text-primary" />
+                                                            {booking.appointment_time}
+                                                        </span>
+                                                    </div>
 
                                             {/* Patient Avatar */}
                                             <Avatar className="h-11 w-11 bg-primary/10 text-primary font-bold text-sm shrink-0">
@@ -1263,43 +1325,22 @@ export default function TodayBookingsPage({
                                 </TableBody>
                             </Table>
                         </div>
-
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between p-4 border-t text-xs text-muted-foreground">
-                            <span>
-                                {t('common.showing', 'Showing')}{' '}
-                                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{' '}
-                                -{' '}
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) *
-                                        table.getState().pagination.pageSize,
-                                    filteredBookings.length
-                                )}{' '}
-                                {t('common.of', 'of')} {filteredBookings.length}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => table.previousPage()}
-                                    disabled={!table.getCanPreviousPage()}
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => table.nextPage()}
-                                    disabled={!table.getCanNextPage()}
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
                     </Card>
                 )}
+
+                {/* Pagination Controls */}
+                {isBookingsPaginated && (
+                    <div className="pt-2">
+                        <Pagination
+                            links={paginationLinks}
+                            from={paginationFrom ?? undefined}
+                            to={paginationTo ?? undefined}
+                            total={paginationTotal ?? undefined}
+                        />
+                    </div>
+                )}
+            </div>
+        )}
 
                 {/* Add / Edit Booking Dialog */}
                 <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

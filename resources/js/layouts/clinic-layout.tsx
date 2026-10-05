@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useImport from '@/hooks/use-import'
 import ClinicHeaderLayout from '@/components/shared/clinic/clinic-header-layout'
@@ -16,36 +16,37 @@ export default function ClinicLayout({ children, title }: Props) {
     const [collapsed, setCollapsed] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
 
+    // Ensure the browser window itself never creates an extra scrollbar
+    useEffect(() => {
+        document.documentElement.classList.add('overflow-hidden', 'h-full')
+        document.body.classList.add('overflow-hidden', 'h-full')
+        return () => {
+            document.documentElement.classList.remove('overflow-hidden', 'h-full')
+            document.body.classList.remove('overflow-hidden', 'h-full')
+        }
+    }, [])
+
     return (
         <div
             dir={isRtl ? 'rtl' : 'ltr'}
-            className="
-                flex
-                h-screen
-                w-full
-                max-w-full
-                overflow-hidden
-                bg-gray-50
-                dark:bg-gray-950
-            "
+            className="flex h-screen h-[100dvh] w-full max-w-full overflow-hidden bg-gray-50/50 dark:bg-gray-950"
         >
-            {/* Desktop Sidebar */}
+            {/* Desktop Sidebar (Flex child: naturally positions and resizes without margin hacks) */}
             <aside
                 className={`
-                    fixed
-                    top-0
-                    bottom-0
+                    relative
+                    shrink-0
+                    h-full
                     z-30
                     hidden
                     flex-col
                     bg-primary
                     shadow-xl
-                    transition-all
+                    transition-[width]
                     duration-300
                     ease-in-out
                     lg:flex
                     ${collapsed ? 'w-16' : 'w-60'}
-                    ${isRtl ? 'right-0' : 'left-0'}
                 `}
             >
                 <ClinicSidebarContent
@@ -60,7 +61,7 @@ export default function ClinicLayout({ children, title }: Props) {
                     className={`
                         absolute
                         top-16
-                        z-10
+                        z-40
                         flex
                         h-6
                         w-6
@@ -69,14 +70,19 @@ export default function ClinicLayout({ children, title }: Props) {
                         justify-center
                         rounded-full
                         border
-                        border-gray-100
+                        border-gray-200
+                        dark:border-gray-700
                         bg-white
+                        dark:bg-gray-800
                         text-primary
                         shadow-md
-                        transition-colors
-                        hover:bg-orange-50
+                        transition-all
+                        hover:scale-105
+                        hover:bg-gray-50
+                        dark:hover:bg-gray-700
                         ${isRtl ? '-left-3' : '-right-3'}
                     `}
+                    aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
                     {(collapsed && !isRtl) || (!collapsed && isRtl) ? (
                         <ChevronRight size={12} />
@@ -87,23 +93,9 @@ export default function ClinicLayout({ children, title }: Props) {
             </aside>
 
             {/* Main Area */}
-            <div
-                className={`
-                    flex
-                    h-screen
-                    min-h-0
-                    min-w-0
-                    flex-1
-                    flex-col
-                    overflow-hidden
-                    transition-all
-                    duration-300
-                    pb-20
-                    ${collapsed ? 'lg:ms-16' : 'lg:ms-60'}
-                `}
-            >
-                {/* Header - Fixed */}
-                <div className="shrink-0">
+            <div className="flex flex-1 flex-col h-full min-w-0 min-h-0 overflow-hidden">
+                {/* Header - Fixed & Sticky */}
+                <div className="shrink-0 z-20">
                     <ClinicHeaderLayout
                         setMobileOpen={setMobileOpen}
                         title={title}
@@ -113,22 +105,23 @@ export default function ClinicLayout({ children, title }: Props) {
                 {/* ONLY THIS AREA SCROLLS */}
                 <main
                     className="
+                        flex-1
                         min-h-0
                         min-w-0
-                        flex-1
                         overflow-y-auto
                         overflow-x-hidden
                         p-3.5
                         sm:p-5
                         md:p-6
+                        pb-24
+                        lg:pb-8
                     "
                 >
                     {children}
                 </main>
-
-                {/* Mobile Bottom Navigation */}
-
             </div>
+
+            {/* Mobile Bottom Navigation (< lg screens) */}
             <ClinicBottomNav />
         </div>
     )
