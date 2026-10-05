@@ -9,14 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PatientService
 {
-    // public function getClinicPatients(Clinic $clinic): Collection
-    // {
-    //     return $clinic->patients()
-    //         ->with(['fieldValues.field'])
-    //         ->orderBy('id', 'desc')
-    //         ->get();
-    // }
-
     public function getClinicPatients(Clinic $clinic, ?string $search = null, ?string $gender = null, ?string $status = null, int $perPage = 10): LengthAwarePaginator
     {
         return $clinic->patients()

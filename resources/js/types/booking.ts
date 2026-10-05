@@ -1,5 +1,21 @@
-import { Patient } from './patient';
+import { Patient, PaginationLink } from './patient';
 import { User } from './auth';
+
+export interface PaginatedBookings {
+    data: Booking[];
+    current_page: number;
+    first_page_url: string;
+    from: number | null;
+    last_page: number;
+    last_page_url: string;
+    links: PaginationLink[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number | null;
+    total: number;
+}
 
 export type BookingType = 'new' | 'follow_up';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';

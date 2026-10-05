@@ -5,13 +5,71 @@ use App\Models\Clinic;
 use App\Models\Patient;
 use App\Models\User;
 
-test('authenticated user can view clinic bookings page', function () {
+test('authenticated user can view clinic bookings page with pagination and stats', function () {
     $user = User::factory()->create();
     $clinic = Clinic::factory()->create();
+    $patient = Patient::factory()->create(['clinic_id' => $clinic->id, 'first_name' => 'John', 'last_name' => 'Doe']);
+
+    Booking::factory()->count(15)->create([
+        'clinic_id' => $clinic->id,
+        'patient_id' => $patient->id,
+        'appointment_date' => now()->toDateString(),
+        'status' => 'confirmed',
+    ]);
 
     $response = $this->actingAs($user)->get(route('clinics.booking', $clinic->slug));
 
     $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('booking/index')
+        ->has('bookings.data', 10)
+        ->where('bookings.total', 15)
+        ->where('bookings.current_page', 1)
+        ->where('stats.total', 15)
+        ->where('stats.confirmed', 15)
+        ->has('filters')
+    );
+});
+
+test('clinic bookings can be filtered by search, status, type, and date', function () {
+    $user = User::factory()->create();
+    $clinic = Clinic::factory()->create();
+    $patientA = Patient::factory()->create(['clinic_id' => $clinic->id, 'first_name' => 'Alice']);
+    $patientB = Patient::factory()->create(['clinic_id' => $clinic->id, 'first_name' => 'Bob']);
+
+    $targetDate = now()->addDays(2)->toDateString();
+
+    $match = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'patient_id' => $patientA->id,
+        'appointment_date' => $targetDate,
+        'status' => 'confirmed',
+        'type' => 'new',
+    ]);
+
+    $other = Booking::factory()->create([
+        'clinic_id' => $clinic->id,
+        'patient_id' => $patientB->id,
+        'appointment_date' => now()->toDateString(),
+        'status' => 'pending',
+        'type' => 'follow_up',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('clinics.booking', [
+        'slug' => $clinic->slug,
+        'search' => 'Alice',
+        'status' => 'confirmed',
+        'type' => 'new',
+        'date' => $targetDate,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('booking/index')
+        ->has('bookings.data', 1)
+        ->where('bookings.data.0.id', $match->id)
+        ->where('bookings.total', 1)
+    );
 });
 
 test('authenticated user can create a booking', function () {

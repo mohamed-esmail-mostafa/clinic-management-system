@@ -4,7 +4,7 @@ import PageHeader from '@/components/shared/page-header';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import useImport from '@/hooks/use-import';
 import { Booking, BookingFormValues, BookingStatus } from '@/types/booking';
-import { Patient } from '@/types/patient';
+import { Patient, PaginatedPatients } from '@/types/patient';
 import { User } from '@/types/auth';
 import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
@@ -92,7 +92,7 @@ import {
 interface Props {
     clinic?: any;
     bookings?: Booking[];
-    patients?: Patient[];
+    patients?: PaginatedPatients | Patient[];
     doctors?: User[];
 }
 
@@ -146,6 +146,19 @@ export default function TodayBookingsPage({
             return todayStr;
         }
     }, [todayStr, isRtl]);
+
+    // Extract patients list (handles both array and paginated response)
+    const isPatientsPaginated = !Array.isArray(patients) && patients !== null && typeof patients === 'object' && 'data' in patients;
+    const patientList: Patient[] = useMemo(() => {
+        const list = isPatientsPaginated
+            ? (patients as PaginatedPatients).data
+            : (Array.isArray(patients) ? patients : []);
+
+        if (editingBooking?.patient && !list.some((p) => p.id === editingBooking.patient?.id)) {
+            return [editingBooking.patient, ...list];
+        }
+        return list;
+    }, [patients, isPatientsPaginated, editingBooking]);
 
     // Statistics counts
     const stats = useMemo(() => {
@@ -1355,7 +1368,7 @@ export default function TodayBookingsPage({
                                             <SelectValue placeholder={t('bookings.select_patient', 'Select Patient')} />
                                         </SelectTrigger>
                                         <SelectContent className="max-h-56">
-                                            {patients.map((p) => (
+                                            {patientList.map((p) => (
                                                 <SelectItem key={p.id} value={String(p.id)}>
                                                     {p.first_name} {p.last_name}{' '}
                                                     {p.phone ? `(${p.phone})` : ''}

@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Services\BookingService;
 use App\Services\ClinicService;
 use App\Services\PatientService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,18 +22,40 @@ class BookingController extends Controller
         protected PatientService $patient_service
     ) {}
 
-    public function index(string $slug): Response
+    public function index(Request $request, string $slug): Response
     {
         $clinic = $this->clinic_service->getClinic($slug);
-        $bookings = $this->booking_service->getClinicBookings($clinic);
+        $bookings = $this->booking_service->getClinicBookings(
+            clinic: $clinic,
+            search: $request->input('search'),
+            status: $request->input('status'),
+            type: $request->input('type'),
+            date: $request->input('date'),
+            perPage: (int) $request->input('per_page', 10),
+        );
         $patients = $this->patient_service->getClinicPatients($clinic);
         $doctors = $clinic->users;
+
+        $today = Carbon::today()->toDateString();
+        $stats = [
+            'total' => $clinic->bookings()->count(),
+            'todays' => $clinic->bookings()->whereDate('appointment_date', $today)->count(),
+            'confirmed' => $clinic->bookings()->where('status', 'confirmed')->count(),
+            'pending' => $clinic->bookings()->where('status', 'pending')->count(),
+        ];
 
         return Inertia::render('booking/index', [
             'clinic' => $clinic,
             'bookings' => $bookings,
             'patients' => $patients,
             'doctors' => $doctors,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'status' => $request->input('status', 'all'),
+                'type' => $request->input('type', 'all'),
+                'date' => $request->input('date', ''),
+            ],
+            'stats' => $stats,
         ]);
     }
 

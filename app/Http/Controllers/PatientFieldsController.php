@@ -23,15 +23,15 @@ class PatientFieldsController extends Controller
         return Inertia::render('patients-settings/index', [
             'clinic' => $clinic,
             'fields' => $fields,
-            'field_types' => [
-                ['value' => 'text', 'label' => 'Text Input'],
-                ['value' => 'number', 'label' => 'Number Input'],
-                ['value' => 'textarea', 'label' => 'Text Area'],
-                ['value' => 'select', 'label' => 'Dropdown Select'],
-                ['value' => 'radio', 'label' => 'Radio Choice'],
-                ['value' => 'checkbox', 'label' => 'Checkbox Group'],
-                ['value' => 'date', 'label' => 'Date Picker'],
-            ],
+            // 'field_types' => [
+            //     ['value' => 'text', 'label' => 'Text Input'],
+            //     ['value' => 'number', 'label' => 'Number Input'],
+            //     ['value' => 'textarea', 'label' => 'Text Area'],
+            //     ['value' => 'select', 'label' => 'Dropdown Select'],
+            //     ['value' => 'radio', 'label' => 'Radio Choice'],
+            //     ['value' => 'checkbox', 'label' => 'Checkbox Group'],
+            //     ['value' => 'date', 'label' => 'Date Picker'],
+            // ],
         ]);
     }
 

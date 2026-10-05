@@ -1,8 +1,8 @@
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import ClinicLayout from '@/layouts/clinic-layout';
-import React, { useState, useMemo } from 'react';
-import { Booking, BookingFormValues, BookingStatus } from '@/types/booking';
-import { Patient } from '@/types/patient';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Booking, BookingFormValues, BookingStatus, PaginatedBookings } from '@/types/booking';
+import { Patient, PaginatedPatients } from '@/types/patient';
 import { User } from '@/types/auth';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -16,7 +16,6 @@ import {
     useLegacyTable as useReactTable,
     getCoreRowModel,
     getSortedRowModel,
-    getPaginationRowModel,
     LegacyColumnDef as ColumnDef,
 } from '@tanstack/react-table/legacy';
 
@@ -51,6 +50,7 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import PageHeader from '@/components/shared/page-header';
+import Pagination from '@/components/shared/pagination';
 
 // Icons
 import {
@@ -76,27 +76,51 @@ import {
 
 interface Props {
     clinic?: any;
-    bookings?: Booking[];
-    patients?: Patient[];
+    bookings?: PaginatedBookings | Booking[];
+    patients?: PaginatedPatients | Patient[];
     doctors?: User[];
+    filters?: {
+        search?: string;
+        status?: string;
+        type?: string;
+        date?: string;
+    };
+    stats?: {
+        total: number;
+        todays: number;
+        confirmed: number;
+        pending: number;
+    };
 }
 
 export default function BookingPage({
     clinic: serverClinic,
-    bookings = [],
+    bookings,
     patients = [],
+    doctors = [],
+    filters,
+    stats: serverStats,
 }: Props) {
     const { t, isRtl } = useImport();
     const { clinics } = useAuthClinics() as { clinics?: any[] };
-
     // Clinic slug
     const clinicSlug = serverClinic?.slug || (Array.isArray(clinics) && clinics.length > 0 ? clinics[0].slug : '');
 
-    // Search and filter states
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [typeFilter, setTypeFilter] = useState('all');
-    const [dateFilter, setDateFilter] = useState('');
+    // Extract bookings list and pagination metadata
+    const isBookingsPaginated = !Array.isArray(bookings) && bookings !== null && typeof bookings === 'object' && 'data' in bookings;
+    const bookingList: Booking[] = isBookingsPaginated
+        ? (bookings as PaginatedBookings).data
+        : (Array.isArray(bookings) ? bookings : []);
+    const paginationLinks = isBookingsPaginated ? (bookings as PaginatedBookings).links : [];
+    const paginationFrom = isBookingsPaginated ? (bookings as PaginatedBookings).from : (bookingList.length > 0 ? 1 : 0);
+    const paginationTo = isBookingsPaginated ? (bookings as PaginatedBookings).to : bookingList.length;
+    const paginationTotal = isBookingsPaginated ? (bookings as PaginatedBookings).total : bookingList.length;
+
+    // Search and filter states (synced with backend)
+    const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+    const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
+    const [typeFilter, setTypeFilter] = useState(filters?.type || 'all');
+    const [dateFilter, setDateFilter] = useState(filters?.date || '');
 
     // Modals state
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -107,16 +131,64 @@ export default function BookingPage({
     // Patient selection mode: registered or unregistered
     const [patientType, setPatientType] = useState<'registered' | 'unregistered'>('registered');
 
-    // Sorting & Pagination
+    // Sorting
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     // Today's date YYYY-MM-DD
     const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-    // Filter bookings
-    const filteredBookings = useMemo(() => {
-        return bookings.filter((booking) => {
+    // Debounced Backend Search & Filter query dispatch
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            if (!clinicSlug) return;
+
+            router.get(
+                `/clinic/${clinicSlug}/booking`,
+                {
+                    search: searchTerm.trim() ? searchTerm.trim() : undefined,
+                    status: statusFilter !== 'all' ? statusFilter : undefined,
+                    type: typeFilter !== 'all' ? typeFilter : undefined,
+                    date: dateFilter ? dateFilter : undefined,
+                    page: 1, // Reset to page 1 on new filter criteria
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                }
+            );
+        }, 350);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, statusFilter, typeFilter, dateFilter, clinicSlug]);
+
+    // Extract patients list (handles both array and paginated response)
+    const isPatientsPaginated = !Array.isArray(patients) && patients !== null && typeof patients === 'object' && 'data' in patients;
+    const patientList: Patient[] = useMemo(() => {
+        const list = isPatientsPaginated
+            ? (patients as PaginatedPatients).data
+            : (Array.isArray(patients) ? patients : []);
+
+        if (editingBooking?.patient && !list.some((p) => p.id === editingBooking.patient?.id)) {
+            return [editingBooking.patient, ...list];
+        }
+        return list;
+    }, [patients, isPatientsPaginated, editingBooking]);
+
+    // Display bookings (server-paginated by default, client fallback for raw array)
+    const displayBookings = useMemo(() => {
+        if (isBookingsPaginated) {
+            return bookingList;
+        }
+
+        return bookingList.filter((booking) => {
             const registeredName = booking.patient
                 ? `${booking.patient.first_name || ''} ${booking.patient.last_name || ''}`.toLowerCase()
                 : '';
@@ -140,17 +212,21 @@ export default function BookingPage({
 
             return matchesSearch && matchesStatus && matchesType && matchesDate;
         });
-    }, [bookings, searchTerm, statusFilter, typeFilter, dateFilter]);
+    }, [isBookingsPaginated, bookingList, searchTerm, statusFilter, typeFilter, dateFilter]);
 
     // Statistics
     const stats = useMemo(() => {
-        const total = bookings.length;
-        const todays = bookings.filter((b) => b.appointment_date === todayStr).length;
-        const confirmed = bookings.filter((b) => b.status === 'confirmed').length;
-        const pending = bookings.filter((b) => b.status === 'pending').length;
+        if (serverStats) {
+            return serverStats;
+        }
+
+        const total = paginationTotal;
+        const todays = bookingList.filter((b) => b.appointment_date === todayStr).length;
+        const confirmed = bookingList.filter((b) => b.status === 'confirmed').length;
+        const pending = bookingList.filter((b) => b.status === 'pending').length;
 
         return { total, todays, confirmed, pending };
-    }, [bookings, todayStr]);
+    }, [serverStats, paginationTotal, bookingList, todayStr]);
 
     // Validation Schema
     const validationSchema = Yup.object({
@@ -524,14 +600,12 @@ export default function BookingPage({
     );
 
     const table = useReactTable({
-        data: filteredBookings,
+        data: displayBookings,
         columns,
-        state: { sorting, pagination },
+        state: { sorting },
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
     });
 
     return (
@@ -541,7 +615,7 @@ export default function BookingPage({
                 <PageHeader
                     icon={<CalendarDays className="h-7 w-7 text-primary" />}
                     title={t('bookings.title', 'Bookings & Appointments')}
-                    count={bookings.length}
+                    count={stats.total}
                     subtitle={t('bookings.subtitle', 'Manage clinic appointments, patient schedules, and booking statuses.')}
                 >
                     <Button onClick={handleOpenAdd} className="gap-2 shrink-0">
@@ -813,37 +887,17 @@ export default function BookingPage({
                         </Table>
                     </div>
 
-                    {/* Pagination */}
-                    {table.getPageCount() > 1 && (
-                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 dark:border-gray-800">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t('common.page', 'Page')} {table.getState().pagination.pageIndex + 1}{' '}
-                                {t('common.of', 'of')} {table.getPageCount()}
-                                {' · '}
-                                {filteredBookings.length} {t('bookings.total', 'total')}
-                            </p>
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => table.previousPage()}
-                                    disabled={!table.getCanPreviousPage()}
-                                    className="h-8 w-8"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => table.nextPage()}
-                                    disabled={!table.getCanNextPage()}
-                                    className="h-8 w-8"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
+                    {/* Pagination Controls */}
+                    {isBookingsPaginated ? (
+                        <div className="pt-2">
+                            <Pagination
+                                links={paginationLinks}
+                                from={paginationFrom ?? undefined}
+                                to={paginationTo ?? undefined}
+                                total={paginationTotal ?? undefined}
+                            />
                         </div>
-                    )}
+                    ) : null}
                 </Card>
             </div>
 
@@ -911,7 +965,7 @@ export default function BookingPage({
                                         <SelectValue placeholder={t('bookings.select_patient', 'Select Patient')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {patients.map((p) => (
+                                        {patientList.map((p) => (
                                             <SelectItem key={p.id} value={String(p.id)}>
                                                 {p.first_name} {p.last_name} ({p.patient_number})
                                             </SelectItem>
