@@ -16,6 +16,7 @@ export default function useClinicNavlinks() {
         { key: t('clinics.sidebar.medicines'), href: `/clinic/${authClinic?.slug}/medications`, icon: Pill },
         { key: t('clinics.sidebar.phones'), href: `/clinic/${authClinic?.slug}/phones/page`, icon: Phone },
         { key: t('clinics.sidebar.working-hours'), href: `/clinic/${authClinic?.slug}/working/hours`, icon: Timer },
+        { key: t('clinics.sidebar.employees'), href: `/clinic/${authClinic?.slug}/employees`, icon: Users },
         { key: t('clinics.sidebar.profile'), href: '/auth/profile', icon: User },
     ];
     return {

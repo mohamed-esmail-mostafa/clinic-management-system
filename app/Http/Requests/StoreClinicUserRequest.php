@@ -12,7 +12,7 @@ class StoreClinicUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +22,23 @@ class StoreClinicUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $mode = $this->input('mode', 'new');
+
+        if ($mode === 'new') {
+            return [
+                'mode' => ['nullable', 'in:new,existing'],
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8'],
+                'phone' => ['nullable', 'string', 'max:20'],
+                'role_id' => ['required', 'exists:roles,id'],
+            ];
+        }
+
         return [
-            //
+            'mode' => ['required', 'in:new,existing'],
+            'user_id' => ['required', 'exists:users,id'],
+            'role_id' => ['required', 'exists:roles,id'],
         ];
     }
 }

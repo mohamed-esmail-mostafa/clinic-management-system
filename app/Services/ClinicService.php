@@ -194,4 +194,25 @@ class ClinicService
     {
         return Clinic::where('slug', $slug)->firstOrFail();
     }
+
+    public function getClinicEmployees(Clinic $clinic): Collection
+    {
+        return ClinicUser::with(['user', 'role'])
+            ->where('clinic_id', $clinic->id)
+            ->latest('id')
+            ->get();
+    }
+
+    public function updateClinicUserRole(Clinic $clinic, int $userId, int $roleId): bool
+    {
+        User::where('id', $userId)->update([
+            'role_id' => $roleId,
+        ]);
+
+        return (bool) ClinicUser::where('clinic_id', $clinic->id)
+            ->where('user_id', $userId)
+            ->update([
+                'role_id' => $roleId,
+            ]);
+    }
 }

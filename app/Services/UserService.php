@@ -68,4 +68,31 @@ class UserService
 
         return $user;
     }
+
+    public function updateUser(User $user, array $data): User
+    {
+        if (isset($data['name'])) {
+            $user->name = $data['name'];
+        }
+
+        if (isset($data['email'])) {
+            $user->email = $data['email'];
+        }
+
+        if (array_key_exists('phone', $data)) {
+            $user->phone = ! empty($data['phone']) ? $data['phone'] : null;
+        }
+
+        if (! empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        if (! empty($data['role_id'])) {
+            $user->role_id = $data['role_id'];
+        }
+
+        $user->save();
+
+        return $user;
+    }
 }

@@ -13,6 +13,13 @@ class RoleService
         return Role::orderBy('id', 'desc')->get();
     }
 
+    public function getRolesForClinic(): Collection
+    {
+         return Role::where('type', 'clinic')
+        ->orderByDesc('id')
+        ->get();
+    }
+
     public function createNewRole(array $data): Role
     {
         $name = $data['name'];

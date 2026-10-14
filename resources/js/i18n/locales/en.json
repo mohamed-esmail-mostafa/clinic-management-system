@@ -537,11 +537,19 @@
     "showing": "Showing",
     "of": "of",
     "to":"To",
-    "results":" Results ",
     "saving": "Saving...",
     "deleting": "Deleting...",
     "continue-to-dashboard": "Continue to Dashboard",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "copied": "Copied to clipboard",
+    "copy_email": "Copy email",
+    "active_filters": "Active filters:",
+    "clear_all": "Clear all",
+    "optional": "Optional",
+    "you": "You",
+    "removing": "Removing...",
+    "invalid_email": "Invalid email address",
+    "min_characters": "Password must be at least 8 characters"
   },
   "website_settings": {
     "title": "Website Settings",
@@ -907,5 +915,71 @@
     "desktop_step_2": "Or from the browser menu (⋮), choose 'Install Eyadati'.",
     "got_it": "Got it",
     "close": "Close"
+  },
+  "employees": {
+    "title": "Clinic Employees",
+    "subtitle": "Manage your clinic medical staff, receptionists, administrators, and assign roles.",
+    "add_employee": "Add Employee",
+    "stats": {
+      "total": "Total Staff",
+      "doctors": "Doctors",
+      "nurses": "Nurses",
+      "receptionists": "Receptionists",
+      "admins": "Admins & Owners"
+    },
+    "search_placeholder": "Search by name, email, phone or role...",
+    "filter_by_role": "Filter by Role",
+    "all_roles": "All Roles",
+    "view_table": "Table View",
+    "view_grid": "Grid Cards View",
+    "empty_title": "No employees registered yet",
+    "empty_subtitle": "Start assembling your team by adding doctors, nurses, receptionists, or staff to this clinic.",
+    "add_first_employee": "Add First Employee",
+    "no_search_results": "No employees match your search",
+    "no_search_subtitle": "Try adjusting your search query or reset the role filter to view all staff members.",
+    "table": {
+      "employee": "Employee",
+      "role": "Clinic Role",
+      "contact": "Contact Info",
+      "joined": "Joined Date"
+    },
+    "unknown_user": "Unknown Staff",
+    "no_phone": "No phone provided",
+    "joined": "Joined",
+    "cannot_remove_self": "You cannot remove yourself",
+    "dialog": {
+      "add_title": "Add Clinic Employee",
+      "add_subtitle": "Register a new employee account and assign their clinic role.",
+      "edit_title": "Edit Employee",
+      "edit_subtitle": "Update staff profile information and clinic role assignment.",
+      "delete_title": "Remove Employee",
+      "delete_subtitle": "Confirm employee removal from this clinic"
+    },
+    "delete_confirm_text": "Are you sure you want to remove this employee from the clinic? They will lose access to this clinic's patient files, appointments, and dashboard.",
+    "confirm_remove": "Remove from Clinic",
+    "fields": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "role": "Clinic Role",
+      "password": "Initial Password",
+      "new_password": "New Password"
+    },
+    "password_placeholder": "Leave blank to keep existing password",
+    "password_hint": "Minimum 8 characters. The user can change this later.",
+    "select_role": "Select role",
+    "add_employee_btn": "Add to Clinic",
+    "roles": {
+      "member": "Staff Member"
+    },
+    "created_success": "Employee added successfully!",
+    "updated_success": "Employee details updated successfully!",
+    "deleted_success": "Employee removed from clinic.",
+    "errors": {
+      "no_clinic": "Clinic slug not found.",
+      "add_failed": "Failed to add employee",
+      "update_failed": "Failed to update employee",
+      "delete_failed": "Failed to remove employee"
+    }
   }
 }
