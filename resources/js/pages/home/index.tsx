@@ -15,6 +15,7 @@ import Testimonials from './components/testimonials';
 import CtaBanner from './components/cta-banner';
 import Footer from './components/footer';
 import InstallAppButton from '@/components/shared/install-app-button';
+import MobileHomeAction from './components/mobile-home-action';
 
 export default function HomePage() {
     const { isRtl } = useImport();
@@ -45,6 +46,7 @@ export default function HomePage() {
 
             {/* Footer */}
             <Footer />
+            <MobileHomeAction />
         </div>
     );
 }

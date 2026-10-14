@@ -538,7 +538,9 @@
     "to": " الي ",
     "results": " النتائج ",
     "saving": "جاري الحفظ...",
-    "deleting": "جاري الحذف..."
+    "deleting": "جاري الحذف...",
+    "continue-to-dashboard": "متابعة إلى لوحة التحكم",
+    "welcome": "مرحبًا"
   },
   "website_settings": {
     "title": "إعدادات الموقع",

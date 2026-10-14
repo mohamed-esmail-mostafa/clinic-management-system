@@ -93,8 +93,7 @@ class PatientController extends Controller
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $this->patient_service->createPatient($clinic, $request->validated());
-
-        return redirect()->route('clinics.patients', ['slug' => $slug])->with('success', 'Patient created successfully');
+        return redirect()->route('clinics.patients', ['slug' => $slug]);
     }
 
     public function update(UpdatePatientRequest $request, string $slug, Patient $patient): RedirectResponse

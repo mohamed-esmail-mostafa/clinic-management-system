@@ -38,7 +38,7 @@ export default function PatientFilterSearch({ searchTerm, setSearchTerm, genderF
                         </SelectContent>
                     </Select>
 
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    {/* <Select value={statusFilter} onValueChange={setStatusFilter}>
                         <SelectTrigger className="w-full md:w-40">
                             <SelectValue placeholder={t('patients.is_active', 'Status')} />
                         </SelectTrigger>
@@ -47,7 +47,7 @@ export default function PatientFilterSearch({ searchTerm, setSearchTerm, genderF
                             <SelectItem value="active">{t('patients.active', 'Active')}</SelectItem>
                             <SelectItem value="inactive">{t('patients.inactive', 'Inactive')}</SelectItem>
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                 </div>
             </CardContent>
         </Card>

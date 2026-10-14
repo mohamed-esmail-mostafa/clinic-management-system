@@ -539,7 +539,9 @@
     "to":"To",
     "results":" Results ",
     "saving": "Saving...",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "continue-to-dashboard": "Continue to Dashboard",
+    "welcome": "Welcome"
   },
   "website_settings": {
     "title": "Website Settings",
