@@ -549,7 +549,8 @@
     "you": "أنت",
     "removing": "جاري الإزالة...",
     "invalid_email": "بريد إلكتروني غير صالح",
-    "min_characters": "كلمة المرور يجب ألا تقل عن 8 أحرف"
+    "min_characters": "كلمة المرور يجب ألا تقل عن 8 أحرف",
+    "clear_filters": " مسح الفلاتر "
   },
   "website_settings": {
     "title": "إعدادات الموقع",

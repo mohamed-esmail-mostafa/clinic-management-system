@@ -42,9 +42,9 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.jpeg" sizes="any">
-        <link rel="icon" href="/favicon.jpeg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/favicon.jpg">
+        <link rel="icon" href="/favicon.png" sizes="any">
+        <link rel="icon" href="/favicon.png" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/favicon.png">
 
         @fonts
 

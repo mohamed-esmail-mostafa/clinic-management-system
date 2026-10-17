@@ -330,7 +330,7 @@ export default function visits_settings_page({
 
     return (
         <ClinicLayout title={t('visits_settings.page_title', 'Visit Settings')}>
-            <div className="space-y-6 max-w-7xl mx-auto">
+            <div className="space-y-6  mx-auto">
                 {/* Page Header */}
                 <PageHeader
                     title={t('visits_settings.header_title', 'Visit Fields Settings')}
@@ -355,7 +355,7 @@ export default function visits_settings_page({
                 </PageHeader>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-xs">
                         <CardContent className="p-4 flex items-center gap-3.5">
                             <div className="p-3 rounded-xl bg-primary/10 text-primary">

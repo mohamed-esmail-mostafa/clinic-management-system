@@ -10,14 +10,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
 import { AlertCircle, Calendar, Eye, MapPin, MoreHorizontal, Pencil, Phone, Sliders, Stethoscope, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, router } from '@inertiajs/react';
@@ -184,15 +176,7 @@ export default function PatientCard({ patient, custom_fields }: { patient: Patie
 
                     {/* Quick Badges row */}
                     <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                        <Badge
-                            className={
-                                patient.is_active
-                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 text-[11px] font-medium'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[11px] font-medium'
-                            }
-                        >
-                            {patient.is_active ? t('patients.active', 'Active') : t('patients.inactive', 'Inactive')}
-                        </Badge>
+                        
 
                         {patient.gender && (
                             <Badge variant="outline" className="capitalize text-[11px] font-normal">
@@ -439,16 +423,18 @@ export default function PatientCard({ patient, custom_fields }: { patient: Patie
                         </div>
                     )}
 
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Link href={`/clinic/${authClinic?.slug}/patients/${viewingPatient?.id}/edit`}>
-                            <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <DialogFooter className="gap-2 sm:gap-0 ">
+                       <div className='flex items-center gap-3'>
+                         <Link className='flex-1' href={`/clinic/${authClinic?.slug}/patients/${viewingPatient?.id}/edit`}>
+                            <Button className="w-full">
                                 <Pencil className="h-4 w-4" />
                                 {t('patients.edit', 'Edit Patient')}
                             </Button>
                         </Link>
-                        <Button variant="outline" onClick={() => setViewingPatient(null)}>
+                        <Button variant="destructive" className='flex-1' onClick={() => setViewingPatient(null)}>
                             {t('common.close', 'Close')}
                         </Button>
+                       </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

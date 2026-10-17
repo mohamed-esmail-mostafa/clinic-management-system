@@ -13,11 +13,11 @@ export default function NoPatientsFound({ searchTerm, genderFilter, statusFilter
                 <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                     {t('patients.no_patients', 'No patients found')}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+                {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
                     {searchTerm || genderFilter !== 'all' || statusFilter !== 'all'
                         ? t('patients.no_matching_patients', 'No patients match your search criteria. Try clearing the filters.')
-                        : t('patients.no_patients_desc', 'Start by adding your clinic\'s first patient record.')}
-                </p>
+                        : t('patients.no_patients_desc')}
+                </p> */}
                 <div className="mt-4 flex items-center justify-center gap-2">
                     {(searchTerm || genderFilter !== 'all' || statusFilter !== 'all') ? (
                         <Button
