@@ -119,7 +119,8 @@
       "phones": "Clinic Phones",
       "working-hours": "Working Hours",
       "options": "Options",
-      "visit-settings": " Visit Settings "
+      "visit-settings": " Visit Settings ",
+      "add_new_booking":"Add New Booking"
     }
   },
   "admin": {

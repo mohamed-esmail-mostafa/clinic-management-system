@@ -11,5 +11,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/clinic/{slug}/booking/{booking}', 'update')->name('clinics.booking.update');
         Route::patch('/clinic/{slug}/booking/{booking}/status', 'updateStatus')->name('clinics.booking.update-status');
         Route::delete('/clinic/{slug}/booking/{booking}', 'destroy')->name('clinics.booking.destroy');
+        Route::get('/clinic/{slug}/create/booking/page','create_booking_page')->name("create.booking.page");
+        // Route::get('/clinic/create/booking/page','create_booking_page')->name("create.booking.page");
     });
 });

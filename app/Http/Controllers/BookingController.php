@@ -59,19 +59,17 @@ class BookingController extends Controller
         ]);
     }
 
-    public function store(StoreBookingRequest $request, $slug): RedirectResponse
+    public function store(StoreBookingRequest $request, string $slug): RedirectResponse
     {
         $clinic = $this->clinic_service->getClinic($slug);
         $this->booking_service->createBooking($clinic, $request->validated());
-
-        return redirect()->back()->with('success', 'Appointment booked successfully');
+        return redirect()->back();
     }
 
     public function update(UpdateBookingRequest $request, $slug, Booking $booking): RedirectResponse
     {
         $this->booking_service->updateBooking($booking, $request->validated());
-
-        return redirect()->back()->with('success', 'Appointment updated successfully');
+        return redirect()->back();
     }
 
     public function updateStatus(Request $request, $slug, Booking $booking): RedirectResponse
@@ -81,15 +79,13 @@ class BookingController extends Controller
         ]);
 
         $this->booking_service->updateBookingStatus($booking, $validated['status']);
-
-        return redirect()->back()->with('success', 'Appointment status updated successfully');
+        return redirect()->back();
     }
 
     public function destroy($slug, Booking $booking): RedirectResponse
     {
         $this->booking_service->deleteBooking($booking);
-
-        return redirect()->back()->with('success', 'Appointment deleted successfully');
+        return redirect()->back();
     }
 
     public function today_bookings(Request $request, string $slug): Response
@@ -136,6 +132,21 @@ class BookingController extends Controller
                 'doctor_id' => $request->input('doctor_id', 'all'),
             ],
             'stats' => $stats,
+        ]);
+    }
+
+
+
+    public function create_booking_page(Request $request,string $slug)
+    {
+        $clinic = $this->clinic_service->getClinic($slug);
+        $working_days = $clinic->workingHours;
+
+        // dd($slug);
+        // dd($request->day);
+       
+        return Inertia::render('booking/create', [
+            "working_days" => $working_days
         ]);
     }
 }

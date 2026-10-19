@@ -119,7 +119,8 @@
       "phones": " ارقام هواتف العيادة ",
       "working-hours": "مواعيد العمل",
       "options": " الخيارات ",
-      "visit-settings": " اعدادت الزيارات "
+      "visit-settings": " اعدادت الزيارات ",
+      "add_new_booking":" اضافة حجز جديد "
     }
   },
   "admin": {

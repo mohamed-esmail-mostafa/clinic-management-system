@@ -144,253 +144,269 @@ export default function BookingCard({ booking, index }: any) {
         };
 
     return (
-        <div>
-
-            <Card
-                key={booking.id}
-                className={`transition-all duration-200 border-l-4 hover:shadow-sm ${isCompleted
-                    ? 'border-l-blue-500 bg-blue-50/15 dark:bg-blue-950/10'
+        <>
+        <Card
+            className={`h-full min-w-0 overflow-hidden border-t-4 transition-all duration-200 hover:shadow-md ${
+                isCompleted
+                    ? 'border-t-blue-500 bg-blue-50/20 dark:bg-blue-950/10'
                     : isConfirmed
-                        ? 'border-l-emerald-500 bg-white dark:bg-gray-900'
-                        : isPending
-                            ? 'border-l-amber-500 bg-white dark:bg-gray-900'
-                            : 'border-l-gray-300 dark:border-l-gray-700 bg-white dark:bg-gray-900 opacity-80'
-                    }`}
-            >
-                <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {/* Left Side: Time, Patient Info, Doctor & Badges */}
-                    <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                        {/* Order / Time Badge */}
-                        <div className="flex flex-col items-center justify-center px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shrink-0 min-w-[75px]">
-                            <span className="text-xs font-mono text-muted-foreground">
-                                {/* #{((paginationFrom || 1) + index)} */}
-                            </span>
-                            <span className="text-sm font-bold flex items-center gap-1 mt-0.5">
-                                <Clock className="h-3 w-3 text-primary" />
+                      ? 'border-t-emerald-500'
+                      : isPending
+                        ? 'border-t-amber-500'
+                        : 'border-t-gray-300 dark:border-t-gray-700'
+            }`}
+        >
+            <CardContent className="flex h-full flex-col gap-4 p-4">
+                {/* Header: appointment time and actions */}
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex h-14 min-w-[76px] flex-col items-center justify-center rounded-xl bg-muted px-3">
+                            <Clock className="mb-1 h-4 w-4 text-primary" />
+                            <span className="text-sm font-bold tabular-nums">
                                 {booking.appointment_time}
                             </span>
                         </div>
 
-                        {/* Patient Avatar */}
-                        <Avatar className="h-11 w-11 bg-primary/10 text-primary font-bold text-sm shrink-0">
-                            <AvatarFallback>{getInitials(patientName)}</AvatarFallback>
-                        </Avatar>
-
-                        {/* Patient Info */}
-                        <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <h4 className="font-semibold text-gray-900 dark:text-white text-base truncate">
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="break-words font-semibold text-foreground">
                                     {patientName}
                                 </h4>
-                                {!isRegistered ? (
-                                    <Badge
-                                        variant="outline"
-                                        className="text-[10px] py-0 px-1.5 text-muted-foreground"
-                                    >
-                                        {t('bookings.walk_in_unregistered', 'Walk-in / Unregistered')}
-                                    </Badge>
-                                ) : (
-                                    booking.patient?.patient_number && (
-                                        <Badge
-                                            variant="secondary"
-                                            className="text-[10px] py-0 px-1.5 font-mono"
-                                        >
-                                            {booking.patient.patient_number}
-                                        </Badge>
-                                    )
-                                )}
                                 {getStatusBadge(booking.status)}
                             </div>
 
-                            {/* Meta Details: Phone, Doctor, Type, Amount */}
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
-                                {phone && (
-                                    <a
-                                        href={`tel:${phone}`}
-                                        className="flex items-center gap-1 hover:text-primary transition-colors"
-                                    >
-                                        <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                                        <span>{phone}</span>
-                                    </a>
-                                )}
-
-                                {booking.doctor && (
-                                    <span className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
-                                        <Stethoscope className="h-3.5 w-3.5 text-primary" />
-                                        <span>{booking.doctor.name}</span>
-                                    </span>
-                                )}
-
-                                <Badge variant="outline" className="text-[11px] py-0 h-4.5 font-normal">
-                                    {booking.type === 'new'
-                                        ? t('bookings.type_new', 'New Examination')
-                                        : t('bookings.type_follow_up', 'Follow-up')}
-                                </Badge>
-
-                                {booking.amount ? (
-                                    <span className="flex items-center gap-0.5 text-gray-900 dark:text-gray-100 font-medium">
-                                        <DollarSign className="h-3 w-3 text-emerald-600" />
-                                        <span>
-                                            {booking.amount} {booking.payment_method ? `(${getPaymentMethodLabel(booking.payment_method)})` : ''}
-                                        </span>
-                                    </span>
-                                ) : null}
-                            </div>
-
-                            {/* Notes / Reason */}
-                            {booking.notes && (
-                                <p className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 p-1.5 rounded-md mt-2 italic border border-gray-100 dark:border-gray-800">
-                                    &ldquo;{booking.notes}&rdquo;
-                                </p>
-                            )}
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                {isRegistered
+                                    ? booking.patient?.patient_number
+                                        ? `${t('bookings.patient_number', 'Patient No.')}: ${booking.patient.patient_number}`
+                                        : t('bookings.registered_patient', 'Registered Patient')
+                                    : t('bookings.walk_in_unregistered', 'Walk-in / Unregistered')}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Right Side: Quick Action Buttons & Dropdown */}
-                    <div className="flex items-center justify-end gap-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0">
-                        {/* Pending Quick Actions */}
-                        {isPending && (
-                            <>
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40 border-emerald-300 gap-1.5"
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 shrink-0"
+                                aria-label={t('bookings.actions', 'Booking actions')}
+                            >
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-48">
+                            {booking.status !== 'pending' && (
+                                <DropdownMenuItem
+                                    onClick={() => handleUpdateStatus(booking, 'pending')}
+                                >
+                                    <Clock className="me-2 h-4 w-4 text-amber-500" />
+                                    {t('bookings.set_pending', 'Set as Pending')}
+                                </DropdownMenuItem>
+                            )}
+
+                            {booking.status !== 'confirmed' && (
+                                <DropdownMenuItem
                                     onClick={() => handleUpdateStatus(booking, 'confirmed')}
                                 >
-                                    <UserCheck className="h-3.5 w-3.5" />
-                                    <span>{t('bookings.confirm_arrival', 'Confirm')}</span>
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
+                                    <UserCheck className="me-2 h-4 w-4 text-emerald-500" />
+                                    {t('bookings.set_confirmed', 'Set as Confirmed')}
+                                </DropdownMenuItem>
+                            )}
+
+                            {booking.status !== 'completed' && (
+                                <DropdownMenuItem
                                     onClick={() => handleUpdateStatus(booking, 'completed')}
                                 >
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                    <span>{t('bookings.mark_completed', 'Complete')}</span>
-                                </Button>
-                            </>
-                        )}
+                                    <CheckCircle2 className="me-2 h-4 w-4 text-blue-500" />
+                                    {t('bookings.set_completed', 'Set as Completed')}
+                                </DropdownMenuItem>
+                            )}
 
-                        {/* Confirmed Quick Actions */}
-                        {isConfirmed && (
-                            <Button
-                                size="sm"
-                                className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
-                                onClick={() => handleUpdateStatus(booking, 'completed')}
-                            >
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                <span>{t('bookings.mark_completed', 'Mark Completed')}</span>
-                            </Button>
-                        )}
+                            {booking.status !== 'no_show' && (
+                                <DropdownMenuItem
+                                    onClick={() => handleUpdateStatus(booking, 'no_show')}
+                                >
+                                    <UserX className="me-2 h-4 w-4" />
+                                    {t('bookings.set_no_show', 'Mark as No Show')}
+                                </DropdownMenuItem>
+                            )}
 
-                        {/* Completed state indicator */}
-                        {isCompleted && (
-                            <Badge
-                                variant="outline"
-                                className="bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-300 py-1 px-2.5 gap-1.5 text-xs font-semibold"
+                            {booking.status !== 'cancelled' && (
+                                <DropdownMenuItem
+                                    onClick={() => handleUpdateStatus(booking, 'cancelled')}
+                                >
+                                    <XCircle className="me-2 h-4 w-4 text-red-500" />
+                                    {t('bookings.cancel', 'Cancel Appointment')}
+                                </DropdownMenuItem>
+                            )}
+
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem
+                                onClick={() => setDeletingBooking(booking)}
+                                className="text-destructive focus:text-destructive"
                             >
-                                <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
-                                <span>{t('bookings.status_completed', 'Completed')}</span>
+                                <Trash2 className="me-2 h-4 w-4" />
+                                {t('bookings.delete', 'Delete')}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                {/* Patient details */}
+                <div className="space-y-3 rounded-lg border bg-card p-3">
+                    {phone && (
+                        <a
+                            href={`tel:${phone}`}
+                            className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+                        >
+                            <Phone className="h-4 w-4 shrink-0" />
+                            <span className="break-all">{phone}</span>
+                        </a>
+                    )}
+
+                    {booking.doctor && (
+                        <div className="flex min-w-0 items-center gap-2 text-sm">
+                            <Stethoscope className="h-4 w-4 shrink-0 text-primary" />
+                            <span className="truncate">
+                                {booking.doctor.name}
+                            </span>
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline">
+                            {booking.type === 'new'
+                                ? t('bookings.type_new', 'New Examination')
+                                : t('bookings.type_follow_up', 'Follow-up')}
+                        </Badge>
+
+                        {booking.amount != null && (
+                            <Badge variant="secondary" className="gap-1">
+                                <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+                                {booking.amount}
+                                {booking.payment_method && (
+                                    <span>
+                                        · {getPaymentMethodLabel(booking.payment_method)}
+                                    </span>
+                                )}
                             </Badge>
                         )}
-
-                        {/* Action Menu Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                                {/* <DropdownMenuItem onClick={() => handleOpenEdit(booking)}>
-                                <Pencil className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-amber-600" />
-                                <span>{t('bookings.edit', 'Edit Booking')}</span>
-                            </DropdownMenuItem> */}
-
-                                <DropdownMenuSeparator />
-
-                                {booking.status !== 'pending' && (
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking, 'pending')}>
-                                        <Clock className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-amber-500" />
-                                        <span>{t('bookings.set_pending', 'Set as Pending')}</span>
-                                    </DropdownMenuItem>
-                                )}
-                                {booking.status !== 'confirmed' && (
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking, 'confirmed')}>
-                                        <UserCheck className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-emerald-500" />
-                                        <span>{t('bookings.set_confirmed', 'Set as Confirmed')}</span>
-                                    </DropdownMenuItem>
-                                )}
-                                {booking.status !== 'completed' && (
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking, 'completed')}>
-                                        <CheckCircle2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-blue-500" />
-                                        <span>{t('bookings.set_completed', 'Set as Completed')}</span>
-                                    </DropdownMenuItem>
-                                )}
-                                {booking.status !== 'no_show' && (
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking, 'no_show')}>
-                                        <UserX className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-gray-500" />
-                                        <span>{t('bookings.set_no_show', 'Mark as No Show')}</span>
-                                    </DropdownMenuItem>
-                                )}
-                                {booking.status !== 'cancelled' && (
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking, 'cancelled')}>
-                                        <XCircle className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 text-red-500" />
-                                        <span>{t('bookings.cancel', 'Cancel Appointment')}</span>
-                                    </DropdownMenuItem>
-                                )}
-
-                                <DropdownMenuSeparator />
-
-                                <DropdownMenuItem
-                                    onClick={() => setDeletingBooking(booking)}
-                                    className="text-red-600 focus:text-red-700"
-                                >
-                                    <Trash2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                                    <span>{t('bookings.delete', 'Delete')}</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
 
-            <Dialog
-                open={Boolean(deletingBooking)}
-                onOpenChange={(open) => !open && setDeletingBooking(null)}
-            >
-                <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle className="text-red-600 flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5" />
-                            {t('bookings.delete', 'Delete Booking')}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t(
-                                'bookings.delete_confirm',
-                                'Are you sure you want to delete this booking? This action cannot be undone.'
-                            )}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2">
+                {/* Notes */}
+                {booking.notes && (
+                    <p className="line-clamp-3 rounded-md bg-muted/60 p-3 text-sm italic text-muted-foreground">
+                        “{booking.notes}”
+                    </p>
+                )}
+
+                {/* Actions: anchored at the bottom */}
+                <div className="mt-auto border-t pt-3">
+                    {isPending && (
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="min-w-0 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400"
+                                onClick={() => handleUpdateStatus(booking, 'confirmed')}
+                            >
+                                <UserCheck className="me-1 h-4 w-4 shrink-0" />
+                                <span className="truncate">
+                                    {t('bookings.confirm_arrival', 'Confirm')}
+                                </span>
+                            </Button>
+
+                            <Button
+                                size="sm"
+                                className="min-w-0 bg-blue-600 text-white hover:bg-blue-700"
+                                onClick={() => handleUpdateStatus(booking, 'completed')}
+                            >
+                                <CheckCircle2 className="me-1 h-4 w-4 shrink-0" />
+                                <span className="truncate">
+                                    {t('bookings.mark_completed', 'Complete')}
+                                </span>
+                            </Button>
+                        </div>
+                    )}
+
+                    {isConfirmed && (
                         <Button
-                            variant="outline"
-                            onClick={() => setDeletingBooking(null)}
-                            disabled={isDeleting}
+                            size="sm"
+                            className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                            onClick={() => handleUpdateStatus(booking, 'completed')}
                         >
-                            {t('common.cancel', 'Cancel')}
+                            <CheckCircle2 className="me-2 h-4 w-4" />
+                            {t('bookings.mark_completed', 'Mark Completed')}
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
+                    )}
+
+                    {isCompleted && (
+                        <div className="flex items-center justify-center gap-2 rounded-md bg-blue-50 py-2 text-sm font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                            <CheckCircle2 className="h-4 w-4" />
+                            {t('bookings.status_completed', 'Completed')}
+                        </div>
+                    )}
+
+                    {!isPending && !isConfirmed && !isCompleted && (
+                        <p className="py-2 text-center text-sm text-muted-foreground">
+                            {getStatusBadge(booking.status)}
+                        </p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Delete confirmation */}
+        <Dialog
+            open={Boolean(deletingBooking)}
+            onOpenChange={(open) => {
+                if (!open && !isDeleting) {
+                    setDeletingBooking(null);
+                }
+            }}
+        >
+            <DialogContent className="max-w-sm">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertCircle className="h-5 w-5" />
+                        {t('bookings.delete', 'Delete Booking')}
+                    </DialogTitle>
+
+                    <DialogDescription>
+                        {t(
+                            'bookings.delete_confirm',
+                            'Are you sure you want to delete this booking? This action cannot be undone.'
+                        )}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter className="gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setDeletingBooking(null)}
+                        disabled={isDeleting}
+                    >
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+
+                    <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting
+                            ? t('common.deleting', 'Deleting...')
+                            : t('common.delete', 'Delete')}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    </>
 
     )
 }

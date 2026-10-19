@@ -4,8 +4,8 @@ import PageHeader from '@/components/shared/page-header';
 import useAuthClinics from '@/hooks/use-auth-clinics';
 import useImport from '@/hooks/use-import';
 import Pagination from '@/components/shared/pagination';
-import { Booking, BookingFormValues, BookingStatus, PaginatedBookings } from '@/types/booking';
-import { Patient, PaginatedPatients } from '@/types/patient';
+import { Booking, PaginatedBookings } from '@/types/booking';
+import { PaginatedPatients } from '@/types/patient';
 import { User } from '@/types/auth';
 import { router, Link } from '@inertiajs/react';
 import { toast } from 'sonner';
@@ -47,11 +47,18 @@ interface Props {
 }
 
 export default function TodayBookingsPage({ bookings, patients, doctors = [], filters, stats: serverStats }: Props) {
-   
-   
+
+
     const { t, isRtl } = useImport();
     const { authClinic } = useAuthClinics()
-    const [patientType, setPatientType] = useState<'registered' | 'unregistered'>('registered');
+    const bookingList = bookings.data;
+
+    const {
+        links: paginationLinks,
+        from: paginationFrom,
+        to: paginationTo,
+        total: paginationTotal,
+    } = bookings;
     const {
         searchTerm,
         setSearchTerm,
@@ -62,21 +69,21 @@ export default function TodayBookingsPage({ bookings, patients, doctors = [], fi
         typeFilter,
         setTypeFilter,
         isRefreshing,
-        setIsRefreshing } = useBookingSearch({ filters })
+        patientType, 
+        setPatientType,
+        setIsRefreshing ,
+        stats
+    } = useBookingSearch({
+            filters,
+            serverStats,
+            bookingList
+        })
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const todayStr = getTodayDate();
     const formattedToday = formatToday(isRtl);
 
 
-    const bookingList = bookings.data;
-
-    const {
-        links: paginationLinks,
-        from: paginationFrom,
-        to: paginationTo,
-        total: paginationTotal,
-    } = bookings;
 
 
 
@@ -86,35 +93,20 @@ export default function TodayBookingsPage({ bookings, patients, doctors = [], fi
 
 
 
-   const patientList = useMemo(() => {
-    const list = patients.data;
 
-    if (
-        editingBooking?.patient &&
-        !list.some((patient) => patient.id === editingBooking.patient?.id)
-    ) {
-        return [editingBooking.patient, ...list];
-    }
+    const patientList = useMemo(() => {
+        const list = patients.data;
 
-    return list;
-}, [patients.data, editingBooking?.patient]);
-
-    // Statistics counts
-    const stats = useMemo(() => {
-        if (serverStats) {
-            return serverStats;
+        if (
+            editingBooking?.patient &&
+            !list.some((patient) => patient.id === editingBooking.patient?.id)
+        ) {
+            return [editingBooking.patient, ...list];
         }
-        const total = bookingList.length;
-        const pending = bookingList.filter((b) => b.status === 'pending').length;
-        const confirmed = bookingList.filter((b) => b.status === 'confirmed').length;
-        const completed = bookingList.filter((b) => b.status === 'completed').length;
-        const cancelled = bookingList.filter((b) => b.status === 'cancelled' || b.status === 'no_show').length;
-        const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-        return { total, pending, confirmed, completed, cancelled, completionRate };
-    }, [serverStats, bookingList]);
+        return list;
+    }, [patients.data, editingBooking?.patient]);
 
-    // Filtered bookings: If server-paginated, data is already filtered on backend; fallback to client filtering otherwise
     const displayBookings = bookingList;
 
 
@@ -232,7 +224,7 @@ export default function TodayBookingsPage({ bookings, patients, doctors = [], fi
                     />
                 ) : (
                     <div className="space-y-4">
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                             {displayBookings.map((booking, index) => (
                                 <BookingCard booking={booking} index={index} />
                             ))}
