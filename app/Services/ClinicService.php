@@ -23,7 +23,6 @@ class ClinicService
 
     public function createClinic(array $data, ?User $user = null): Clinic
     {
-        $name = $data['name'];
         $imageUrl = null;
         $publicId = null;
 
@@ -42,8 +41,8 @@ class ClinicService
         $clinic->governorate_id = $data['governorate_id'] ?? null;
         $clinic->city_id = $data['city_id'] ?? null;
         $clinic->clinic_type_id = $data['clinic_type_id'] ?? null;
-        $clinic->name = $name;
-        $clinic->slug = $this->generateSlug($name);
+        $clinic->name = $data['name'];
+        $clinic->slug = $this->generateSlug($data['name']);
         $clinic->image = $imageUrl;
         $clinic->public_id = $publicId;
         $clinic->phone = $data['phone'] ?? null;
@@ -64,7 +63,7 @@ class ClinicService
             $existingAssociation = ClinicUser::where('user_id', $user->id)->first();
             if (! $existingAssociation) {
                 // Get owner or first role
-                $ownerRole = Role::where('slug', 'owner')->orWhere('slug', 'admin')->first()
+                $ownerRole = Role::where('slug', 'doctor')->first()
                     ?? Role::first();
 
                 if (! $ownerRole) {
