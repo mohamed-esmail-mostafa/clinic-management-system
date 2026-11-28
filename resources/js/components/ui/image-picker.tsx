@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import useImport from '@/hooks/use-import'
+import { useTranslation } from 'react-i18next'
 
 interface ImageUploadProps {
     label: string
@@ -33,7 +34,8 @@ export default function ImagePicker({
     const [preview, setPreview] = useState<string | null>(initialPreview)
     const [isDragging, setIsDragging] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const { t } = useImport()
+    // const { t } = useTranslation("common")
+    const { tc } = useImport()
 
     React.useEffect(() => {
         setPreview(initialPreview)
@@ -150,7 +152,7 @@ export default function ImagePicker({
                                 disabled={disabled}
                             >
                                 <Upload className="w-4 h-4 mr-2" />
-                                {t('common.change')}
+                                {tc('change')}
                             </Button>
                             <Button
                                 type="button"
@@ -163,7 +165,7 @@ export default function ImagePicker({
                                 disabled={disabled}
                             >
                                 <X className="w-4 h-4 mr-2" />
-                                {t('common.remove')}
+                                {tc('remove')}
                             </Button>
                         </div>
                     </div>
@@ -175,11 +177,11 @@ export default function ImagePicker({
                         <div className="mb-2">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">
 
-                                {t('common.upload-image')}
+                                {tc('upload-image')}
                             </span>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {t('common.file-size-limit')}
+                            {tc('file-size-limit')}
                         </p>
                         <Button
                             type="button"
@@ -193,7 +195,7 @@ export default function ImagePicker({
                             }}
                         >
                             <Upload className="w-4 h-4 mr-2" />
-                            {t('common.choose-file')}
+                            {tc('choose-file')}
                         </Button>
                     </div>
                 )}

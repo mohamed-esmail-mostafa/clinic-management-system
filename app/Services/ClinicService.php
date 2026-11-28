@@ -24,15 +24,6 @@ class ClinicService
     public function createClinic(array $data, ?User $user = null): Clinic
     {
         $name = $data['name'];
-        $baseSlug = Str::slug($name);
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (Clinic::where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$counter;
-            $counter++;
-        }
-
         $imageUrl = null;
         $publicId = null;
 
@@ -52,7 +43,7 @@ class ClinicService
         $clinic->city_id = $data['city_id'] ?? null;
         $clinic->clinic_type_id = $data['clinic_type_id'] ?? null;
         $clinic->name = $name;
-        $clinic->slug = $slug;
+        $clinic->slug = $this->generateSlug($name);
         $clinic->image = $imageUrl;
         $clinic->public_id = $publicId;
         $clinic->phone = $data['phone'] ?? null;
@@ -110,7 +101,7 @@ class ClinicService
             $counter = 1;
 
             while (Clinic::where('slug', $slug)->where('id', '!=', $clinic->id)->exists()) {
-                $slug = $baseSlug.'-'.$counter;
+                $slug = $baseSlug . '-' . $counter;
                 $counter++;
             }
         }
@@ -126,19 +117,19 @@ class ClinicService
             }
         }
 
-        $clinic->country_id = $data['country_id'] ?? $clinic->country_id;
-        $clinic->governorate_id = $data['governorate_id'] ?? $clinic->governorate_id;
-        $clinic->city_id = $data['city_id'] ?? $clinic->city_id;
+        $clinic->country_id = array_key_exists('country_id', $data) ? $data['country_id'] : $clinic->country_id;
+        $clinic->governorate_id = array_key_exists('governorate_id', $data) ? $data['governorate_id'] : $clinic->governorate_id;
+        $clinic->city_id = array_key_exists('city_id', $data) ? $data['city_id'] : $clinic->city_id;
         if (array_key_exists('clinic_type_id', $data)) {
             $clinic->clinic_type_id = $data['clinic_type_id'];
         }
         $clinic->name = $name;
         $clinic->slug = $slug;
-        $clinic->phone = $data['phone'] ?? $clinic->phone;
-        $clinic->address = $data['address'] ?? $clinic->address;
-        $clinic->description = $data['description'] ?? $clinic->description;
-        $clinic->latitude = $data['latitude'] ?? $clinic->latitude;
-        $clinic->longitude = $data['longitude'] ?? $clinic->longitude;
+        $clinic->phone = array_key_exists('phone', $data) ? $data['phone'] : $clinic->phone;
+        $clinic->address = array_key_exists('address', $data) ? $data['address'] : $clinic->address;
+        $clinic->description = array_key_exists('description', $data) ? $data['description'] : $clinic->description;
+        $clinic->latitude = array_key_exists('latitude', $data) ? $data['latitude'] : $clinic->latitude;
+        $clinic->longitude = array_key_exists('longitude', $data) ? $data['longitude'] : $clinic->longitude;
         if (isset($data['is_active'])) {
             $clinic->is_active = $data['is_active'];
         }
@@ -190,9 +181,11 @@ class ClinicService
             ->delete();
     }
 
-    public function getClinic(string $slug)
+    public function getClinic(string $slug): Clinic
     {
-        return Clinic::where('slug', $slug)->firstOrFail();
+        return Clinic::with(['country', 'governorate', 'city', 'clinicType', 'specialties'])
+            ->where('slug', $slug)
+            ->firstOrFail();
     }
 
     public function getClinicEmployees(Clinic $clinic): Collection
@@ -214,5 +207,29 @@ class ClinicService
             ->update([
                 'role_id' => $roleId,
             ]);
+    }
+
+
+
+
+
+    private function generateSlug(string $name): string
+    {
+        $baseSlug = mb_strtolower(
+            preg_replace('/[^\p{Arabic}\p{L}\p{N}]+/u', '-', $name),
+            'UTF-8'
+        );
+
+        $baseSlug = trim($baseSlug, '-');
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (Clinic::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

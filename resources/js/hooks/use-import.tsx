@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useAppearance } from './use-appearance';
 
 export default function useImport() {
-    const { t, i18n } = useTranslation();
+    const { t: tc, i18n } = useTranslation("common");
+    const { t: tClinic } = useTranslation('clinics')
+    const { t: tDefault } = useTranslation('translation')
     const isRtl = i18n.language === 'ar';
 
 
@@ -41,14 +43,21 @@ export default function useImport() {
      * Theme toggle
      */
 
-      const { appearance, resolvedAppearance, updateAppearance } = useAppearance()
-    
-    
-        const isDark = resolvedAppearance === 'dark'
-        const toggleTheme = () => {
-            updateAppearance(isDark ? 'light' : 'dark')
-        }
+    const { appearance, resolvedAppearance, updateAppearance } = useAppearance()
+
+
+    const isDark = resolvedAppearance === 'dark'
+    const toggleTheme = () => {
+        updateAppearance(isDark ? 'light' : 'dark')
+    }
     return {
-        t, i18n, isRtl, toggleLanguage,toggleTheme,appearance
+        t: tDefault, 
+        tc,
+        tClinic,
+        i18n, 
+        isRtl, 
+        toggleLanguage, 
+        toggleTheme, 
+        appearance
     }
 }

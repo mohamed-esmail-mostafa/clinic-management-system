@@ -8,7 +8,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/clinics', 'index')->name('admin.clinics.index');
         Route::get('/create/clinic/page', 'create_clinic_page')->name('admin.clinics.create');
         Route::post('/store/clinic', 'store_clinic')->name('admin.clinics.store');
-        Route::put('/admin/clinics/{clinic}', 'update')->name('admin.clinics.update');
+        Route::get('/clinic/{slug}/update', 'update_clinic_page')->name('update.clinic.page');
+        // Route::put('/admin/clinics/{clinic}', 'update')->name('admin.clinics.update');
         Route::delete('/admin/clinics/{clinic}', 'destroy')->name('admin.clinics.destroy');
         Route::patch('/admin/clinics/{clinic}/toggle-status', 'toggleStatus')->name('admin.clinics.toggle-status');
         Route::post('/admin/clinics/{clinic}/users', 'addUser')->name('admin.clinics.users.store');

@@ -66,13 +66,32 @@ class ClinicController extends Controller
     public function store_clinic(StoreClinicRequest $request): RedirectResponse
     {
         $this->clinicService->createClinic($request->validated(), $request->user());
+        return redirect()->route('clinics.overview');
+        // return redirect()->route('admin.clinics.index')->with('success', 'Clinic created successfully');
+    }
 
-        return redirect()->route('admin.clinics.index')->with('success', 'Clinic created successfully');
+
+    public function update_clinic_page(string $slug): Response
+    {
+        return Inertia::render('clinics/update', [
+            'clinic' => $this->clinicService->getClinic($slug),
+            'countries' => $this->countryService->getAllCountries(),
+            'governorates' => $this->governorateService->getAllGovernorates(),
+            'cities' => $this->cityService->getAllCities(),
+            'specialties' => $this->specialtyService->getAllSpecialties(),
+            'clinic_types' => $this->clinicTypeService->getAllClinicTypes(),
+        ]);
     }
 
     public function update(UpdateClinicRequest $request, Clinic $clinic): RedirectResponse
     {
         $this->clinicService->updateClinic($clinic, $request->validated());
+
+        if ($clinic->wasChanged('slug') && str_contains(url()->previous(), '/update')) {
+            return redirect()
+                ->route('update.clinic.page', $clinic->slug)
+                ->with('success', 'Clinic updated successfully');
+        }
 
         return redirect()->back()->with('success', 'Clinic updated successfully');
     }
